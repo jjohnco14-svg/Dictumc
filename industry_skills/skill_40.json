@@ -1,0 +1,34 @@
+{
+  "name": "Firmware Security Engineer",
+  "industry": "Cybersecurity / Embedded",
+  "tier": 5,
+  "description": "Secure embedded systems and IoT devices. Implement secure boot, encryption, attestation, and side-channel resistance.",
+  "deliverables": [
+    "Secure boot chain verifier",
+    "Firmware encryption tool",
+    "Device attestation protocol",
+    "Side-channel resistant crypto"
+  ],
+  "dictum_features": [
+    "C backend for bare metal",
+    "Unsafe for crypto operations",
+    "C imports for hardware crypto",
+    "Attempt blocks for verification",
+    "Static memory only"
+  ],
+  "c_cpp_concepts": [
+    "Secure boot (ROM -> bootloader -> app)",
+    "AES-GCM encryption",
+    "HMAC verification",
+    "Trusted Platform Module (TPM)",
+    "Side-channel attacks (timing, power)",
+    "Code signing and verification"
+  ],
+  "example_snippet": "program SecureBoot:\n    shape FirmwareImage holds:\n        Version as whole number\n        Hash as byte with values\n        Signature as byte with values\n        Valid as truth value\n    end shape\n\n    action verify_signature takes Img as const ref FirmwareImage produces truth value:\n        # Would use RSA/ECDSA verify\n        print the text \"Verifying firmware v\" and Img.Version and newline\n        produce success with Img.Valid\n    end action\n\n    keep FW as FirmwareImage with 1 and nothing and nothing and true\n    keep Verified as truth value\n    call verify_signature with FW giving Verified\n    print the text \"Firmware verified: \" and Verified and newline\nend program",
+  "estimated_hours": 50,
+  "prerequisites": [
+    "skill_10",
+    "skill_18"
+  ],
+  "status": "verified"
+}

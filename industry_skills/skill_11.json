@@ -1,0 +1,33 @@
+{
+  "name": "IoT Connectivity Specialist",
+  "industry": "Internet of Things",
+  "tier": 5,
+  "description": "Connect devices to the internet via WiFi, BLE, LoRa, or cellular. Implement MQTT, HTTP, CoAP protocols for IoT communication.",
+  "deliverables": [
+    "WiFi-connected weather station",
+    "BLE heart rate monitor",
+    "MQTT sensor publisher",
+    "HTTP REST API client for devices"
+  ],
+  "dictum_features": [
+    "wifi config, dictum_wifi_init",
+    "ble handle, dictum_ble_start",
+    "HTTP module (dictum_http_get/post)",
+    "Attempt blocks for connection errors"
+  ],
+  "c_cpp_concepts": [
+    "TCP/IP stack on MCU",
+    "WiFi association process",
+    "BLE GATT services",
+    "MQTT publish/subscribe",
+    "JSON parsing on embedded",
+    "Power management for wireless"
+  ],
+  "example_snippet": "program WiFiWeather:\n    keep Cfg as wifi config\n    put \"MyHomeWiFi\" into Cfg.ssid\n    put \"password123\" into Cfg.password\n    put 10000 into Cfg.timeout_ms\n\n    attempt call dictum_wifi_init with Cfg\n    on success\n        keep IP as text\n        call dictum_wifi_ip_address giving IP\n        print the text \"Connected! IP: \" and IP and newline\n\n        keep Temp as sensor reading\n        call dictum_sensor_read with \"temperature\" and Bus giving Temp\n        call dictum_http_post with \"api.weather.com\" and Temp and nothing\n    on failure with Err\n        print the text \"WiFi failed: \" and Err and newline\n    end attempt\nend program",
+  "estimated_hours": 35,
+  "prerequisites": [
+    "skill_10"
+  ],
+  "status": "partial",
+  "status_note": "HTTP module (dictum_http.c) and attempt blocks fully implemented. WiFi/BLE/LoRa require niche/edgeai libs (dictum_stdlib_edgeai.c)."
+}

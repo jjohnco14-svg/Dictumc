@@ -1,0 +1,35 @@
+{
+  "name": "Quantum Computing Systems Programmer",
+  "industry": "Quantum Computing",
+  "tier": 6,
+  "description": "Develop classical control software for quantum computers. Implement qubit control pulses, error correction, and quantum circuit compilers.",
+  "deliverables": [
+    "Qubit pulse sequence generator",
+    "Quantum error correction stub",
+    "Circuit DAG optimizer",
+    "Quantum state simulator (small scale)"
+  ],
+  "dictum_features": [
+    "C++ backend for performance",
+    "Template-based complex numbers",
+    "Smart pointers for circuit nodes",
+    "Unsafe for SIMD matrix ops",
+    "JSON for circuit serialization"
+  ],
+  "c_cpp_concepts": [
+    "Qubit states and gates",
+    "Quantum circuits (DAG representation)",
+    "Pulse-level control",
+    "Error correction codes (surface code)",
+    "Density matrices",
+    "Quantum Fourier transform"
+  ],
+  "example_snippet": "program QuantumCircuit:\n    shape Qubit holds:\n        Alpha as fractional number\n        Beta as fractional number\n    end shape\n\n    action apply_hadamard takes Q as ref Qubit produces nothing:\n        keep NewAlpha as fractional number\n        put the quotient of the sum of Q.Alpha and Q.Beta and 1.4142 into NewAlpha\n        keep NewBeta as fractional number\n        put the quotient of the difference of Q.Alpha and Q.Beta and 1.4142 into NewBeta\n        put NewAlpha into Q.Alpha\n        put NewBeta into Q.Beta\n    end action\n\n    keep Q1 as Qubit with 1.0 and 0.0\n    call apply_hadamard with Q1\n    print the text \"Qubit after H gate: alpha=\" and Q1.Alpha and \" beta=\" and Q1.Beta and newline\nend program",
+  "estimated_hours": 65,
+  "prerequisites": [
+    "skill_07",
+    "skill_28"
+  ],
+  "status": "partial",
+  "status_note": "C++ backend active (C++17/20/23, CI-tested). Quantum circuit serialization via dictum_json.c. Quantum hardware APIs require C imports."
+}

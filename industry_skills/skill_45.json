@@ -1,0 +1,35 @@
+{
+  "name": "Drone / UAV Flight Software Engineer",
+  "industry": "Aerospace / Robotics",
+  "tier": 5,
+  "description": "Develop flight control software for drones and UAVs. Implement sensor fusion, flight modes, navigation, and communication protocols.",
+  "deliverables": [
+    "IMU sensor fusion (complementary filter)",
+    "Waypoint navigation controller",
+    "Telemetry radio link",
+    "Fail-safe return-to-home"
+  ],
+  "dictum_features": [
+    "C backend for flight controllers",
+    "Unsafe for sensor registers",
+    "PID control loops",
+    "Network for telemetry",
+    "Attempt blocks for sensor errors"
+  ],
+  "c_cpp_concepts": [
+    "Flight dynamics (roll, pitch, yaw)",
+    "Kalman filtering",
+    "GPS/GLONASS navigation",
+    "MAVLink protocol",
+    "Brushless motor ESC control",
+    "Geofencing"
+  ],
+  "example_snippet": "program FlightController:\n    shape Attitude holds:\n        Roll as fractional number\n        Pitch as fractional number\n        Yaw as fractional number\n    end shape\n\n    action update_attitude takes A as ref Attitude, GyroX as fractional number, \n                              GyroY as fractional number, GyroZ as fractional number, \n                              Dt as fractional number produces nothing:\n        put the sum of A.Roll and the product of GyroX and Dt into A.Roll\n        put the sum of A.Pitch and the product of GyroY and Dt into A.Pitch\n        put the sum of A.Yaw and the product of GyroZ and Dt into A.Yaw\n    end action\n\n    keep CurrentAttitude as Attitude with 0.0 and 0.0 and 0.0\n    call update_attitude with CurrentAttitude and 0.1 and 0.0 and 0.05 and 0.01\n    print the text \"Roll: \" and CurrentAttitude.Roll and newline\nend program",
+  "estimated_hours": 50,
+  "prerequisites": [
+    "skill_10",
+    "skill_13"
+  ],
+  "status": "partial",
+  "status_note": "dictum_timer.c, dictum_net.c, dictum_signal.c, dictum_file.c implemented. Sensor register access and flight controller HAL require C imports."
+}

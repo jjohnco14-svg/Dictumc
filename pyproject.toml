@@ -1,0 +1,99 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dictum-lang"
+version = "5.0.0"
+description = "Natural language programming for systems code — v5 (split package, polyglot)"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Dictum Contributors", email = "dictum@example.com"}
+]
+keywords = ["programming-language", "transpiler", "embedded", "ai", "vibecoding", "polyglot"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: C",
+    "Programming Language :: C++",
+    "Topic :: Software Development :: Compilers",
+    "Topic :: Software Development :: Embedded Systems",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "pygls>=1.0",
+    "lsprotocol>=2023.0",
+]
+
+[project.optional-dependencies]
+server = [
+    "fastapi>=0.100",
+    "uvicorn>=0.23",
+    "pydantic>=2.0",
+]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.1.0",
+    "black>=23.0",
+    "mypy>=1.0",
+]
+docs = [
+    "mkdocs>=1.5",
+    "mkdocs-material>=9.0",
+    "mkdocstrings[python]>=0.23",
+]
+
+[project.scripts]
+# v5: entry points updated to split package
+dictumc       = "dictumc.__main__:main"
+dictum-repl   = "tooling.repl.repl:main"
+dictum-lsp    = "tooling.vscode.dictum-lsp.server:main"
+
+[project.urls]
+Homepage      = "https://dictum-lang.github.io"
+Documentation = "https://dictum-lang.github.io"
+Repository    = "https://github.com/yourname/dictum"
+Issues        = "https://github.com/yourname/dictum/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["dictumc*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.black]
+line-length = 100
+target-version = ['py39', 'py310', 'py311', 'py312']
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.pytest.ini_options]
+# Custom markers so jobs can select exactly what they need.
+#   pytest tests/ -m "not c_integration and not cpp_integration and not polyglot"
+#   pytest tests/ -m c_integration
+#   pytest tests/ -m cpp_integration
+#   pytest tests/ -m polyglot
+markers = [
+    "c_integration: tests that transpile Dictum → C and compile+run with gcc",
+    "cpp_integration: tests that transpile Dictum → C++ and compile+run with g++",
+    "polyglot: tests for the polyglot parser, linker, and binding generator",
+]
+# Never silently swallow skip-due-to-missing-compiler in CI.
+# Each CI job installs the compiler it needs, so a skip means something broke.
+# Override per-job with -p no:skip if you intentionally want skips.
+filterwarnings = [
+    "error::pytest.PytestUnraisableExceptionWarning",
+]

@@ -1,0 +1,32 @@
+{
+  "name": "Memory Management Specialist",
+  "industry": "Systems Programming",
+  "tier": 2,
+  "description": "Master manual memory management, dynamic allocation, pointer arithmetic, and ownership tracking. Build custom allocators and data structures from scratch.",
+  "deliverables": [
+    "Custom memory pool allocator",
+    "Linked list with manual free",
+    "Ring buffer implementation",
+    "String builder with realloc"
+  ],
+  "dictum_features": [
+    "handle to bytes with room for",
+    "release",
+    "unsafe blocks",
+    "transmute",
+    "Index at N of Array"
+  ],
+  "c_cpp_concepts": [
+    "malloc/free",
+    "Pointer arithmetic",
+    "void* casting",
+    "Memory alignment",
+    "Buffer overflows prevention"
+  ],
+  "example_snippet": "program BufferDemo:\n    keep Buffer as handle to bytes with room for 1024\n\n    unsafe:\n        keep Ptr as * byte\n        put transmute Buffer as * byte into Ptr\n        put 65 into Index at 0 of Ptr\n    end unsafe\n\n    print the text \"First byte: \" and Index at 0 of Buffer and newline\n    release Buffer\nend program",
+  "estimated_hours": 20,
+  "prerequisites": [
+    "skill_01"
+  ],
+  "status": "verified"
+}

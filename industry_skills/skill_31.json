@@ -1,0 +1,35 @@
+{
+  "name": "Computer Vision Engineer",
+  "industry": "AI / Robotics / Autonomous Systems",
+  "tier": 4,
+  "description": "Implement image processing algorithms, feature detection, and neural network inference for vision tasks. Optimize for embedded cameras.",
+  "deliverables": [
+    "Grayscale converter",
+    "Sobel edge detector",
+    "Haar cascade face detector stub",
+    "Camera frame capture pipeline"
+  ],
+  "dictum_features": [
+    "C++ backend",
+    "Unsafe for pixel access",
+    "Template-based image types",
+    "Raw handles for frame buffers",
+    "Edge AI module for NN inference"
+  ],
+  "c_cpp_concepts": [
+    "Image formats (BMP, PNG, RAW)",
+    "Convolution kernels",
+    "Histogram equalization",
+    "Feature detection (SIFT, ORB)",
+    "Camera interfaces (V4L2)",
+    "OpenCV integration"
+  ],
+  "example_snippet": "program EdgeDetector:\n    shape Image holds:\n        Pixels as raw handle to byte\n        Width as whole number\n        Height as whole number\n    end shape\n\n    action sobel_x takes Img as const ref Image, X as whole number, Y as whole number produces whole number:\n        # Simplified Sobel X kernel\n        keep Sum as whole number with value 0\n\n        unsafe:\n            keep Ptr as * byte\n            put transmute Img.Pixels as * byte into Ptr\n\n            keep Idx as whole number\n            put the sum of the product of Y and Img.Width and X into Idx\n            keep Val as whole number\n            put Index at Idx of Ptr into Val\n            put the sum of Sum and Val into Sum\n        end unsafe\n\n        produce success with Sum\n    end action\n\n    keep Img as Image with nothing and 640 and 480\n    print the text \"Sobel edge detector initialized for 640x480\" and newline\nend program",
+  "estimated_hours": 45,
+  "prerequisites": [
+    "skill_07",
+    "skill_12"
+  ],
+  "status": "partial",
+  "status_note": "C++ backend active (C++17/20/23, CI-tested). OpenCV/camera frame buffer access requires C imports."
+}

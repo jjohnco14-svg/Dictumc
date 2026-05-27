@@ -1,0 +1,36 @@
+{
+  "name": "Cloud-Native Systems Programmer",
+  "industry": "Cloud Infrastructure",
+  "tier": 4,
+  "description": "Build microservices, service meshes, and cloud-native infrastructure in C/C++. Implement gRPC services, load balancers, and circuit breakers.",
+  "deliverables": [
+    "gRPC service stub",
+    "HTTP/2 load balancer",
+    "Circuit breaker pattern",
+    "Distributed tracing collector"
+  ],
+  "dictum_features": [
+    "C++ backend",
+    "Network sockets (HTTP/2)",
+    "Thread pool for concurrency",
+    "Smart pointers for request context",
+    "JSON/Protobuf parsing"
+  ],
+  "c_cpp_concepts": [
+    "HTTP/2 protocol",
+    "gRPC/Protobuf",
+    "Service discovery",
+    "Circuit breaker pattern",
+    "Distributed tracing (OpenTelemetry)",
+    "Load balancing algorithms"
+  ],
+  "example_snippet": "program LoadBalancer:\n    shape Backend holds:\n        Address as text\n        Port as whole number\n        Healthy as truth value\n        ActiveConnections as whole number\n    end shape\n\n    action select_backend takes Backends as raw handle to Backend, Count as whole number produces text:\n        repeat Count times using I:\n            keep B as raw handle to Backend\n            put transmute Backends as * raw handle to Backend into B\n            keep Offset as whole number\n            put the product of I and 32 into Offset\n            keep Ptr as raw handle to Backend\n            put transmute B as raw handle to byte and Offset into Ptr\n            if Ptr.Healthy then:\n                produce success with Ptr.Address\n            end if\n        end repeat\n        produce success with \"none\"\n    end action\n\n    print the text \"Load balancer initialized\" and newline\nend program",
+  "estimated_hours": 50,
+  "prerequisites": [
+    "skill_05",
+    "skill_06",
+    "skill_07"
+  ],
+  "status": "partial",
+  "status_note": "C++ backend active (C++17/20/23, CI-tested). HTTP/2 and TLS via dictum_tls.c + dictum_net.c. Cloud SDKs (AWS/GCP) require C imports."
+}

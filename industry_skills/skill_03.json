@@ -1,0 +1,32 @@
+{
+  "name": "File Systems Engineer",
+  "industry": "Systems Programming",
+  "tier": 2,
+  "description": "Work with file I/O, binary data, directory traversal, path manipulation, and memory-mapped files. Build utilities like grep, find, and hex dumpers.",
+  "deliverables": [
+    "File copy utility with progress bar",
+    "Recursive directory scanner",
+    "Binary hex dump tool",
+    "Log file analyzer"
+  ],
+  "dictum_features": [
+    "import from C (fopen, fread, fwrite)",
+    "attempt blocks for file errors",
+    "mmap via C imports",
+    "String manipulation"
+  ],
+  "c_cpp_concepts": [
+    "FILE* operations",
+    "fseek/ftell",
+    "mmap/munmap",
+    "Binary I/O",
+    "Directory APIs (dirent.h)"
+  ],
+  "example_snippet": "program FileCopy:\n    import from C the action fopen takes text, text produces handle to bytes as file_open\n    import from C the action fread takes handle to bytes, count, count, handle to bytes produces count as file_read\n\n    keep Source as handle to bytes\n    put call file_open with \"input.txt\" and \"rb\" into Source\n\n    keep Buffer as handle to bytes with room for 4096\n    keep BytesRead as count\n    put call file_read with Buffer and 1 and 4096 and Source into BytesRead\n\n    print the text \"Read \" and BytesRead and \" bytes\" and newline\nend program",
+  "estimated_hours": 15,
+  "prerequisites": [
+    "skill_01",
+    "skill_02"
+  ],
+  "status": "verified"
+}

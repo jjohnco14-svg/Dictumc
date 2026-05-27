@@ -1,0 +1,32 @@
+{
+  "name": "Network Protocol Engineer",
+  "industry": "Networking / Cybersecurity",
+  "tier": 3,
+  "description": "Build TCP/UDP clients and servers, HTTP handlers, and custom protocol implementations. Understand sockets, packet structures, and network security basics.",
+  "deliverables": [
+    "HTTP client from scratch",
+    "TCP echo server with concurrent connections",
+    "Simple DNS resolver",
+    "Port scanner utility"
+  ],
+  "dictum_features": [
+    "socket, connect, bind, listen, accept",
+    "send, recv via C imports",
+    "Network byte order handling",
+    "Error handling for network ops"
+  ],
+  "c_cpp_concepts": [
+    "BSD sockets API",
+    "TCP vs UDP",
+    "select()/poll()/epoll()",
+    "HTTP protocol basics",
+    "Network byte order (htonl, htons)"
+  ],
+  "example_snippet": "program TCPServer:\n    import from C the action socket takes whole number, whole number, whole number produces whole number as create_socket\n    import from C the action bind takes whole number, handle to bytes, whole number produces whole number as bind_socket\n    import from C the action listen takes whole number, whole number produces whole number as start_listening\n\n    keep Sock as whole number\n    put call create_socket with 2 and 1 and 0 into Sock\n    print the text \"Server socket created: \" and Sock and newline\n    call start_listening with Sock and 5\n    print the text \"Listening on port 8080...\" and newline\nend program",
+  "estimated_hours": 30,
+  "prerequisites": [
+    "skill_04"
+  ],
+  "status": "partial",
+  "status_note": "dictum_net.c fully implemented (TCP/UDP POSIX sockets). WiFi/BLE/LoRa require niche hardware libs."
+}

@@ -1,0 +1,34 @@
+{
+  "name": "C++ Systems Programmer",
+  "industry": "Systems Programming",
+  "tier": 4,
+  "description": "Switch to C++ backend. Use classes, smart pointers, templates, lambdas, and RAII. Build modern systems with zero manual memory management.",
+  "deliverables": [
+    "RAII file handle class",
+    "Template-based generic container",
+    "Smart pointer linked list",
+    "Lambda-based event system"
+  ],
+  "dictum_features": [
+    "--backend cpp --cpp-standard 20",
+    "shape with methods",
+    "unique handle to T",
+    "shared handle to T",
+    "ref T, const ref T",
+    "action taking ... produces ... (lambdas)"
+  ],
+  "c_cpp_concepts": [
+    "Classes and objects",
+    "std::unique_ptr, std::shared_ptr",
+    "Templates and concepts",
+    "Lambda expressions",
+    "RAII and move semantics"
+  ],
+  "example_snippet": "program SmartPointerDemo:\n    shape Resource holds:\n        Data as whole number\n\n        constructor takes D as whole number produces nothing:\n            put D into Data\n            print the text \"Resource created with \" and D and newline\n        end constructor\n\n        destructor produces nothing:\n            print the text \"Resource destroyed\" and newline\n        end destructor\n    end shape\n\n    keep R as unique handle to Resource with new Resource with 42\n    print the text \"Data: \" and R.Data and newline\nend program",
+  "estimated_hours": 35,
+  "prerequisites": [
+    "skill_02",
+    "skill_06"
+  ],
+  "status": "verified"
+}

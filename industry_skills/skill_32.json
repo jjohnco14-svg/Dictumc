@@ -1,0 +1,36 @@
+{
+  "name": "Distributed Systems Engineer",
+  "industry": "Cloud Computing / Backend Infrastructure",
+  "tier": 4,
+  "description": "Build distributed systems, consensus algorithms, and fault-tolerant services. Implement Raft, gossip protocols, and distributed hash tables.",
+  "deliverables": [
+    "Raft consensus implementation",
+    "Distributed key-value store",
+    "Gossip protocol for cluster state",
+    "Leader election service"
+  ],
+  "dictum_features": [
+    "C++ backend",
+    "Network sockets for RPC",
+    "Thread pool for request handling",
+    "Smart pointers for node state",
+    "JSON for message serialization"
+  ],
+  "c_cpp_concepts": [
+    "Raft consensus algorithm",
+    "CAP theorem",
+    "Vector clocks",
+    "Consistent hashing",
+    "Byzantine fault tolerance",
+    "gRPC/Protobuf"
+  ],
+  "example_snippet": "program RaftNode:\n    shape NodeState holds:\n        ID as whole number\n        CurrentTerm as whole number\n        VotedFor as whole number\n        IsLeader as truth value\n        Log as text with values\n    end shape\n\n    action request_vote takes State as ref NodeState, CandidateTerm as whole number, \n                           CandidateID as whole number produces truth value:\n        if CandidateTerm is greater than State.CurrentTerm then:\n            put CandidateTerm into State.CurrentTerm\n            put CandidateID into State.VotedFor\n            produce success with true\n        end if\n        produce success with false\n    end action\n\n    keep Node1 as NodeState with 1 and 0 and 0 and false and nothing\n    keep Granted as truth value\n    call request_vote with Node1 and 1 and 2 giving Granted\n    print the text \"Vote granted: \" and Granted and newline\nend program",
+  "estimated_hours": 55,
+  "prerequisites": [
+    "skill_05",
+    "skill_06",
+    "skill_07"
+  ],
+  "status": "partial",
+  "status_note": "C++ backend active (C++17/20/23, CI-tested). RPC transport uses dictum_net.c (TCP sockets). Domain: gRPC/Protobuf require C imports."
+}

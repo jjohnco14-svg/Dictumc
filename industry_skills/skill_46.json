@@ -1,0 +1,35 @@
+{
+  "name": "Smart Grid / Energy Systems Engineer",
+  "industry": "Energy / Smart Grid",
+  "tier": 5,
+  "description": "Develop software for smart grid systems, energy management, and power electronics control. Implement protocols like IEC 61850 and DNP3.",
+  "deliverables": [
+    "Smart meter data collector",
+    "Load balancing controller",
+    "IEC 61850 GOOSE message parser",
+    "Battery management system (BMS)"
+  ],
+  "dictum_features": [
+    "C backend for embedded controllers",
+    "Network sockets for grid comms",
+    "File I/O for data logging",
+    "Deterministic control loops",
+    "Attempt blocks for safety"
+  ],
+  "c_cpp_concepts": [
+    "IEC 61850 standard",
+    "DNP3 protocol",
+    "Modbus for power systems",
+    "Power factor correction",
+    "Battery SOC/SOH estimation",
+    "Demand response algorithms"
+  ],
+  "example_snippet": "program SmartMeter:\n    shape MeterReading holds:\n        Timestamp as whole number\n        Voltage as fractional number\n        Current as fractional number\n        Power as fractional number\n        EnergyConsumed as fractional number\n    end shape\n\n    action calculate_power takes M as const ref MeterReading produces fractional number:\n        produce success with the product of M.Voltage and M.Current\n    end action\n\n    keep Reading as MeterReading with 1234567890 and 230.0 and 5.0 and 0.0 and 1000.0\n    keep Power as fractional number\n    call calculate_power with Reading giving Power\n    print the text \"Power: \" and Power and \" W\" and newline\nend program",
+  "estimated_hours": 45,
+  "prerequisites": [
+    "skill_10",
+    "skill_11"
+  ],
+  "status": "partial",
+  "status_note": "dictum_net.c, dictum_file.c, dictum_timer.c, dictum_signal.c implemented. Grid protocol stacks (IEC 61850, DNP3) require C imports."
+}

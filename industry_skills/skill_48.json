@@ -1,0 +1,35 @@
+{
+  "name": "Cryptocurrency Protocol Engineer",
+  "industry": "FinTech / Blockchain",
+  "tier": 5,
+  "description": "Implement layer-1 and layer-2 blockchain protocols. Build consensus mechanisms, mempool management, and P2P networking stacks.",
+  "deliverables": [
+    "Mempool transaction validator",
+    "P2P gossip protocol",
+    "State trie (Merkle Patricia)",
+    "EVM-compatible bytecode interpreter"
+  ],
+  "dictum_features": [
+    "C++ backend for performance",
+    "Smart pointers for transaction objects",
+    "Network sockets for P2P",
+    "Unsafe for crypto hashing",
+    "Template-based data structures"
+  ],
+  "c_cpp_concepts": [
+    "Merkle Patricia Trie",
+    "RLP encoding",
+    "EVM opcodes and gas metering",
+    "P2P networking (libp2p, devp2p)",
+    "Consensus (PoW, PoS, BFT)",
+    "State management"
+  ],
+  "example_snippet": "program Mempool:\n    shape Transaction holds:\n        Nonce as whole number\n        GasPrice as whole number\n        GasLimit as whole number\n        To as text\n        Value as whole number\n        Data as text\n        Hash as text\n    end shape\n    \n    action validate_tx takes Tx as const ref Transaction produces truth value:\n        if Tx.GasLimit is less than 21000 then:\n            produce success with false\n        end if\n        if Tx.GasPrice is equal to 0 then:\n            produce success with false\n        end if\n        produce success with true\n    end action\n    \n    keep Tx1 as Transaction with 0 and 20000000000 and 21000 and \"0xabc\" and 1000000000000000000 and \"\" and \"0xhash\"\n    keep Valid as truth value\n    call validate_tx with Tx1 giving Valid\n    print the text \"Transaction valid: \" and Valid and newline\nend program",
+  "estimated_hours": 60,
+  "prerequisites": [
+    "skill_21",
+    "skill_32"
+  ],
+  "status": "partial",
+  "status_note": "C++ backend active (C++17/20/23, CI-tested). dictum_net.c (P2P sockets), dictum_tls.c (secure comms), dictum_json.c (tx serialization). Crypto hashing requires C import OpenSSL."
+}
