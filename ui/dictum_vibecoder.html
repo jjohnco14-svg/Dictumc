@@ -1094,45 +1094,42 @@
       <!-- API -->
       <div class="modal-panel" id="settings-api">
         <div class="form-group">
-          <label>Backend Server URL</label>
+          <label>Dictum Backend Server URL</label>
           <input type="text" id="settApiEndpoint" value="http://localhost:8765">
           <div class="hint">Dictum backend server URL. Must expose /generate, /transpile, and /run.</div>
         </div>
 
         <div class="form-group">
-          <label>🔑 Anthropic API Key (BYOK)</label>
-          <input type="password" id="settApiKey" placeholder="sk-ant-api03-...">
-          <div class="hint">Your own Anthropic key — sent directly to api.anthropic.com, never stored on the Dictum server. Leave blank to use ANTHROPIC_API_KEY env var on the server.</div>
+          <label>🔑 LLM API Key (BYOK)</label>
+          <input type="password" id="settApiKey" placeholder="sk-...">
+          <div class="hint">Your own API key — sent directly to the LLM provider you specify below. Never stored on the Dictum backend server.</div>
         </div>
 
         <div class="form-group">
-          <label>Model</label>
-          <select id="settModel">
-            <option value="claude-opus-4-5" selected>claude-opus-4-5 (best quality)</option>
-            <option value="claude-sonnet-4-5">claude-sonnet-4-5 (balanced)</option>
-            <option value="claude-haiku-4-5">claude-haiku-4-5 (fastest)</option>
-          </select>
-          <div class="hint">Model used for the Ask→Plan→Verify→Output pipeline.</div>
+          <label>LLM API Endpoint</label>
+          <input type="text" id="settLlmEndpoint" value="https://api.anthropic.com" placeholder="https://api.anthropic.com">
+          <div class="hint">Base URL of the LLM provider. Examples: https://api.anthropic.com, https://api.openai.com, https://openrouter.ai/api, http://localhost:8080/v1</div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label>Timeout (seconds)</label>
-            <input type="number" id="settApiTimeout" value="60" min="10" max="300">
+            <label>API Format</label>
+            <select id="settApiFormat">
+              <option value="anthropic" selected>Anthropic Messages API</option>
+              <option value="openai">OpenAI-compatible (Chat Completions)</option>
+            </select>
+            <div class="hint">Protocol used to talk to the endpoint. Anthropic = /v1/messages. OpenAI = /v1/chat/completions.</div>
           </div>
           <div class="form-group">
-            <label>LLM Provider</label>
-            <select id="settLlmProvider">
-              <option value="anthropic" selected>Anthropic (BYOK)</option>
-              <option value="local">Local (Dictum backend)</option>
-              <option value="custom">Custom endpoint</option>
-            </select>
+            <label>Model</label>
+            <input type="text" id="settModel" value="claude-opus-4-5" placeholder="claude-opus-4-5">
+            <div class="hint">Model name passed to the provider. Free-form text — use whatever the endpoint accepts.</div>
           </div>
         </div>
 
-        <div class="form-group" id="customEndpointGroup" style="display:none">
-          <label>Custom LLM Endpoint</label>
-          <input type="text" id="settCustomEndpoint" placeholder="https://api.example.com/v1/chat/completions">
+        <div class="form-group">
+          <label>Timeout (seconds)</label>
+          <input type="number" id="settApiTimeout" value="60" min="10" max="300">
         </div>
 
         <div class="checkbox-row">
@@ -1488,6 +1485,7 @@ const state = {
   cCode: '',
   isGenerating: false,
   apiEndpoint: 'http://localhost:8765',
+  apiFormat: 'anthropic',
   apiKey: '',
   model: 'claude-opus-4-5'
 };
@@ -1778,7 +1776,9 @@ async function sendChat() {
         project: state.projectPath,
         currentFile: state.currentFile,
         skills: enabledSkills,
+        api_endpoint: state.llmEndpoint || '',
         api_key: state.apiKey,
+        api_format: state.apiFormat || 'anthropic',
         model: state.model,
         auto_transpile: true
       })
@@ -1976,7 +1976,9 @@ $('closeSettings').addEventListener('click', () => closeModal(settingsModal));
 $('btnSaveSettings').addEventListener('click', () => {
   // Save to state
   state.apiEndpoint = $('settApiEndpoint').value.trim() || state.apiEndpoint;
+  state.llmEndpoint = $('settLlmEndpoint').value.trim();
   state.apiKey  = $('settApiKey').value.trim();
+  state.apiFormat = $('settApiFormat').value;
   state.model   = $('settModel').value || state.model;
   state.settings = {
     projectName: $('settProjectName').value,
@@ -1986,12 +1988,11 @@ $('btnSaveSettings').addEventListener('click', () => {
     autoTranspile: $('settAutoTranspile').checked,
     autoRun: $('settAutoRun').checked,
     apiEndpoint: $('settApiEndpoint').value,
+    llmEndpoint: $('settLlmEndpoint').value,
     apiKey: $('settApiKey').value,
+    apiFormat: $('settApiFormat').value,
     apiTimeout: parseInt($('settApiTimeout').value),
-    llmProvider: $('settLlmProvider').value,
-    customEndpoint: $('settCustomEndpoint').value,
     model: $('settModel').value,
-    streamResponse: $('settStreamResponse').checked,
     fontSize: parseInt($('settFontSize').value),
     tabSize: parseInt($('settTabSize').value),
     lineNumbers: $('settLineNumbers').checked,
@@ -2018,11 +2019,10 @@ $('btnResetSettings').addEventListener('click', () => {
   $('settAutoTranspile').checked = false;
   $('settAutoRun').checked = false;
   $('settApiKey').value = '';
-  $('settApiTimeout').value = '30';
-  $('settLlmProvider').value = 'local';
-  $('settCustomEndpoint').value = '';
-  $('settModel').value = '';
-  $('settStreamResponse').checked = false;
+  $('settLlmEndpoint').value = 'https://api.anthropic.com';
+  $('settApiFormat').value = 'anthropic';
+  $('settApiTimeout').value = '60';
+  $('settModel').value = 'claude-opus-4-5';
   $('settFontSize').value = '13';
   $('settTabSize').value = '4';
   $('settLineNumbers').checked = true;
@@ -2038,11 +2038,6 @@ document.querySelectorAll('#settingsModal .modal-tab').forEach(tab => {
     tab.classList.add('active');
     $(tab.dataset.panel).classList.add('active');
   });
-});
-
-// LLM provider toggle
-$('settLlmProvider').addEventListener('change', (e) => {
-  $('customEndpointGroup').style.display = e.target.value === 'custom' ? 'block' : 'none';
 });
 
 // ── Skills Modal ──

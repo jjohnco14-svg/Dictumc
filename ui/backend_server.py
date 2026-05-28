@@ -438,8 +438,10 @@ class GenerateRequest(BaseModel):
     project:      str = ""
     currentFile:  str = ""
     skills:       List[str] = []          # e.g. ["general","embedded","medical"]
-    api_key:      str = ""                # BYOK — Claude API key from the UI
-    model:        str = "claude-opus-4-5" # override if needed
+    api_endpoint: str = ""              # BYOK — e.g. "https://api.anthropic.com"
+    api_key:      str = ""                # BYOK — API key
+    api_format:   str = "anthropic"       # "anthropic" | "openai"
+    model:        str = "claude-opus-4-5" # override per provider
     auto_transpile: bool = True           # run transpiler on generated code
 
 
@@ -569,47 +571,93 @@ def generate(req: GenerateRequest):
     """
     Ask → Plan → Verify → Output pipeline.
 
-    Calls the Anthropic Claude API (BYOK) with the assembled system prompt,
-    extracts the generated Dictum code, optionally auto-transpiles it,
+    Calls any LLM API (BYOK) in OpenAI or Anthropic format.
+    Extracts the generated Dictum code, optionally auto-transpiles it,
     and returns the full structured response.
     """
     import urllib.request
     import json as _json
 
+    # ── API Key ─────────────────────────────────────────────────────────
     api_key = req.api_key.strip()
     if not api_key:
-        # Try env fallback
-        api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+        api_key = os.environ.get("LLM_API_KEY",
+                                 os.environ.get("ANTHROPIC_API_KEY", ""))
     if not api_key:
         return {
             "ok": False,
             "error": (
-                "No API key provided. "
-                "Pass your Anthropic API key in the request as \'api_key\' "
-                "or set the ANTHROPIC_API_KEY environment variable."
+                "No API key provided. Pass 'api_key' in the request "
+                "or set the LLM_API_KEY / ANTHROPIC_API_KEY environment variable."
             ),
             "message": "API key required — enter your key in Settings → LLM Provider.",
         }
 
+    # ── API Endpoint ──────────────────────────────────────────────────────
+    api_endpoint = req.api_endpoint.strip()
+    if not api_endpoint:
+        return {
+            "ok": False,
+            "error": (
+                "No API endpoint provided. Pass 'api_endpoint' in the request "
+                "(e.g. https://api.anthropic.com, https://api.openai.com, "
+                "https://openrouter.ai/api, http://localhost:8080/v1, etc.)."
+            ),
+            "message": "API endpoint required — enter your endpoint in Settings → LLM Provider.",
+        }
+
+    # ── API Format ───────────────────────────────────────────────────────
+    api_format = req.api_format.strip().lower()
+    if api_format not in ("openai", "anthropic"):
+        return {
+            "ok": False,
+            "error": f"Unsupported api_format '{api_format}'. Use 'openai' or 'anthropic'.",
+            "message": "Invalid API format.",
+        }
+
     system_prompt = _build_system_prompt(req.skills)
 
-    payload = _json.dumps({
-        "model": req.model,
-        "max_tokens": 4096,
-        "system": system_prompt,
-        "messages": [
-            {"role": "user", "content": req.prompt}
-        ],
-    }).encode("utf-8")
+    # ── Build URL ───────────────────────────────────────────────────────
+    if api_format == "anthropic":
+        url = (api_endpoint if "/v1/messages" in api_endpoint
+               else api_endpoint.rstrip("/") + "/v1/messages")
+    else:  # openai-compatible
+        url = (api_endpoint if "/v1/chat/completions" in api_endpoint
+               else api_endpoint.rstrip("/") + "/v1/chat/completions")
 
-    api_req = urllib.request.Request(
-        "https://api.anthropic.com/v1/messages",
-        data=payload,
-        headers={
+    # ── Build Payload & Headers ─────────────────────────────────────────
+    if api_format == "anthropic":
+        payload = {
+            "model": req.model,
+            "max_tokens": 4096,
+            "system": system_prompt,
+            "messages": [{"role": "user", "content": req.prompt}],
+        }
+        headers = {
             "Content-Type": "application/json",
             "x-api-key": api_key,
             "anthropic-version": "2023-06-01",
-        },
+        }
+    else:  # openai
+        payload = {
+            "model": req.model,
+            "max_tokens": 4096,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": req.prompt},
+            ],
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}",
+        }
+
+    payload_bytes = _json.dumps(payload).encode("utf-8")
+
+    api_req = urllib.request.Request(
+        url,
+        data=payload_bytes,
+        headers=headers,
         method="POST",
     )
 
@@ -618,20 +666,27 @@ def generate(req: GenerateRequest):
             body = _json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         err_body = e.read().decode("utf-8", errors="replace")
-        return {"ok": False, "error": f"Anthropic API error {e.code}: {err_body}", "message": "API call failed."}
+        return {"ok": False, "error": f"LLM API error {e.code}: {err_body}",
+                "message": "API call failed."}
     except Exception as e:
         return {"ok": False, "error": str(e), "message": "API call failed."}
 
-    # Extract text content from response
+    # ── Extract text from response ──────────────────────────────────────
     full_text = ""
-    for block in body.get("content", []):
-        if block.get("type") == "text":
-            full_text += block["text"]
+    if api_format == "anthropic":
+        for block in body.get("content", []):
+            if block.get("type") == "text":
+                full_text += block.get("text", "")
+    else:  # openai
+        choices = body.get("choices", [])
+        if choices:
+            full_text = choices[0].get("message", {}).get("content", "")
 
     if not full_text:
-        return {"ok": False, "error": "Empty response from API", "message": "No content returned."}
+        return {"ok": False, "error": "Empty response from API",
+                "message": "No content returned."}
 
-    # Extract Dictum code block
+    # ── Extract Dictum code block ───────────────────────────────────────
     dictum_code = _extract_dictum_code(full_text)
 
     result = {
@@ -642,7 +697,7 @@ def generate(req: GenerateRequest):
         "warnings": [],
     }
 
-    # Auto-transpile if code was extracted and compile=True
+    # Auto-transpile if code was extracted
     if req.auto_transpile and dictum_code:
         transpile_req = TranspileRequest(
             source=dictum_code,
@@ -663,9 +718,7 @@ def generate(req: GenerateRequest):
 
 # ---------------------------------------------------------------------------
 # Info endpoints
-# ---------------------------------------------------------------------------
-
-@app.get("/targets")
+# ---------------------------------------------------------------------------@app.get("/targets")
 def list_targets():
     """List all supported QEMU execution targets and their availability."""
     result = []

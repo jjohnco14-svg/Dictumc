@@ -60,8 +60,8 @@ dictum-lsp    = "tooling.vscode.dictum-lsp.server:main"
 [project.urls]
 Homepage      = "https://dictum-lang.github.io"
 Documentation = "https://dictum-lang.github.io"
-Repository    = "https://github.com/yourname/dictum"
-Issues        = "https://github.com/yourname/dictum/issues"
+Repository    = "https://github.com/jjohnco14-svg/dictum"
+Issues        = "https://github.com/jjohnco14-svg/dictum/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
