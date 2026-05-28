@@ -1,0 +1,133 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Dictum",
+  "scopeName": "source.dictum",
+  "fileTypes": [".dict", ".dictum"],
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#directives" },
+    { "include": "#keywords" },
+    { "include": "#types" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#operators" },
+    { "include": "#builtin_funcs" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [{
+        "match": "#.*$",
+        "name": "comment.line.number-sign.dictum"
+      }]
+    },
+    "directives": {
+      "patterns": [{
+        "match": "#\[\s*(packed)\s*\]",
+        "name": "meta.attribute.dictum",
+        "captures": {
+          "1": { "name": "keyword.other.attribute.dictum" }
+        }
+      }]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "match": "\b(program|module|end)\b",
+          "name": "keyword.control.block.dictum"
+        },
+        {
+          "match": "\b(shape|action|method|constructor|destructor)\b",
+          "name": "keyword.control.definition.dictum"
+        },
+        {
+          "match": "\b(keep|put|if|then|otherwise|while|repeat|for|each|in|attempt|on|success|failure|return|produce|assert|print|call|run|defer|release)\b",
+          "name": "keyword.control.statement.dictum"
+        },
+        {
+          "match": "\b(import|from|bind|use|extern|unsafe|new|public|private|protected|virtual|override|export)\b",
+          "name": "keyword.other.dictum"
+        },
+        {
+          "match": "\b(any|Type|takes|produces|as|with|into|holds|giving|using|times|and|or|is|not|empty|true|false|nothing|newline)\b",
+          "name": "keyword.operator.word.dictum"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "match": "\b(whole number|count|fractional number|truth value|byte|text|handle to bytes|nothing|result)\b",
+          "name": "storage.type.primitive.dictum"
+        },
+        {
+          "match": "\b(u16|u32|i32|i64|u64|u8)\b",
+          "name": "storage.type.integer.dictum"
+        },
+        {
+          "match": "\b(unique handle to|shared handle to|weak handle to|raw handle to)\b",
+          "name": "storage.type.smart-pointer.dictum"
+        },
+        {
+          "match": "\b(const ref|ref|move)\b",
+          "name": "storage.type.reference.dictum"
+        },
+        {
+          "match": "\b(llm handle|speech handle|stream handle|diffusion handle|image handle|session handle|tensor handle)\b",
+          "name": "storage.type.stdlib-handle.dictum"
+        },
+        {
+          "match": "\b(pin handle|i2c handle|spi handle|uart handle|pwm handle|timer handle|camera handle|ble handle)\b",
+          "name": "storage.type.embedded-handle.dictum"
+        },
+        {
+          "match": "\b(servo handle|motor handle|encoder handle|pid handle)\b",
+          "name": "storage.type.robotics-handle.dictum"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "match": ""[^"]*"",
+          "name": "string.quoted.double.dictum"
+        },
+        {
+          "match": "'[^']*'",
+          "name": "string.quoted.single.dictum"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [{
+        "match": "\b\d+(\.\d+)?\b",
+        "name": "constant.numeric.dictum"
+      }]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "match": "\b(sum|difference|product|quotient|remainder|divided by|modulo|times|plus|minus)\b",
+          "name": "keyword.operator.arithmetic.dictum"
+        },
+        {
+          "match": "\b(equal to|not equal to|greater than|less than|at least|at most)\b",
+          "name": "keyword.operator.comparison.dictum"
+        },
+        {
+          "match": "\b(bitwise and|bitwise or|bitwise not|left shift|right shift)\b",
+          "name": "keyword.operator.bitwise.dictum"
+        },
+        {
+          "match": "\b(count|length|of|tanh|square root|power|exponential|sine|cosine)\b",
+          "name": "keyword.operator.function.dictum"
+        }
+      ]
+    },
+    "builtin_funcs": {
+      "patterns": [{
+        "match": "\b(dictum_[a-z_]+)\b",
+        "name": "support.function.stdlib.dictum"
+      }]
+    }
+  }
+}

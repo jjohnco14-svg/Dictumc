@@ -1,0 +1,1629 @@
+{
+  "skill_01": {
+    "name": "Console Application Developer",
+    "industry": "General Software",
+    "tier": 1,
+    "description": "Build command-line tools, scripts, and terminal applications using Dictum's natural-language syntax. Master printing, variables, arithmetic, conditionals, loops, arrays, functions, and structs.",
+    "deliverables": [
+      "CLI calculator with error handling",
+      "Text-based adventure game",
+      "File processing script",
+      "Data formatter utility"
+    ],
+    "dictum_features": [
+      "print, keep, put",
+      "if-then-otherwise",
+      "while, repeat, for-each",
+      "action ... takes ... produces",
+      "shape ... holds"
+    ],
+    "c_cpp_concepts": [
+      "stdio.h basics",
+      "Primitive types (int, double, bool)",
+      "Control flow (if, while, for)",
+      "Functions and structs",
+      "Arrays and pointers intro"
+    ],
+    "example_snippet": "program Calculator:\n    action add takes A as whole number, B as whole number produces whole number:\n        produce success with the sum of A and B\n    end action\n\n    keep Result as whole number\n    call add with 5 and 3 giving Result\n    print the text \"5 + 3 = \" and Result and newline\nend program",
+    "estimated_hours": 10,
+    "prerequisites": []
+  },
+  "skill_02": {
+    "name": "Memory Management Specialist",
+    "industry": "Systems Programming",
+    "tier": 2,
+    "description": "Master manual memory management, dynamic allocation, pointer arithmetic, and ownership tracking. Build custom allocators and data structures from scratch.",
+    "deliverables": [
+      "Custom memory pool allocator",
+      "Linked list with manual free",
+      "Ring buffer implementation",
+      "String builder with realloc"
+    ],
+    "dictum_features": [
+      "handle to bytes with room for",
+      "release",
+      "unsafe blocks",
+      "transmute",
+      "Index at N of Array"
+    ],
+    "c_cpp_concepts": [
+      "malloc/free",
+      "Pointer arithmetic",
+      "void* casting",
+      "Memory alignment",
+      "Buffer overflows prevention"
+    ],
+    "example_snippet": "program BufferDemo:\n    keep Buffer as handle to bytes with room for 1024\n\n    unsafe:\n        keep Ptr as * byte\n        put transmute Buffer as * byte into Ptr\n        put 65 into Index at 0 of Ptr\n    end unsafe\n\n    print the text \"First byte: \" and Index at 0 of Buffer and newline\n    release Buffer\nend program",
+    "estimated_hours": 20,
+    "prerequisites": [
+      "skill_01"
+    ]
+  },
+  "skill_03": {
+    "name": "File Systems Engineer",
+    "industry": "Systems Programming",
+    "tier": 2,
+    "description": "Work with file I/O, binary data, directory traversal, path manipulation, and memory-mapped files. Build utilities like grep, find, and hex dumpers.",
+    "deliverables": [
+      "File copy utility with progress bar",
+      "Recursive directory scanner",
+      "Binary hex dump tool",
+      "Log file analyzer"
+    ],
+    "dictum_features": [
+      "import from C (fopen, fread, fwrite)",
+      "attempt blocks for file errors",
+      "mmap via C imports",
+      "String manipulation"
+    ],
+    "c_cpp_concepts": [
+      "FILE* operations",
+      "fseek/ftell",
+      "mmap/munmap",
+      "Binary I/O",
+      "Directory APIs (dirent.h)"
+    ],
+    "example_snippet": "program FileCopy:\n    import from C the action fopen takes text, text produces handle to bytes as file_open\n    import from C the action fread takes handle to bytes, count, count, handle to bytes produces count as file_read\n\n    keep Source as handle to bytes\n    put call file_open with \"input.txt\" and \"rb\" into Source\n\n    keep Buffer as handle to bytes with room for 4096\n    keep BytesRead as count\n    put call file_read with Buffer and 1 and 4096 and Source into BytesRead\n\n    print the text \"Read \" and BytesRead and \" bytes\" and newline\nend program",
+    "estimated_hours": 15,
+    "prerequisites": [
+      "skill_01",
+      "skill_02"
+    ]
+  },
+  "skill_04": {
+    "name": "Process & IPC Developer",
+    "industry": "Systems Programming",
+    "tier": 3,
+    "description": "Create multi-process applications using fork, exec, pipes, and signals. Build job schedulers, process monitors, and inter-process communication systems.",
+    "deliverables": [
+      "Parallel file processor using fork",
+      "Pipe-based chat between processes",
+      "Process pool worker system",
+      "Signal-based graceful shutdown"
+    ],
+    "dictum_features": [
+      "C imports for fork, exec, pipe",
+      "Signal handling",
+      "Process ID tracking",
+      "Waitpid patterns"
+    ],
+    "c_cpp_concepts": [
+      "fork()/exec() family",
+      "pipe() and dup2()",
+      "sigaction",
+      "Process groups",
+      "Zombie process prevention"
+    ],
+    "example_snippet": "program ForkDemo:\n    import from C the action fork produces whole number as spawn_process\n    import from C the action waitpid takes whole number, handle to bytes, whole number produces whole number as wait_child\n\n    keep PID as whole number\n    put call spawn_process into PID\n\n    if PID is equal to 0 then:\n        print the text \"Child process running\" and newline\n    otherwise:\n        print the text \"Parent waiting for child...\" and newline\n        call wait_child with PID and nothing and 0\n        print the text \"Child finished\" and newline\n    end if\nend program",
+    "estimated_hours": 25,
+    "prerequisites": [
+      "skill_03"
+    ]
+  },
+  "skill_05": {
+    "name": "Network Protocol Engineer",
+    "industry": "Networking / Cybersecurity",
+    "tier": 3,
+    "description": "Build TCP/UDP clients and servers, HTTP handlers, and custom protocol implementations. Understand sockets, packet structures, and network security basics.",
+    "deliverables": [
+      "HTTP client from scratch",
+      "TCP echo server with concurrent connections",
+      "Simple DNS resolver",
+      "Port scanner utility"
+    ],
+    "dictum_features": [
+      "socket, connect, bind, listen, accept",
+      "send, recv via C imports",
+      "Network byte order handling",
+      "Error handling for network ops"
+    ],
+    "c_cpp_concepts": [
+      "BSD sockets API",
+      "TCP vs UDP",
+      "select()/poll()/epoll()",
+      "HTTP protocol basics",
+      "Network byte order (htonl, htons)"
+    ],
+    "example_snippet": "program TCPServer:\n    import from C the action socket takes whole number, whole number, whole number produces whole number as create_socket\n    import from C the action bind takes whole number, handle to bytes, whole number produces whole number as bind_socket\n    import from C the action listen takes whole number, whole number produces whole number as start_listening\n\n    keep Sock as whole number\n    put call create_socket with 2 and 1 and 0 into Sock\n    print the text \"Server socket created: \" and Sock and newline\n    call start_listening with Sock and 5\n    print the text \"Listening on port 8080...\" and newline\nend program",
+    "estimated_hours": 30,
+    "prerequisites": [
+      "skill_04"
+    ]
+  },
+  "skill_06": {
+    "name": "Threading & Concurrency Expert",
+    "industry": "High-Performance Computing",
+    "tier": 3,
+    "description": "Master multi-threading, synchronization primitives, lock-free data structures, and thread pools. Build high-performance concurrent systems.",
+    "deliverables": [
+      "Thread-safe hash map",
+      "Producer-consumer queue",
+      "Parallel matrix multiplication",
+      "Web server thread pool"
+    ],
+    "dictum_features": [
+      "pthread_create, pthread_join",
+      "pthread_mutex_init/lock/unlock",
+      "Condition variables",
+      "Atomic operations via C imports"
+    ],
+    "c_cpp_concepts": [
+      "POSIX threads (pthreads)",
+      "Mutexes and condition variables",
+      "Deadlock prevention",
+      "Thread-local storage",
+      "Memory ordering and atomics"
+    ],
+    "example_snippet": "program ThreadPool:\n    import from C the action pthread_create takes handle to bytes, handle to bytes, handle to bytes, handle to bytes produces whole number as spawn_thread\n    import from C the action pthread_join takes whole number, handle to bytes produces whole number as wait_thread\n\n    keep Threads as whole number with values 1 and 2 and 3 and 4\n\n    for each T in Threads repeat:\n        call spawn_thread with nothing and nothing and nothing and nothing\n        print the text \"Spawned thread \" and T and newline\n    end for\nend program",
+    "estimated_hours": 30,
+    "prerequisites": [
+      "skill_04"
+    ]
+  },
+  "skill_07": {
+    "name": "C++ Systems Programmer",
+    "industry": "Systems Programming",
+    "tier": 4,
+    "description": "Switch to C++ backend. Use classes, smart pointers, templates, lambdas, and RAII. Build modern systems with zero manual memory management.",
+    "deliverables": [
+      "RAII file handle class",
+      "Template-based generic container",
+      "Smart pointer linked list",
+      "Lambda-based event system"
+    ],
+    "dictum_features": [
+      "--backend cpp --cpp-standard 20",
+      "shape with methods",
+      "unique handle to T",
+      "shared handle to T",
+      "ref T, const ref T",
+      "action taking ... produces ... (lambdas)"
+    ],
+    "c_cpp_concepts": [
+      "Classes and objects",
+      "std::unique_ptr, std::shared_ptr",
+      "Templates and concepts",
+      "Lambda expressions",
+      "RAII and move semantics"
+    ],
+    "example_snippet": "program SmartPointerDemo:\n    shape Resource holds:\n        Data as whole number\n\n        constructor takes D as whole number produces nothing:\n            put D into Data\n            print the text \"Resource created with \" and D and newline\n        end constructor\n\n        destructor produces nothing:\n            print the text \"Resource destroyed\" and newline\n        end destructor\n    end shape\n\n    keep R as unique handle to Resource with new Resource with 42\n    print the text \"Data: \" and R.Data and newline\nend program",
+    "estimated_hours": 35,
+    "prerequisites": [
+      "skill_02",
+      "skill_06"
+    ]
+  },
+  "skill_08": {
+    "name": "Kernel Developer",
+    "industry": "Operating Systems",
+    "tier": 7,
+    "description": "Write bare-metal OS components: bootloaders, interrupt handlers, memory managers, schedulers, and system calls. Build a minimal kernel from scratch.",
+    "deliverables": [
+      "Bootable x86-64 kernel in QEMU",
+      "Interrupt descriptor table (IDT)",
+      "Preemptive multitasking scheduler",
+      "Physical memory bitmap allocator",
+      "System call interface"
+    ],
+    "dictum_features": [
+      "--target baremetal --no-validate",
+      "unsafe blocks extensively",
+      "* volatile byte for MMIO",
+      "extern fn with @syscall",
+      "Raw pointer arithmetic",
+      "Inline assembly via C bindings"
+    ],
+    "c_cpp_concepts": [
+      "x86-64 assembly",
+      "GDT/IDT descriptors",
+      "PIC/APIC interrupt controllers",
+      "Paging and page tables",
+      "Ring 0 vs Ring 3",
+      "System calls (int 0x80, syscall)"
+    ],
+    "example_snippet": "program KernelMain:\n    unsafe:\n        # VGA text buffer at 0xB8000\n        keep VGA as * volatile byte\n        put transmute 753664 as * volatile byte into VGA\n\n        # Print 'K' in white on black\n        put 75 into Index at 0 of VGA\n        put 15 into Index at 1 of VGA\n    end unsafe\n\n    # Halt\n    repeat forever:\n    end repeat\nend program",
+    "estimated_hours": 80,
+    "prerequisites": [
+      "skill_02",
+      "skill_04",
+      "skill_06"
+    ]
+  },
+  "skill_09": {
+    "name": "Device Driver Engineer",
+    "industry": "Hardware / Embedded",
+    "tier": 3,
+    "description": "Write kernel modules and device drivers for Linux. Handle character devices, block devices, interrupts, DMA, and hardware registers.",
+    "deliverables": [
+      "Linux character device driver",
+      "GPIO driver for Raspberry Pi",
+      "Simple block device driver",
+      "PCI device probe driver"
+    ],
+    "dictum_features": [
+      "C backend with Linux headers",
+      "Module init/exit actions",
+      "ioctl handling",
+      "Kernel memory allocation (kmalloc)"
+    ],
+    "c_cpp_concepts": [
+      "Linux kernel module API",
+      "file_operations struct",
+      "kmalloc/kfree",
+      "spin_lock vs mutex",
+      "Interrupt handlers (request_irq)",
+      "Memory-mapped I/O (ioremap)"
+    ],
+    "example_snippet": "program SimpleDriver:\n    import from C the action printk takes text produces nothing as kernel_print\n\n    action driver_init produces nothing:\n        call kernel_print with \"Simple driver loaded\\n\"\n    end action\n\n    action driver_exit produces nothing:\n        call kernel_print with \"Simple driver unloaded\\n\"\n    end action\nend program",
+    "estimated_hours": 40,
+    "prerequisites": [
+      "skill_03",
+      "skill_04"
+    ]
+  },
+  "skill_10": {
+    "name": "Embedded Firmware Engineer",
+    "industry": "Embedded Systems / IoT",
+    "tier": 5,
+    "description": "Program microcontrollers (ESP32, STM32, RP2040). Handle GPIO, I2C, SPI, UART, timers, interrupts, and low-power modes.",
+    "deliverables": [
+      "LED blinker with PWM fading",
+      "I2C sensor reader (BME280)",
+      "UART command parser",
+      "Low-power sleep/wake system"
+    ],
+    "dictum_features": [
+      "--target esp32s3 / stm32h7 / rp2040",
+      "pin config, i2c config",
+      "dictum_pin_setup/read/write/toggle",
+      "dictum_i2c_init/read/close",
+      "dictum_task_sleep/yield"
+    ],
+    "c_cpp_concepts": [
+      "MCU register maps",
+      "GPIO configuration",
+      "I2C/SPI protocol",
+      "Interrupt service routines",
+      "Sleep modes and wake sources",
+      "Cross-compilation toolchains"
+    ],
+    "example_snippet": "program BlinkESP32:\n    keep Cfg as pin config\n    put 2 into Cfg.number\n    put \"output\" into Cfg.mode\n    put false into Cfg.initial\n\n    keep Led as pin handle\n    call dictum_pin_setup with Cfg and Led\n\n    repeat 20 times using I:\n        call dictum_pin_toggle with 2\n        call dictum_task_sleep with 500\n    end repeat\nend program",
+    "estimated_hours": 30,
+    "prerequisites": [
+      "skill_02",
+      "skill_09"
+    ]
+  },
+  "skill_11": {
+    "name": "IoT Connectivity Specialist",
+    "industry": "Internet of Things",
+    "tier": 5,
+    "description": "Connect devices to the internet via WiFi, BLE, LoRa, or cellular. Implement MQTT, HTTP, CoAP protocols for IoT communication.",
+    "deliverables": [
+      "WiFi-connected weather station",
+      "BLE heart rate monitor",
+      "MQTT sensor publisher",
+      "HTTP REST API client for devices"
+    ],
+    "dictum_features": [
+      "wifi config, dictum_wifi_init",
+      "ble handle, dictum_ble_start",
+      "HTTP module (dictum_http_get/post)",
+      "Attempt blocks for connection errors"
+    ],
+    "c_cpp_concepts": [
+      "TCP/IP stack on MCU",
+      "WiFi association process",
+      "BLE GATT services",
+      "MQTT publish/subscribe",
+      "JSON parsing on embedded",
+      "Power management for wireless"
+    ],
+    "example_snippet": "program WiFiWeather:\n    keep Cfg as wifi config\n    put \"MyHomeWiFi\" into Cfg.ssid\n    put \"password123\" into Cfg.password\n    put 10000 into Cfg.timeout_ms\n\n    attempt call dictum_wifi_init with Cfg\n    on success\n        keep IP as text\n        call dictum_wifi_ip_address giving IP\n        print the text \"Connected! IP: \" and IP and newline\n\n        keep Temp as sensor reading\n        call dictum_sensor_read with \"temperature\" and Bus giving Temp\n        call dictum_http_post with \"api.weather.com\" and Temp and nothing\n    on failure with Err\n        print the text \"WiFi failed: \" and Err and newline\n    end attempt\nend program",
+    "estimated_hours": 35,
+    "prerequisites": [
+      "skill_10"
+    ]
+  },
+  "skill_12": {
+    "name": "Edge AI Engineer",
+    "industry": "Artificial Intelligence / Edge Computing",
+    "tier": 5,
+    "description": "Deploy LLMs, speech recognition, image generation, and ONNX models on edge devices. Optimize for memory-constrained environments.",
+    "deliverables": [
+      "On-device LLM chatbot (GGUF)",
+      "Voice command recognizer (Whisper)",
+      "Real-time object detector",
+      "Custom ONNX model inference"
+    ],
+    "dictum_features": [
+      "llm config, llm handle",
+      "dictum_llm_load/chat/generate/unload",
+      "speech config, dictum_speech_load/transcribe",
+      "diffusion config, dictum_diffusion_txt2img",
+      "tensor handle, dictum_runtime_run"
+    ],
+    "c_cpp_concepts": [
+      "GGML/GGUF format",
+      "Quantization (INT4, INT8)",
+      "KV cache management",
+      "ONNX Runtime API",
+      "Tensor operations",
+      "NPU/GPU acceleration hooks"
+    ],
+    "example_snippet": "program EdgeChat:\n    keep Cfg as llm config\n    put \"cpu\" into Cfg.backend\n    put 2048 into Cfg.context_size\n\n    keep Model as llm handle\n    attempt call dictum_llm_load with \"llama-3b.gguf\" and Cfg and Model\n    on success\n        keep Reply as text\n        call dictum_llm_chat with Model and \"user\" and \"What is edge AI?\" giving Reply\n        print the text \"AI: \" and Reply and newline\n        call dictum_llm_unload with Model\n    on failure with Err\n        print the text \"Failed to load model: \" and Err and newline\n    end attempt\nend program",
+    "estimated_hours": 45,
+    "prerequisites": [
+      "skill_10",
+      "skill_11"
+    ]
+  },
+  "skill_13": {
+    "name": "Robotics Control Engineer",
+    "industry": "Robotics / Automation",
+    "tier": 6,
+    "description": "Develop control systems for robotic platforms. Implement PID loops, kinematics, motion planning, and multi-axis coordination.",
+    "deliverables": [
+      "PID-controlled servo arm",
+      "DC motor with encoder feedback",
+      "Inverse kinematics solver",
+      "Multi-joint robot controller"
+    ],
+    "dictum_features": [
+      "servo handle, motor handle, encoder handle",
+      "pid handle, dictum_pid_init/step",
+      "dictum_servo_init/set_angle/detach",
+      "dictum_motor_init/set_speed/stop",
+      "dictum_kin_deg2rad/rad2deg/map/clamp"
+    ],
+    "c_cpp_concepts": [
+      "PWM signal generation",
+      "Quadrature encoder decoding",
+      "PID control theory",
+      "Forward/inverse kinematics",
+      "Trajectory planning",
+      "Real-time control loops"
+    ],
+    "example_snippet": "program PIDArm:\n    keep Joint1 as servo handle\n    call dictum_servo_init with 9 and 50 and Joint1\n\n    keep Enc1 as encoder handle\n    call dictum_encoder_init with 10 and 11 and Enc1\n\n    keep PID1 as pid handle\n    call dictum_pid_init with 2.0 and 0.5 and 0.1 and PID1\n\n    keep Target as whole number with value 90\n\n    repeat 1000 times using Tick:\n        keep Actual as whole number\n        call dictum_encoder_count with Enc1 giving Actual\n\n        keep Output as fractional number\n        call dictum_pid_step with PID1 and Target and Actual and 0.01 giving Output\n\n        keep Clamped as fractional number\n        call dictum_kin_clamp with Output and 0.0 and 180.0 giving Clamped\n\n        call dictum_servo_set_angle with Joint1 and Clamped\n        call dictum_task_sleep with 10\n    end repeat\nend program",
+    "estimated_hours": 40,
+    "prerequisites": [
+      "skill_10"
+    ]
+  },
+  "skill_14": {
+    "name": "Game Engine Programmer",
+    "industry": "Game Development",
+    "tier": 4,
+    "description": "Build game engines and real-time simulations. Handle game loops, entity systems, physics integration, rendering pipelines, and asset management.",
+    "deliverables": [
+      "2D game engine core",
+      "Entity-component system",
+      "Basic physics integrator",
+      "Sprite renderer with SDL2"
+    ],
+    "dictum_features": [
+      "C++ backend with --cpp-standard 20",
+      "Classes with virtual methods",
+      "Smart pointers for game objects",
+      "Template-based component storage",
+      "Lambda for event callbacks"
+    ],
+    "c_cpp_concepts": [
+      "Game loop (fixed timestep)",
+      "Entity-Component-System (ECS)",
+      "Object pools for performance",
+      "Double buffering",
+      "Collision detection (AABB)",
+      "SDL2/OpenGL integration"
+    ],
+    "example_snippet": "program GameLoop:\n    shape Entity holds:\n        X as fractional number\n        Y as fractional number\n        VelocityX as fractional number\n        VelocityY as fractional number\n\n        method update takes Dt as fractional number produces nothing:\n            put the sum of X and the product of VelocityX and Dt into X\n            put the sum of Y and the product of VelocityY and Dt into Y\n        end method\n    end shape\n\n    keep Player as unique handle to Entity with new Entity with 0.0 and 0.0 and 100.0 and 0.0\n    call Player.update with 0.016\n    print the text \"Player at (\" and Player.X and \", \" and Player.Y and \")\" and newline\nend program",
+    "estimated_hours": 50,
+    "prerequisites": [
+      "skill_07"
+    ]
+  },
+  "skill_15": {
+    "name": "Graphics Programmer",
+    "industry": "Computer Graphics / Visualization",
+    "tier": 4,
+    "description": "Implement rendering pipelines, shaders, ray tracing, and computer vision algorithms. Work with GPU APIs and parallel processing.",
+    "deliverables": [
+      "Software rasterizer",
+      "Ray tracing renderer",
+      "Image processing pipeline",
+      "GPU compute shader launcher"
+    ],
+    "dictum_features": [
+      "C++ backend",
+      "Unsafe blocks for GPU memory",
+      "Template math utilities",
+      "Raw handle to T for GPU buffers"
+    ],
+    "c_cpp_concepts": [
+      "Linear algebra (vectors, matrices)",
+      "Rasterization pipeline",
+      "Ray-sphere intersection",
+      "OpenGL/Vulkan/DirectX basics",
+      "Shader programming (GLSL/HLSL)",
+      "GPU memory management"
+    ],
+    "example_snippet": "program RayTracer:\n    shape Vec3 holds:\n        X as fractional number\n        Y as fractional number\n        Z as fractional number\n    end shape\n\n    action dot takes A as const ref Vec3, B as const ref Vec3 produces fractional number:\n        produce success with the sum of the sum of the product of A.X and B.X and the product of A.Y and B.Y and the product of A.Z and B.Z\n    end action\n\n    keep V1 as Vec3 with 1.0 and 0.0 and 0.0\n    keep V2 as Vec3 with 0.0 and 1.0 and 0.0\n    keep Result as fractional number\n    call dot with V1 and V2 giving Result\n    print the text \"Dot product: \" and Result and newline\nend program",
+    "estimated_hours": 55,
+    "prerequisites": [
+      "skill_07",
+      "skill_14"
+    ]
+  },
+  "skill_16": {
+    "name": "Database Systems Engineer",
+    "industry": "Data Infrastructure",
+    "tier": 3,
+    "description": "Build database engines, query processors, and storage systems. Implement B-trees, hash indexes, transaction logs, and SQL parsers.",
+    "deliverables": [
+      "In-memory key-value store",
+      "B-tree index implementation",
+      "Write-ahead logging system",
+      "Simple SQL query executor"
+    ],
+    "dictum_features": [
+      "C++ backend for performance",
+      "Smart pointers for nodes",
+      "Template-based storage",
+      "File I/O for persistence",
+      "Action pointers (std::function)"
+    ],
+    "c_cpp_concepts": [
+      "B-tree data structure",
+      "LSM trees",
+      "ACID transactions",
+      "Write-ahead logging (WAL)",
+      "Buffer pool management",
+      "Query optimization basics"
+    ],
+    "example_snippet": "program BTreeNode:\n    shape Node holds:\n        Keys as whole number with values\n        Children as raw handle to Node\n        IsLeaf as truth value\n        KeyCount as whole number\n\n        method insert takes Key as whole number produces nothing:\n            put Key into Index at KeyCount of Keys\n            put the sum of KeyCount and 1 into KeyCount\n        end method\n    end shape\n\n    keep Root as unique handle to Node with new Node with nothing and nothing and true and 0\n    call Root.insert with 42\n    print the text \"Inserted 42\" and newline\nend program",
+    "estimated_hours": 50,
+    "prerequisites": [
+      "skill_07"
+    ]
+  },
+  "skill_17": {
+    "name": "Compiler Engineer",
+    "industry": "Programming Languages / Developer Tools",
+    "tier": 4,
+    "description": "Build compilers, interpreters, and language tools. Implement lexers, parsers, AST walkers, type checkers, and code generators.",
+    "deliverables": [
+      "Lexer for a simple language",
+      "Recursive descent parser",
+      "AST interpreter",
+      "Bytecode compiler and VM"
+    ],
+    "dictum_features": [
+      "C++ backend",
+      "Classes for AST nodes",
+      "Virtual methods for visitors",
+      "Smart pointers for tree nodes",
+      "Template-based symbol tables"
+    ],
+    "c_cpp_concepts": [
+      "Lexical analysis (tokenization)",
+      "Parsing (recursive descent, Pratt)",
+      "Abstract syntax trees",
+      "Symbol tables and scopes",
+      "Type inference",
+      "Code generation (LLVM IR, assembly)"
+    ],
+    "example_snippet": "program ASTNode:\n    shape Expr holds:\n        method eval produces whole number:\n            produce success with 0\n        end method\n    end shape\n\n    shape Number is a Expr holds:\n        Value as whole number\n\n        method eval produces whole number:\n            produce success with Value\n        end method\n    end shape\n\n    shape Add is a Expr holds:\n        Left as unique handle to Expr\n        Right as unique handle to Expr\n\n        method eval produces whole number:\n            produce success with the sum of call Left.eval and call Right.eval\n        end method\n    end shape\n\n    keep Expr1 as unique handle to Number with new Number with 5\n    keep Expr2 as unique handle to Number with new Number with 3\n    keep Sum as unique handle to Add with new Add with Expr1 and Expr2\n\n    keep Result as whole number\n    call Sum.eval giving Result\n    print the text \"5 + 3 = \" and Result and newline\nend program",
+    "estimated_hours": 60,
+    "prerequisites": [
+      "skill_07",
+      "skill_16"
+    ]
+  },
+  "skill_18": {
+    "name": "Security Engineer",
+    "industry": "Cybersecurity",
+    "tier": 3,
+    "description": "Build security tools, exploit mitigations, and cryptographic systems. Understand buffer overflows, encryption, secure coding, and vulnerability analysis.",
+    "deliverables": [
+      "Stack canary bypass detector",
+      "Simple AES encryption tool",
+      "Secure memory wipe utility",
+      "Basic fuzzing harness"
+    ],
+    "dictum_features": [
+      "Unsafe blocks for raw memory",
+      "C imports for crypto libs (OpenSSL)",
+      "Manual memory for secure buffers",
+      "Attempt blocks for crypto errors"
+    ],
+    "c_cpp_concepts": [
+      "Buffer overflow mechanics",
+      "Stack canaries, ASLR, DEP",
+      "Symmetric encryption (AES)",
+      "Hash functions (SHA-256)",
+      "Secure memory (mlock, explicit_bzero)",
+      "Fuzzing (AFL, libFuzzer)"
+    ],
+    "example_snippet": "program SecureWipe:\n    import from C the action memset takes handle to bytes, whole number, count produces handle to bytes as secure_set\n\n    keep Password as handle to bytes with room for 64\n    put \"secret123\" into Password\n\n    print the text \"Before wipe: \" and Password and newline\n\n    # Securely wipe memory\n    call secure_set with Password and 0 and 64\n\n    print the text \"After wipe: \" and Password and newline\n    release Password\nend program",
+    "estimated_hours": 40,
+    "prerequisites": [
+      "skill_02",
+      "skill_05"
+    ]
+  },
+  "skill_19": {
+    "name": "DevOps / SRE Infrastructure Engineer",
+    "industry": "DevOps / Site Reliability",
+    "tier": 3,
+    "description": "Build monitoring tools, deployment scripts, container orchestration helpers, and system automation. Understand Linux internals and cloud APIs.",
+    "deliverables": [
+      "System resource monitor (CPU, memory, disk)",
+      "Log aggregation processor",
+      "Container health checker",
+      "Configuration deployment tool"
+    ],
+    "dictum_features": [
+      "File I/O for config parsing",
+      "Process management for service control",
+      "Network sockets for health checks",
+      "JSON/CSV parsing modules"
+    ],
+    "c_cpp_concepts": [
+      "/proc filesystem parsing",
+      "System calls (sysinfo, getrusage)",
+      "Docker/container APIs",
+      "JSON parsing (jansson, cJSON)",
+      "Signal handling for graceful restarts",
+      "Cron-like job scheduling"
+    ],
+    "example_snippet": "program SystemMonitor:\n    import from C the action sysinfo takes handle to bytes produces whole number as get_sysinfo\n\n    keep Info as handle to bytes with room for 368\n    call get_sysinfo with Info\n\n    # Parse uptime from sysinfo struct (offset 0)\n    keep Uptime as whole number\n    put transmute Info as * whole number into Uptime\n\n    print the text \"System uptime: \" and Uptime and \" seconds\" and newline\nend program",
+    "estimated_hours": 30,
+    "prerequisites": [
+      "skill_03",
+      "skill_04"
+    ]
+  },
+  "skill_20": {
+    "name": "Audio / DSP Engineer",
+    "industry": "Digital Signal Processing / Audio",
+    "tier": 4,
+    "description": "Process audio signals, implement filters, FFT, and real-time audio pipelines. Build synthesizers, effects, and analysis tools.",
+    "deliverables": [
+      "Real-time audio synthesizer",
+      "FFT spectrum analyzer",
+      "Digital filter (low-pass, high-pass)",
+      "WAV file processor"
+    ],
+    "dictum_features": [
+      "C++ backend for performance",
+      "Template-based DSP utilities",
+      "Raw handle to T for audio buffers",
+      "Unsafe for SIMD operations"
+    ],
+    "c_cpp_concepts": [
+      "Digital signal processing basics",
+      "Fourier transform (FFT)",
+      "Digital filters (FIR, IIR)",
+      "Audio APIs (PortAudio, ALSA)",
+      "WAV file format",
+      "Real-time constraints"
+    ],
+    "example_snippet": "program SineWave:\n    keep SampleRate as whole number with value 44100\n    keep Frequency as fractional number with value 440.0\n    keep Duration as whole number with value 1\n    keep NumSamples as whole number\n    put the product of SampleRate and Duration into NumSamples\n\n    keep Buffer as raw handle to fractional number with room for the product of NumSamples and 8\n\n    unsafe:\n        keep Ptr as * fractional number\n        put transmute Buffer as * fractional number into Ptr\n\n        repeat NumSamples times using I:\n            keep T as fractional number\n            put the quotient of I and SampleRate into T\n            keep Sample as fractional number\n            put call dictum_math_sin with the product of the product of 6.28318 and Frequency and T into Sample\n            put Sample into Index at I of Ptr\n        end repeat\n    end unsafe\n\n    print the text \"Generated \" and NumSamples and \" samples at 440Hz\" and newline\nend program",
+    "estimated_hours": 45,
+    "prerequisites": [
+      "skill_07"
+    ]
+  },
+  "skill_21": {
+    "name": "Blockchain / Cryptocurrency Developer",
+    "industry": "FinTech / Blockchain",
+    "tier": 4,
+    "description": "Implement blockchain primitives, consensus algorithms, wallets, and smart contract interactions. Understand cryptography and distributed systems.",
+    "deliverables": [
+      "Simple proof-of-work blockchain",
+      "SHA-256 hash calculator",
+      "Merkle tree implementation",
+      "Wallet key generator"
+    ],
+    "dictum_features": [
+      "C imports for crypto (OpenSSL)",
+      "Unsafe for byte manipulation",
+      "File I/O for block storage",
+      "Network sockets for P2P"
+    ],
+    "c_cpp_concepts": [
+      "Cryptographic hashing",
+      "Public/private key cryptography",
+      "Merkle trees",
+      "Proof of work",
+      "Distributed consensus (Raft, PBFT)",
+      "P2P networking"
+    ],
+    "example_snippet": "program SimpleBlock:\n    shape Block holds:\n        Index as whole number\n        PreviousHash as text\n        Timestamp as whole number\n        Data as text\n        Hash as text\n        Nonce as whole number\n    end shape\n\n    action calculate_hash takes B as const ref Block produces text:\n        # Simplified - would use SHA-256\n        produce success with \"hash_placeholder\"\n    end action\n\n    keep Genesis as Block\n    put 0 into Genesis.Index\n    put \"0\" into Genesis.PreviousHash\n    put 0 into Genesis.Timestamp\n    put \"Genesis Block\" into Genesis.Data\n    put 0 into Genesis.Nonce\n\n    call calculate_hash with Genesis giving Genesis.Hash\n    print the text \"Genesis hash: \" and Genesis.Hash and newline\nend program",
+    "estimated_hours": 50,
+    "prerequisites": [
+      "skill_05",
+      "skill_18"
+    ]
+  },
+  "skill_22": {
+    "name": "Machine Learning Systems Engineer",
+    "industry": "Artificial Intelligence / MLOps",
+    "tier": 4,
+    "description": "Build ML inference engines, model servers, and training pipelines. Optimize tensor operations and manage model lifecycles.",
+    "deliverables": [
+      "Tensor operation library",
+      "Model loading and inference server",
+      "Batch inference pipeline",
+      "Model quantization tool"
+    ],
+    "dictum_features": [
+      "C++ backend",
+      "Template-based tensor ops",
+      "Smart pointers for model weights",
+      "ONNX runtime integration",
+      "Thread pool for parallel inference"
+    ],
+    "c_cpp_concepts": [
+      "Tensor operations (GEMM, conv)",
+      "Memory layout (NCHW, NHWC)",
+      "Model serialization (ONNX, Protobuf)",
+      "Batching and pipelining",
+      "GPU memory management",
+      "Quantization (INT8, FP16)"
+    ],
+    "example_snippet": "program TensorOps:\n    shape Tensor holds:\n        Data as raw handle to fractional number\n        Rows as whole number\n        Cols as whole number\n\n        method get takes R as whole number, C as whole number produces fractional number:\n            produce success with Index at the sum of the product of R and Cols and C of Data\n        end method\n\n        method set takes R as whole number, C as whole number, V as fractional number produces nothing:\n            put V into Index at the sum of the product of R and Cols and C of Data\n        end method\n    end shape\n\n    keep T as unique handle to Tensor with new Tensor with nothing and 3 and 3\n    call T.set with 1 and 1 and 5.0\n\n    keep Val as fractional number\n    call T.get with 1 and 1 giving Val\n    print the text \"T[1][1] = \" and Val and newline\nend program",
+    "estimated_hours": 55,
+    "prerequisites": [
+      "skill_07",
+      "skill_12"
+    ]
+  },
+  "skill_23": {
+    "name": "Real-Time Systems Engineer",
+    "industry": "Aerospace / Automotive / Industrial",
+    "tier": 5,
+    "description": "Build hard real-time systems with deterministic latency. Implement schedulers, priority inversion handling, and safety-critical code.",
+    "deliverables": [
+      "Rate-monotonic scheduler",
+      "Priority ceiling protocol",
+      "Watchdog timer implementation",
+      "Deterministic memory allocator"
+    ],
+    "dictum_features": [
+      "C backend for predictability",
+      "No dynamic allocation in hot path",
+      "Static memory pools",
+      "Signal handling for timers",
+      "Mutex with priority inheritance"
+    ],
+    "c_cpp_concepts": [
+      "Real-time scheduling (RMS, EDF)",
+      "Priority inversion",
+      "Watchdog timers",
+      "Static memory allocation",
+      "Worst-case execution time (WCET)",
+      "Deterministic execution"
+    ],
+    "example_snippet": "program RateMonotonic:\n    shape Task holds:\n        Period as whole number\n        Deadline as whole number\n        Priority as whole number\n        LastRun as whole number\n    end shape\n\n    keep Tasks as Task with values nothing and nothing and nothing\n\n    action schedule takes T as ref Task, CurrentTime as whole number produces truth value:\n        if the difference of CurrentTime and T.LastRun is at least T.Period then:\n            put CurrentTime into T.LastRun\n            produce success with true\n        end if\n        produce success with false\n    end action\n\n    keep T1 as Task with 10 and 10 and 1 and 0\n    keep Now as whole number with value 15\n\n    keep ShouldRun as truth value\n    call schedule with T1 and Now giving ShouldRun\n    print the text \"Task should run: \" and ShouldRun and newline\nend program",
+    "estimated_hours": 45,
+    "prerequisites": [
+      "skill_06",
+      "skill_10"
+    ]
+  },
+  "skill_24": {
+    "name": "Virtualization / Hypervisor Engineer",
+    "industry": "Cloud Infrastructure",
+    "tier": 6,
+    "description": "Build virtualization layers, hypervisors, and container runtimes. Understand CPU virtualization extensions, memory virtualization, and I/O emulation.",
+    "deliverables": [
+      "Simple type-2 hypervisor",
+      "VM exit handler",
+      "Memory shadow page tables",
+      "Paravirtualized device driver"
+    ],
+    "dictum_features": [
+      "C backend",
+      "Unsafe blocks for CPU registers",
+      "Inline assembly via C",
+      "Raw memory for VM state",
+      "Signal handling for VM exits"
+    ],
+    "c_cpp_concepts": [
+      "Intel VT-x / AMD-V",
+      "VMX root/non-root operation",
+      "EPT (Extended Page Tables)",
+      "VMCS (Virtual Machine Control Structure)",
+      "I/O port virtualization",
+      "KVM API"
+    ],
+    "example_snippet": "program HypervisorStub:\n    unsafe:\n        # VMXON region setup (simplified)\n        keep VMXON as * byte\n        put transmute 0x1000 as * byte into VMXON\n\n        # Enable VMX operation (would use inline asm)\n        print the text \"VMXON region at 0x1000\" and newline\n    end unsafe\n\n    print the text \"Hypervisor initialized\" and newline\nend program",
+    "estimated_hours": 70,
+    "prerequisites": [
+      "skill_08",
+      "skill_09"
+    ]
+  },
+  "skill_25": {
+    "name": "WebAssembly Systems Programmer",
+    "industry": "Web Platform / Edge Computing",
+    "tier": 3,
+    "description": "Compile Dictum to WebAssembly for browser and serverless edge computing. Build high-performance web modules and WASI applications.",
+    "deliverables": [
+      "WASM module from Dictum C output",
+      "Browser-based image processor",
+      "WASI command-line tool",
+      "WASM-JS interop module"
+    ],
+    "dictum_features": [
+      "--target wasm32",
+      "C backend (WASM compiles from C)",
+      "Memory export for JS interop",
+      "No file system (WASI for FS)"
+    ],
+    "c_cpp_concepts": [
+      "WebAssembly linear memory",
+      "WASI (WebAssembly System Interface)",
+      "Emscripten toolchain",
+      "WASM-JS FFI",
+      "Memory management in WASM",
+      "WAT (WebAssembly Text Format)"
+    ],
+    "example_snippet": "program WASMHello:\n    # Compiled with: --target wasm32\n    # Emscripten exports this for JS\n\n    import from C the action emscripten_console_log takes text produces nothing as js_log\n\n    action main produces whole number:\n        call js_log with \"Hello from Dictum in WASM!\"\n        produce success with 0\n    end action\nend program",
+    "estimated_hours": 30,
+    "prerequisites": [
+      "skill_01",
+      "skill_03"
+    ]
+  },
+  "skill_26": {
+    "name": "Automotive Software Engineer",
+    "industry": "Automotive / Autonomous Vehicles",
+    "tier": 5,
+    "description": "Develop software for ECUs, ADAS systems, and autonomous driving. Follow automotive safety standards (ISO 26262, ASPICE).",
+    "deliverables": [
+      "CAN bus message parser",
+      "Sensor fusion module",
+      "Adaptive cruise control logic",
+      "Diagnostic trouble code handler"
+    ],
+    "dictum_features": [
+      "C backend for AUTOSAR",
+      "Static memory only",
+      "Deterministic loops",
+      "Error handling with attempt",
+      "Module separation for ASIL levels"
+    ],
+    "c_cpp_concepts": [
+      "CAN bus protocol",
+      "AUTOSAR architecture",
+      "ASIL safety levels",
+      "ISO 26262 functional safety",
+      "Sensor fusion (Kalman filters)",
+      "OBD-II diagnostics"
+    ],
+    "example_snippet": "program CANParser:\n    shape CANMessage holds:\n        ID as whole number\n        Length as whole number\n        Data as byte with values 0 and 0 and 0 and 0 and 0 and 0 and 0 and 0\n    end shape\n\n    action parse_speed takes Msg as const ref CANMessage produces whole number:\n        # Speed in byte 0-1 (little endian)\n        keep Low as whole number\n        put Index at 0 of Msg.Data into Low\n        keep High as whole number\n        put Index at 1 of Msg.Data into High\n        produce success with the sum of Low and the product of High and 256\n    end action\n\n    keep SpeedMsg as CANMessage with 0x123 and 2 and 0 and 50 and 0 and 0 and 0 and 0 and 0 and 0\n    keep Speed as whole number\n    call parse_speed with SpeedMsg giving Speed\n    print the text \"Vehicle speed: \" and Speed and \" km/h\" and newline\nend program",
+    "estimated_hours": 50,
+    "prerequisites": [
+      "skill_10",
+      "skill_23"
+    ]
+  },
+  "skill_27": {
+    "name": "Quantitative Finance Developer",
+    "industry": "FinTech / Quantitative Trading",
+    "tier": 4,
+    "description": "Build high-frequency trading systems, risk engines, and financial models. Optimize for microsecond latency and handle market data feeds.",
+    "deliverables": [
+      "Market data parser (FIX protocol)",
+      "Moving average calculator",
+      "Order book implementation",
+      "Risk limit checker"
+    ],
+    "dictum_features": [
+      "C++ backend for speed",
+      "Zero-copy parsing",
+      "Lock-free queues",
+      "Template-based math",
+      "Shared memory for IPC"
+    ],
+    "c_cpp_concepts": [
+      "FIX protocol parsing",
+      "Order book (price levels)",
+      "Lock-free data structures",
+      "Shared memory (shm_open)",
+      "CPU cache optimization",
+      "Memory-mapped files for logs"
+    ],
+    "example_snippet": "program OrderBook:\n    shape Order holds:\n        Price as fractional number\n        Quantity as whole number\n        Side as text\n    end shape\n\n    keep Bids as Order with values nothing and nothing and nothing\n\n    action add_bid takes Price as fractional number, Qty as whole number produces nothing:\n        keep NewOrder as Order with Price and Qty and \"buy\"\n        # Add to sorted order book\n        print the text \"Bid added: \" and Price and \" x \" and Qty and newline\n    end action\n\n    call add_bid with 100.5 and 500\n    call add_bid with 100.25 and 300\nend program",
+    "estimated_hours": 50,
+    "prerequisites": [
+      "skill_07",
+      "skill_06"
+    ]
+  },
+  "skill_28": {
+    "name": "Scientific Computing Programmer",
+    "industry": "Research / HPC / Simulation",
+    "tier": 4,
+    "description": "Implement numerical methods, simulations, and high-performance computing kernels. Work with linear algebra, differential equations, and parallel algorithms.",
+    "deliverables": [
+      "Matrix multiplication (naive + optimized)",
+      "Monte Carlo simulation",
+      "Heat equation solver",
+      "N-body gravity simulation"
+    ],
+    "dictum_features": [
+      "C++ backend",
+      "Template-based numerics",
+      "Unsafe for SIMD intrinsics",
+      "Thread pool for parallelization",
+      "Raw handles for large arrays"
+    ],
+    "c_cpp_concepts": [
+      "Numerical methods",
+      "Linear algebra (BLAS, LAPACK)",
+      "SIMD intrinsics (SSE, AVX)",
+      "OpenMP/MPI parallelization",
+      "Cache-friendly algorithms",
+      "Floating-point precision"
+    ],
+    "example_snippet": "program MatrixMult:\n    action multiply takes A as raw handle to fractional number, B as raw handle to fractional number, \n                      C as raw handle to fractional number, N as whole number produces nothing:\n        repeat N times using I:\n            repeat N times using J:\n                keep Sum as fractional number with value 0.0\n                repeat N times using K:\n                    keep AVal as fractional number\n                    put Index at the sum of the product of I and N and K of A into AVal\n                    keep BVal as fractional number\n                    put Index at the sum of the product of K and N and J of B into BVal\n                    put the sum of Sum and the product of AVal and BVal into Sum\n                end repeat\n                put Sum into Index at the sum of the product of I and N and J of C\n            end repeat\n        end repeat\n    end action\n\n    keep N as whole number with value 3\n    keep A as raw handle to fractional number with room for the product of N and N and 8\n    keep B as raw handle to fractional number with room for the product of N and N and 8\n    keep C as raw handle to fractional number with room for the product of N and N and 8\n\n    call multiply with A and B and C and N\n    print the text \"Matrix multiplication complete\" and newline\nend program",
+    "estimated_hours": 50,
+    "prerequisites": [
+      "skill_07",
+      "skill_06"
+    ]
+  },
+  "skill_29": {
+    "name": "Bioinformatics Systems Developer",
+    "industry": "Biotechnology / Bioinformatics",
+    "tier": 4,
+    "description": "Process genomic data, implement sequence alignment, and build bioinformatics pipelines. Handle massive datasets with efficient algorithms.",
+    "deliverables": [
+      "FASTA/FASTQ file parser",
+      "Smith-Waterman aligner",
+      "K-mer counter",
+      "VCF variant caller stub"
+    ],
+    "dictum_features": [
+      "C++ backend for performance",
+      "File I/O for large datasets",
+      "Hash maps for k-mer counting",
+      "String manipulation for sequences",
+      "Memory-mapped files for genomes"
+    ],
+    "c_cpp_concepts": [
+      "Sequence alignment algorithms",
+      "Suffix arrays/trees",
+      "Bloom filters",
+      "Memory-mapped I/O for large files",
+      "Parallel processing (OpenMP)",
+      "Bioinformatics file formats"
+    ],
+    "example_snippet": "program KmerCounter:\n    keep K as whole number with value 3\n    keep Sequence as text\n    put \"ATCGATCGA\" into Sequence\n\n    keep SeqLen as whole number\n    put call string_length with Sequence into SeqLen\n\n    keep Count as whole number\n    put the difference of SeqLen and K into Count\n    put the sum of Count and 1 into Count\n\n    print the text \"Sequence: \" and Sequence and newline\n    print the text \"K-mer count (K=\" and K and \"): \" and Count and newline\n\n    repeat Count times using I:\n        print the text \"K-mer at \" and I and \": \" and newline\n    end repeat\nend program",
+    "estimated_hours": 45,
+    "prerequisites": [
+      "skill_07",
+      "skill_03"
+    ]
+  },
+  "skill_30": {
+    "name": "Telecommunications Engineer",
+    "industry": "Telecommunications / 5G",
+    "tier": 5,
+    "description": "Implement protocol stacks, signal processing, and network functions. Work with cellular protocols, packet processing, and software-defined radio.",
+    "deliverables": [
+      "LTE MAC scheduler stub",
+      "Packet parser for 5G NR",
+      "Signal constellation generator",
+      "Network function virtualization module"
+    ],
+    "dictum_features": [
+      "C backend for DSP",
+      "Unsafe for SIMD",
+      "Bit manipulation",
+      "Circular buffers",
+      "Timer interrupts"
+    ],
+    "c_cpp_concepts": [
+      "OFDM modulation",
+      "MIMO signal processing",
+      "MAC scheduling algorithms",
+      "Protocol stack layers",
+      "SDR (Software Defined Radio)",
+      "DPDK for packet processing"
+    ],
+    "example_snippet": "program PacketParser:\n    shape Packet holds:\n        Header as whole number\n        Payload as byte with values\n        Length as whole number\n    end shape\n\n    action parse_header takes P as const ref Packet produces whole number:\n        # Extract type from upper 16 bits\n        keep Type as whole number\n        put the right shift of P.Header and 16 into Type\n        produce success with Type\n    end action\n\n    keep Pkt as Packet with 0x00010002 and nothing and 4\n    keep PktType as whole number\n    call parse_header with Pkt giving PktType\n    print the text \"Packet type: \" and PktType and newline\nend program",
+    "estimated_hours": 50,
+    "prerequisites": [
+      "skill_05",
+      "skill_20"
+    ]
+  },
+  "skill_31": {
+    "name": "Computer Vision Engineer",
+    "industry": "AI / Robotics / Autonomous Systems",
+    "tier": 4,
+    "description": "Implement image processing algorithms, feature detection, and neural network inference for vision tasks. Optimize for embedded cameras.",
+    "deliverables": [
+      "Grayscale converter",
+      "Sobel edge detector",
+      "Haar cascade face detector stub",
+      "Camera frame capture pipeline"
+    ],
+    "dictum_features": [
+      "C++ backend",
+      "Unsafe for pixel access",
+      "Template-based image types",
+      "Raw handles for frame buffers",
+      "Edge AI module for NN inference"
+    ],
+    "c_cpp_concepts": [
+      "Image formats (BMP, PNG, RAW)",
+      "Convolution kernels",
+      "Histogram equalization",
+      "Feature detection (SIFT, ORB)",
+      "Camera interfaces (V4L2)",
+      "OpenCV integration"
+    ],
+    "example_snippet": "program EdgeDetector:\n    shape Image holds:\n        Pixels as raw handle to byte\n        Width as whole number\n        Height as whole number\n    end shape\n\n    action sobel_x takes Img as const ref Image, X as whole number, Y as whole number produces whole number:\n        # Simplified Sobel X kernel\n        keep Sum as whole number with value 0\n\n        unsafe:\n            keep Ptr as * byte\n            put transmute Img.Pixels as * byte into Ptr\n\n            keep Idx as whole number\n            put the sum of the product of Y and Img.Width and X into Idx\n            keep Val as whole number\n            put Index at Idx of Ptr into Val\n            put the sum of Sum and Val into Sum\n        end unsafe\n\n        produce success with Sum\n    end action\n\n    keep Img as Image with nothing and 640 and 480\n    print the text \"Sobel edge detector initialized for 640x480\" and newline\nend program",
+    "estimated_hours": 45,
+    "prerequisites": [
+      "skill_07",
+      "skill_12"
+    ]
+  },
+  "skill_32": {
+    "name": "Distributed Systems Engineer",
+    "industry": "Cloud Computing / Backend Infrastructure",
+    "tier": 4,
+    "description": "Build distributed systems, consensus algorithms, and fault-tolerant services. Implement Raft, gossip protocols, and distributed hash tables.",
+    "deliverables": [
+      "Raft consensus implementation",
+      "Distributed key-value store",
+      "Gossip protocol for cluster state",
+      "Leader election service"
+    ],
+    "dictum_features": [
+      "C++ backend",
+      "Network sockets for RPC",
+      "Thread pool for request handling",
+      "Smart pointers for node state",
+      "JSON for message serialization"
+    ],
+    "c_cpp_concepts": [
+      "Raft consensus algorithm",
+      "CAP theorem",
+      "Vector clocks",
+      "Consistent hashing",
+      "Byzantine fault tolerance",
+      "gRPC/Protobuf"
+    ],
+    "example_snippet": "program RaftNode:\n    shape NodeState holds:\n        ID as whole number\n        CurrentTerm as whole number\n        VotedFor as whole number\n        IsLeader as truth value\n        Log as text with values\n    end shape\n\n    action request_vote takes State as ref NodeState, CandidateTerm as whole number, \n                           CandidateID as whole number produces truth value:\n        if CandidateTerm is greater than State.CurrentTerm then:\n            put CandidateTerm into State.CurrentTerm\n            put CandidateID into State.VotedFor\n            produce success with true\n        end if\n        produce success with false\n    end action\n\n    keep Node1 as NodeState with 1 and 0 and 0 and false and nothing\n    keep Granted as truth value\n    call request_vote with Node1 and 1 and 2 giving Granted\n    print the text \"Vote granted: \" and Granted and newline\nend program",
+    "estimated_hours": 55,
+    "prerequisites": [
+      "skill_05",
+      "skill_06",
+      "skill_07"
+    ]
+  },
+  "skill_33": {
+    "name": "Database Query Optimizer Developer",
+    "industry": "Data Infrastructure",
+    "tier": 5,
+    "description": "Implement query planners, cost estimators, and execution engines. Understand relational algebra, join algorithms, and index selection.",
+    "deliverables": [
+      "SQL parser (subset)",
+      "Query plan tree builder",
+      "Cost-based optimizer",
+      "Iterator-based execution engine"
+    ],
+    "dictum_features": [
+      "C++ backend",
+      "Virtual methods for plan nodes",
+      "Smart pointers for plan trees",
+      "Template-based statistics",
+      "Visitor pattern for plan traversal"
+    ],
+    "c_cpp_concepts": [
+      "Relational algebra",
+      "Query optimization (Selinger)",
+      "Join algorithms (nested loop, hash, merge)",
+      "Cost estimation",
+      "Index selection",
+      "Volcano iterator model"
+    ],
+    "example_snippet": "program QueryPlan:\n    shape PlanNode holds:\n        method next produces truth value:\n            produce success with false\n        end method\n    end shape\n\n    shape ScanNode is a PlanNode holds:\n        TableName as text\n        CurrentRow as whole number\n\n        method next produces truth value:\n            put the sum of CurrentRow and 1 into CurrentRow\n            produce success with true\n        end method\n    end shape\n\n    shape FilterNode is a PlanNode holds:\n        Child as unique handle to PlanNode\n        Predicate as text\n\n        method next produces truth value:\n            keep HasNext as truth value\n            call Child.next giving HasNext\n            produce success with HasNext\n        end method\n    end shape\n\n    keep Scan as unique handle to ScanNode with new ScanNode with \"users\" and 0\n    keep Filter as unique handle to FilterNode with new FilterNode with Scan and \"age > 18\"\n\n    keep Row as truth value\n    call Filter.next giving Row\n    print the text \"Got row: \" and Row and newline\nend program",
+    "estimated_hours": 60,
+    "prerequisites": [
+      "skill_16",
+      "skill_17"
+    ]
+  },
+  "skill_34": {
+    "name": "Game AI Programmer",
+    "industry": "Game Development",
+    "tier": 4,
+    "description": "Implement AI behaviors, pathfinding, decision trees, and state machines for games. Build NPC brains and strategic planners.",
+    "deliverables": [
+      "A* pathfinder",
+      "Behavior tree engine",
+      "Finite state machine for NPCs",
+      "Minimax game AI"
+    ],
+    "dictum_features": [
+      "C++ backend",
+      "Classes for AI components",
+      "Smart pointers for behavior trees",
+      "Lambda for action callbacks",
+      "Template-based blackboards"
+    ],
+    "c_cpp_concepts": [
+      "A* pathfinding algorithm",
+      "Behavior trees (selector, sequence)",
+      "Finite state machines",
+      "GOAP (Goal-Oriented Action Planning)",
+      "Minimax with alpha-beta pruning",
+      "Navigation meshes"
+    ],
+    "example_snippet": "program BehaviorTree:\n    shape Node holds:\n        method tick produces truth value:\n            produce success with true\n        end method\n    end shape\n\n    shape Sequence is a Node holds:\n        Children as raw handle to Node\n        ChildCount as whole number\n\n        method tick produces truth value:\n            repeat ChildCount times using I:\n                keep Child as raw handle to Node\n                put transmute Children as * raw handle to Node into Child\n                keep Result as truth value\n                call tick with Child giving Result\n                if Result is equal to false then:\n                    produce success with false\n                end if\n            end repeat\n            produce success with true\n        end method\n    end shape\n\n    print the text \"Behavior tree framework initialized\" and newline\nend program",
+    "estimated_hours": 45,
+    "prerequisites": [
+      "skill_14"
+    ]
+  },
+  "skill_35": {
+    "name": "Compiler Optimizer Engineer",
+    "industry": "Programming Languages / Developer Tools",
+    "tier": 5,
+    "description": "Implement compiler optimizations: constant folding, dead code elimination, loop unrolling, register allocation, and SSA form.",
+    "deliverables": [
+      "Constant folding pass",
+      "Dead code elimination",
+      "Basic block CFG builder",
+      "Simple register allocator"
+    ],
+    "dictum_features": [
+      "C++ backend",
+      "Classes for IR nodes",
+      "Smart pointers for SSA values",
+      "Template-based analysis passes",
+      "Visitor pattern for transforms"
+    ],
+    "c_cpp_concepts": [
+      "Intermediate representation (IR)",
+      "SSA (Static Single Assignment)",
+      "Control flow graph (CFG)",
+      "Data flow analysis",
+      "Liveness analysis",
+      "Graph coloring register allocation"
+    ],
+    "example_snippet": "program ConstantFold:\n    shape Instruction holds:\n        Opcode as text\n        Result as whole number\n        Op1 as whole number\n        Op2 as whole number\n        IsConst1 as truth value\n        IsConst2 as truth value\n    end shape\n\n    action fold takes Inst as ref Instruction produces truth value:\n        if Inst.Opcode is equal to \"add\" then:\n            if Inst.IsConst1 and Inst.IsConst2 then:\n                put the sum of Inst.Op1 and Inst.Op2 into Inst.Result\n                put true into Inst.IsConst1\n                produce success with true\n            end if\n        end if\n        produce success with false\n    end action\n\n    keep AddInst as Instruction with \"add\" and 0 and 5 and 3 and true and true\n    keep Folded as truth value\n    call fold with AddInst giving Folded\n    print the text \"Folded 5+3 = \" and AddInst.Result and newline\nend program",
+    "estimated_hours": 55,
+    "prerequisites": [
+      "skill_17"
+    ]
+  },
+  "skill_36": {
+    "name": "Embedded Linux Engineer",
+    "industry": "Embedded Systems / IoT",
+    "tier": 4,
+    "description": "Build systems on embedded Linux (Yocto, Buildroot). Handle device trees, kernel modules, systemd services, and containerization on edge.",
+    "deliverables": [
+      "Device tree overlay parser",
+      "Systemd service controller",
+      "Container runtime stub (cgroups)",
+      "OTA update handler"
+    ],
+    "dictum_features": [
+      "C backend",
+      "File I/O for config parsing",
+      "Process management",
+      "Network for updates",
+      "Signal handling"
+    ],
+    "c_cpp_concepts": [
+      "Device tree (DTS/DTB)",
+      "Linux kernel modules",
+      "Systemd unit files",
+      "cgroups and namespaces",
+      "U-Boot bootloader",
+      "Yocto/Buildroot workflow"
+    ],
+    "example_snippet": "program DeviceTree:\n    shape DeviceNode holds:\n        Name as text\n        Compatible as text\n        Reg as whole number with values\n        Status as text\n    end shape\n\n    action parse_status takes Node as const ref DeviceNode produces truth value:\n        produce success with Node.Status is equal to \"okay\"\n    end action\n\n    keep LedNode as DeviceNode with \"led0\" and \"gpio-leds\" and 0x1000 and 0x4 and \"okay\"\n    keep Active as truth value\n    call parse_status with LedNode giving Active\n    print the text \"LED node active: \" and Active and newline\nend program",
+    "estimated_hours": 40,
+    "prerequisites": [
+      "skill_09",
+      "skill_10"
+    ]
+  },
+  "skill_37": {
+    "name": "Cloud-Native Systems Programmer",
+    "industry": "Cloud Infrastructure",
+    "tier": 4,
+    "description": "Build microservices, service meshes, and cloud-native infrastructure in C/C++. Implement gRPC services, load balancers, and circuit breakers.",
+    "deliverables": [
+      "gRPC service stub",
+      "HTTP/2 load balancer",
+      "Circuit breaker pattern",
+      "Distributed tracing collector"
+    ],
+    "dictum_features": [
+      "C++ backend",
+      "Network sockets (HTTP/2)",
+      "Thread pool for concurrency",
+      "Smart pointers for request context",
+      "JSON/Protobuf parsing"
+    ],
+    "c_cpp_concepts": [
+      "HTTP/2 protocol",
+      "gRPC/Protobuf",
+      "Service discovery",
+      "Circuit breaker pattern",
+      "Distributed tracing (OpenTelemetry)",
+      "Load balancing algorithms"
+    ],
+    "example_snippet": "program LoadBalancer:\n    shape Backend holds:\n        Address as text\n        Port as whole number\n        Healthy as truth value\n        ActiveConnections as whole number\n    end shape\n\n    action select_backend takes Backends as raw handle to Backend, Count as whole number produces text:\n        repeat Count times using I:\n            keep B as raw handle to Backend\n            put transmute Backends as * raw handle to Backend into B\n            keep Offset as whole number\n            put the product of I and 32 into Offset\n            keep Ptr as raw handle to Backend\n            put transmute B as raw handle to byte and Offset into Ptr\n            if Ptr.Healthy then:\n                produce success with Ptr.Address\n            end if\n        end repeat\n        produce success with \"none\"\n    end action\n\n    print the text \"Load balancer initialized\" and newline\nend program",
+    "estimated_hours": 50,
+    "prerequisites": [
+      "skill_05",
+      "skill_06",
+      "skill_07"
+    ]
+  },
+  "skill_38": {
+    "name": "Natural Language Processing Engineer",
+    "industry": "Artificial Intelligence / NLP",
+    "tier": 4,
+    "description": "Implement tokenizers, embedding engines, transformer inference, and text processing pipelines. Optimize for both server and edge deployment.",
+    "deliverables": [
+      "BPE tokenizer implementation",
+      "Embedding lookup engine",
+      "Attention mechanism kernel",
+      "Text classification pipeline"
+    ],
+    "dictum_features": [
+      "C++ backend",
+      "Template-based tensor ops",
+      "Smart pointers for model weights",
+      "Edge AI module for inference",
+      "String manipulation for tokenization"
+    ],
+    "c_cpp_concepts": [
+      "Tokenization algorithms (BPE, WordPiece)",
+      "Embedding matrices",
+      "Self-attention mechanism",
+      "Softmax and layer normalization",
+      "Quantization for edge",
+      "ONNX export/import"
+    ],
+    "example_snippet": "program Tokenizer:\n    shape Token holds:\n        ID as whole number\n        Text as text\n        Score as fractional number\n    end shape\n\n    action merge_tokens takes A as const ref Token, B as const ref Token produces Token:\n        keep Merged as Token\n        put A.ID into Merged.ID\n        put \"merged\" into Merged.Text\n        put the sum of A.Score and B.Score into Merged.Score\n        produce success with Merged\n    end action\n\n    keep T1 as Token with 1 and \"hello\" and 0.9\n    keep T2 as Token with 2 and \"world\" and 0.8\n    keep Combined as Token\n    call merge_tokens with T1 and T2 giving Combined\n    print the text \"Merged: \" and Combined.Text and newline\nend program",
+    "estimated_hours": 50,
+    "prerequisites": [
+      "skill_07",
+      "skill_12"
+    ]
+  },
+  "skill_39": {
+    "name": "GPU Compute Programmer",
+    "industry": "High-Performance Computing / AI",
+    "tier": 5,
+    "description": "Write GPU kernels and compute shaders using CUDA, OpenCL, or Vulkan Compute. Optimize memory coalescing, occupancy, and parallel algorithms.",
+    "deliverables": [
+      "Matrix multiplication CUDA kernel",
+      "Reduction algorithm on GPU",
+      "Image convolution shader",
+      "GPU-accelerated sorting"
+    ],
+    "dictum_features": [
+      "C++ backend",
+      "Unsafe for GPU memory",
+      "Raw handles for device buffers",
+      "Template-based kernel launches",
+      "C imports for CUDA/OpenCL"
+    ],
+    "c_cpp_concepts": [
+      "CUDA kernel programming",
+      "Thread hierarchy (grid, block, thread)",
+      "Shared memory and coalescing",
+      "Warp divergence",
+      "Occupancy optimization",
+      "CUDA streams and events"
+    ],
+    "example_snippet": "program GPUStub:\n    # Dictum transpiles to C++, then nvcc compiles CUDA\n    shape GPUBuffer holds:\n        DevicePtr as raw handle to byte\n        Size as count\n\n        method allocate takes Bytes as count produces result:\n            # Would call cudaMalloc\n            print the text \"Allocating \" and Bytes and \" bytes on GPU\" and newline\n            produce success with nothing\n        end method\n    end shape\n\n    keep Buf as GPUBuffer\n    call Buf.allocate with 1048576\n    print the text \"GPU buffer ready\" and newline\nend program",
+    "estimated_hours": 55,
+    "prerequisites": [
+      "skill_07",
+      "skill_28"
+    ]
+  },
+  "skill_40": {
+    "name": "Firmware Security Engineer",
+    "industry": "Cybersecurity / Embedded",
+    "tier": 5,
+    "description": "Secure embedded systems and IoT devices. Implement secure boot, encryption, attestation, and side-channel resistance.",
+    "deliverables": [
+      "Secure boot chain verifier",
+      "Firmware encryption tool",
+      "Device attestation protocol",
+      "Side-channel resistant crypto"
+    ],
+    "dictum_features": [
+      "C backend for bare metal",
+      "Unsafe for crypto operations",
+      "C imports for hardware crypto",
+      "Attempt blocks for verification",
+      "Static memory only"
+    ],
+    "c_cpp_concepts": [
+      "Secure boot (ROM -> bootloader -> app)",
+      "AES-GCM encryption",
+      "HMAC verification",
+      "Trusted Platform Module (TPM)",
+      "Side-channel attacks (timing, power)",
+      "Code signing and verification"
+    ],
+    "example_snippet": "program SecureBoot:\n    shape FirmwareImage holds:\n        Version as whole number\n        Hash as byte with values\n        Signature as byte with values\n        Valid as truth value\n    end shape\n\n    action verify_signature takes Img as const ref FirmwareImage produces truth value:\n        # Would use RSA/ECDSA verify\n        print the text \"Verifying firmware v\" and Img.Version and newline\n        produce success with Img.Valid\n    end action\n\n    keep FW as FirmwareImage with 1 and nothing and nothing and true\n    keep Verified as truth value\n    call verify_signature with FW giving Verified\n    print the text \"Firmware verified: \" and Verified and newline\nend program",
+    "estimated_hours": 50,
+    "prerequisites": [
+      "skill_10",
+      "skill_18"
+    ]
+  },
+  "skill_41": {
+    "name": "Satellite Systems Programmer",
+    "industry": "Aerospace / Space",
+    "tier": 6,
+    "description": "Develop flight software for satellites and spacecraft. Handle radiation-hardened computing, fault tolerance, and orbital mechanics calculations.",
+    "deliverables": [
+      "Attitude determination algorithm",
+      "Telemetry packet formatter",
+      "Fault detection and recovery system",
+      "Orbital propagator stub"
+    ],
+    "dictum_features": [
+      "C backend for space-grade CPUs",
+      "Static memory allocation only",
+      "Error handling with attempt",
+      "Deterministic execution patterns",
+      "Module separation for redundancy"
+    ],
+    "c_cpp_concepts": [
+      "Radiation-hardened processors",
+      "Triple modular redundancy (TMR)",
+      "Watchdog timers",
+      "EDAC (Error Detection and Correction)",
+      "CCSDS packet standards",
+      "Orbital mechanics (Kepler, SGP4)"
+    ],
+    "example_snippet": "program SatelliteTelemetry:\n    shape TelemetryPacket holds:\n        Timestamp as whole number\n        BatteryVoltage as fractional number\n        SolarPanelCurrent as fractional number\n        Temperature as fractional number\n        StatusFlags as whole number\n    end shape\n\n    action format_telemetry takes TLM as const ref TelemetryPacket produces text:\n        # CCSDS-like packet formatting\n        produce success with \"TM_PACKET\"\n    end action\n\n    keep Packet as TelemetryPacket with 1234567890 and 7.4 and 2.1 and 25.0 and 0x0001\n    keep Formatted as text\n    call format_telemetry with Packet giving Formatted\n    print the text \"Telemetry: \" and Formatted and newline\nend program",
+    "estimated_hours": 60,
+    "prerequisites": [
+      "skill_10",
+      "skill_23"
+    ]
+  },
+  "skill_42": {
+    "name": "Medical Device Software Engineer",
+    "industry": "Healthcare / Medical Devices",
+    "tier": 5,
+    "description": "Develop safety-critical software for medical devices. Follow FDA/IEC 62304 standards, implement real-time monitoring, and ensure fail-safe operation.",
+    "deliverables": [
+      "Patient monitor data acquisition",
+      "Alarm management system",
+      "Infusion pump controller",
+      "ECG signal processing pipeline"
+    ],
+    "dictum_features": [
+      "C backend for safety",
+      "Static memory allocation",
+      "Deterministic loops",
+      "Attempt blocks for safety checks",
+      "Module separation for risk classes"
+    ],
+    "c_cpp_concepts": [
+      "IEC 62304 software lifecycle",
+      "Risk management (ISO 14971)",
+      "Real-time signal processing",
+      "Fail-safe design patterns",
+      "Alarm prioritization",
+      "Data integrity checks"
+    ],
+    "example_snippet": "program PatientMonitor:\n    shape VitalSigns holds:\n        HeartRate as whole number\n        SpO2 as whole number\n        BloodPressureSys as whole number\n        BloodPressureDia as whole number\n        AlarmLevel as whole number\n    end shape\n\n    action check_alarms takes V as const ref VitalSigns produces whole number:\n        if V.HeartRate is less than 60 then:\n            produce success with 2\n        end if\n        if V.SpO2 is less than 90 then:\n            produce success with 3\n        end if\n        produce success with 0\n    end action\n\n    keep Patient1 as VitalSigns with 55 and 98 and 120 and 80 and 0\n    keep Alarm as whole number\n    call check_alarms with Patient1 giving Alarm\n    print the text \"Alarm level: \" and Alarm and newline\nend program",
+    "estimated_hours": 50,
+    "prerequisites": [
+      "skill_10",
+      "skill_23"
+    ]
+  },
+  "skill_43": {
+    "name": "Industrial Control Systems Engineer",
+    "industry": "Manufacturing / Industrial Automation",
+    "tier": 5,
+    "description": "Program PLCs, SCADA systems, and industrial controllers. Implement ladder logic, PID control, and safety interlocks for factory automation.",
+    "deliverables": [
+      "PLC ladder logic simulator",
+      "SCADA data historian",
+      "Safety interlock controller",
+      "Modbus TCP client/server"
+    ],
+    "dictum_features": [
+      "C backend for real-time",
+      "Timer interrupts",
+      "Signal handling",
+      "Network sockets for Modbus",
+      "Deterministic execution"
+    ],
+    "c_cpp_concepts": [
+      "IEC 61131-3 standards",
+      "Ladder logic",
+      "Modbus protocol",
+      "OPC UA",
+      "Safety PLCs (SIL ratings)",
+      "Real-time Ethernet (EtherCAT, Profinet)"
+    ],
+    "example_snippet": "program SafetyInterlock:\n    shape MachineState holds:\n        EmergencyStop as truth value\n        GuardClosed as truth value\n        MotorRunning as truth value\n        Temperature as fractional number\n    end shape\n\n    action check_safety takes S as const ref MachineState produces truth value:\n        if S.EmergencyStop is equal to true then:\n            produce success with false\n        end if\n        if S.GuardClosed is equal to false then:\n            produce success with false\n        end if\n        if S.Temperature is greater than 80.0 then:\n            produce success with false\n        end if\n        produce success with true\n    end action\n\n    keep Press as MachineState with false and true and false and 65.0\n    keep Safe as truth value\n    call check_safety with Press giving Safe\n    print the text \"Machine safe to run: \" and Safe and newline\nend program",
+    "estimated_hours": 45,
+    "prerequisites": [
+      "skill_10",
+      "skill_13"
+    ]
+  },
+  "skill_44": {
+    "name": "Quantum Computing Systems Programmer",
+    "industry": "Quantum Computing",
+    "tier": 6,
+    "description": "Develop classical control software for quantum computers. Implement qubit control pulses, error correction, and quantum circuit compilers.",
+    "deliverables": [
+      "Qubit pulse sequence generator",
+      "Quantum error correction stub",
+      "Circuit DAG optimizer",
+      "Quantum state simulator (small scale)"
+    ],
+    "dictum_features": [
+      "C++ backend for performance",
+      "Template-based complex numbers",
+      "Smart pointers for circuit nodes",
+      "Unsafe for SIMD matrix ops",
+      "JSON for circuit serialization"
+    ],
+    "c_cpp_concepts": [
+      "Qubit states and gates",
+      "Quantum circuits (DAG representation)",
+      "Pulse-level control",
+      "Error correction codes (surface code)",
+      "Density matrices",
+      "Quantum Fourier transform"
+    ],
+    "example_snippet": "program QuantumCircuit:\n    shape Qubit holds:\n        Alpha as fractional number\n        Beta as fractional number\n    end shape\n\n    action apply_hadamard takes Q as ref Qubit produces nothing:\n        keep NewAlpha as fractional number\n        put the quotient of the sum of Q.Alpha and Q.Beta and 1.4142 into NewAlpha\n        keep NewBeta as fractional number\n        put the quotient of the difference of Q.Alpha and Q.Beta and 1.4142 into NewBeta\n        put NewAlpha into Q.Alpha\n        put NewBeta into Q.Beta\n    end action\n\n    keep Q1 as Qubit with 1.0 and 0.0\n    call apply_hadamard with Q1\n    print the text \"Qubit after H gate: alpha=\" and Q1.Alpha and \" beta=\" and Q1.Beta and newline\nend program",
+    "estimated_hours": 65,
+    "prerequisites": [
+      "skill_07",
+      "skill_28"
+    ]
+  },
+  "skill_45": {
+    "name": "Drone / UAV Flight Software Engineer",
+    "industry": "Aerospace / Robotics",
+    "tier": 5,
+    "description": "Develop flight control software for drones and UAVs. Implement sensor fusion, flight modes, navigation, and communication protocols.",
+    "deliverables": [
+      "IMU sensor fusion (complementary filter)",
+      "Waypoint navigation controller",
+      "Telemetry radio link",
+      "Fail-safe return-to-home"
+    ],
+    "dictum_features": [
+      "C backend for flight controllers",
+      "Unsafe for sensor registers",
+      "PID control loops",
+      "Network for telemetry",
+      "Attempt blocks for sensor errors"
+    ],
+    "c_cpp_concepts": [
+      "Flight dynamics (roll, pitch, yaw)",
+      "Kalman filtering",
+      "GPS/GLONASS navigation",
+      "MAVLink protocol",
+      "Brushless motor ESC control",
+      "Geofencing"
+    ],
+    "example_snippet": "program FlightController:\n    shape Attitude holds:\n        Roll as fractional number\n        Pitch as fractional number\n        Yaw as fractional number\n    end shape\n\n    action update_attitude takes A as ref Attitude, GyroX as fractional number, \n                              GyroY as fractional number, GyroZ as fractional number, \n                              Dt as fractional number produces nothing:\n        put the sum of A.Roll and the product of GyroX and Dt into A.Roll\n        put the sum of A.Pitch and the product of GyroY and Dt into A.Pitch\n        put the sum of A.Yaw and the product of GyroZ and Dt into A.Yaw\n    end action\n\n    keep CurrentAttitude as Attitude with 0.0 and 0.0 and 0.0\n    call update_attitude with CurrentAttitude and 0.1 and 0.0 and 0.05 and 0.01\n    print the text \"Roll: \" and CurrentAttitude.Roll and newline\nend program",
+    "estimated_hours": 50,
+    "prerequisites": [
+      "skill_10",
+      "skill_13"
+    ]
+  },
+  "skill_46": {
+    "name": "Smart Grid / Energy Systems Engineer",
+    "industry": "Energy / Smart Grid",
+    "tier": 5,
+    "description": "Develop software for smart grid systems, energy management, and power electronics control. Implement protocols like IEC 61850 and DNP3.",
+    "deliverables": [
+      "Smart meter data collector",
+      "Load balancing controller",
+      "IEC 61850 GOOSE message parser",
+      "Battery management system (BMS)"
+    ],
+    "dictum_features": [
+      "C backend for embedded controllers",
+      "Network sockets for grid comms",
+      "File I/O for data logging",
+      "Deterministic control loops",
+      "Attempt blocks for safety"
+    ],
+    "c_cpp_concepts": [
+      "IEC 61850 standard",
+      "DNP3 protocol",
+      "Modbus for power systems",
+      "Power factor correction",
+      "Battery SOC/SOH estimation",
+      "Demand response algorithms"
+    ],
+    "example_snippet": "program SmartMeter:\n    shape MeterReading holds:\n        Timestamp as whole number\n        Voltage as fractional number\n        Current as fractional number\n        Power as fractional number\n        EnergyConsumed as fractional number\n    end shape\n\n    action calculate_power takes M as const ref MeterReading produces fractional number:\n        produce success with the product of M.Voltage and M.Current\n    end action\n\n    keep Reading as MeterReading with 1234567890 and 230.0 and 5.0 and 0.0 and 1000.0\n    keep Power as fractional number\n    call calculate_power with Reading giving Power\n    print the text \"Power: \" and Power and \" W\" and newline\nend program",
+    "estimated_hours": 45,
+    "prerequisites": [
+      "skill_10",
+      "skill_11"
+    ]
+  },
+  "skill_47": {
+    "name": "Augmented Reality Systems Engineer",
+    "industry": "AR / VR / Mixed Reality",
+    "tier": 5,
+    "description": "Develop low-level systems for AR/VR headsets. Implement SLAM, hand tracking, display pipelines, and spatial audio.",
+    "deliverables": [
+      "IMU-based pose tracker",
+      "Display timing controller",
+      "Spatial audio renderer",
+      "Hand gesture recognizer stub"
+    ],
+    "dictum_features": [
+      "C++ backend for performance",
+      "Unsafe for GPU/display access",
+      "Template-based math (vectors, matrices)",
+      "Smart pointers for frame data",
+      "Thread pool for parallel tracking"
+    ],
+    "c_cpp_concepts": [
+      "SLAM (Simultaneous Localization and Mapping)",
+      "Sensor fusion (IMU + camera)",
+      "Display refresh timing",
+      "Foveated rendering",
+      "Spatial audio (HRTF)",
+      "Latency reduction techniques"
+    ],
+    "example_snippet": "program ARPose:\n    shape Pose holds:\n        PositionX as fractional number\n        PositionY as fractional number\n        PositionZ as fractional number\n        QuaternionW as fractional number\n        QuaternionX as fractional number\n        QuaternionY as fractional number\n        QuaternionZ as fractional number\n    end shape\n\n    action update_pose takes P as ref Pose, AccelX as fractional number, \n                         AccelY as fractional number, AccelZ as fractional number, \n                         Dt as fractional number produces nothing:\n        put the sum of P.PositionX and the product of AccelX and Dt into P.PositionX\n        put the sum of P.PositionY and the product of AccelY and Dt into P.PositionY\n        put the sum of P.PositionZ and the product of AccelZ and Dt into P.PositionZ\n    end action\n\n    keep CurrentPose as Pose with 0.0 and 0.0 and 0.0 and 1.0 and 0.0 and 0.0 and 0.0\n    call update_pose with CurrentPose and 0.1 and 0.0 and 9.8 and 0.016\n    print the text \"Position: (\" and CurrentPose.PositionX and \", \" and CurrentPose.PositionY and \", \" and CurrentPose.PositionZ and \")\" and newline\nend program",
+    "estimated_hours": 55,
+    "prerequisites": [
+      "skill_07",
+      "skill_15"
+    ]
+  },
+  "skill_48": {
+    "name": "Cryptocurrency Protocol Engineer",
+    "industry": "FinTech / Blockchain",
+    "tier": 5,
+    "description": "Implement layer-1 and layer-2 blockchain protocols. Build consensus mechanisms, mempool management, and P2P networking stacks.",
+    "deliverables": [
+      "Mempool transaction validator",
+      "P2P gossip protocol",
+      "State trie (Merkle Patricia)",
+      "EVM-compatible bytecode interpreter"
+    ],
+    "dictum_features": [
+      "C++ backend for performance",
+      "Smart pointers for transaction objects",
+      "Network sockets for P2P",
+      "Unsafe for crypto hashing",
+      "Template-based data structures"
+    ],
+    "c_cpp_concepts": [
+      "Merkle Patricia Trie",
+      "RLP encoding",
+      "EVM opcodes and gas metering",
+      "P2P networking (libp2p, devp2p)",
+      "Consensus (PoW, PoS, BFT)",
+      "State management"
+    ],
+    "example_snippet": "program Mempool:\n    shape Transaction holds:\n        Nonce as whole number\n        GasPrice as whole number\n        GasLimit as whole number\n        To as text\n        Value as whole number\n        Data as text\n        Hash as text\n    end shape\n    \n    action validate_tx takes Tx as const ref Transaction produces truth value:\n        if Tx.GasLimit is less than 21000 then:\n            produce success with false\n        end if\n        if Tx.GasPrice is equal to 0 then:\n            produce success with false\n        end if\n        produce success with true\n    end action\n    \n    keep Tx1 as Transaction with 0 and 20000000000 and 21000 and \"0xabc\" and 1000000000000000000 and \"\" and \"0xhash\"\n    keep Valid as truth value\n    call validate_tx with Tx1 giving Valid\n    print the text \"Transaction valid: \" and Valid and newline\nend program",
+    "estimated_hours": 60,
+    "prerequisites": [
+      "skill_21",
+      "skill_32"
+    ]
+  },
+  "skill_49": {
+    "name": "Neuromorphic Computing Engineer",
+    "industry": "AI / Neuromorphic Hardware",
+    "tier": 6,
+    "description": "Program neuromorphic chips and spiking neural networks (SNNs). Implement leaky integrate-and-fire neurons, STDP learning, and event-based processing.",
+    "deliverables": [
+      "Leaky integrate-and-fire neuron",
+      "Spike-timing dependent plasticity (STDP)",
+      "Event-based vision processor",
+      "SNN inference engine"
+    ],
+    "dictum_features": [
+      "C++ backend",
+      "Template-based neuron models",
+      "Smart pointers for synapses",
+      "Unsafe for hardware spike registers",
+      "Deterministic timing loops"
+    ],
+    "c_cpp_concepts": [
+      "Spiking neural networks (SNN)",
+      "Leaky integrate-and-fire (LIF)",
+      "STDP learning rule",
+      "Event-based computation",
+      "Neuromorphic hardware (Loihi, TrueNorth)",
+      "Address-event representation (AER)"
+    ],
+    "example_snippet": "program LIFNeuron:\n    shape Neuron holds:\n        MembranePotential as fractional number\n        Threshold as fractional number\n        LeakRate as fractional number\n        RefractoryPeriod as whole number\n        LastSpikeTime as whole number\n    end shape\n\n    action update_neuron takes N as ref Neuron, InputCurrent as fractional number, \n                            CurrentTime as whole number produces truth value:\n        if the difference of CurrentTime and N.LastSpikeTime is less than N.RefractoryPeriod then:\n            produce success with false\n        end if\n        \n        put the sum of N.MembranePotential and InputCurrent into N.MembranePotential\n        put the difference of N.MembranePotential and N.LeakRate into N.MembranePotential\n        \n        if N.MembranePotential is greater than N.Threshold then:\n            put 0.0 into N.MembranePotential\n            put CurrentTime into N.LastSpikeTime\n            produce success with true\n        end if\n        \n        produce success with false\n    end action\n    \n    keep N1 as Neuron with 0.0 and 1.0 and 0.1 and 5 and 0\n    keep Spiked as truth value\n    call update_neuron with N1 and 0.5 and 10 giving Spiked\n    print the text \"Neuron spiked: \" and Spiked and newline\nend program",
+    "estimated_hours": 55,
+    "prerequisites": [
+      "skill_07",
+      "skill_22"
+    ]
+  },
+  "skill_50": {
+    "name": "Dictum Language Designer & Transpiler Architect",
+    "industry": "Programming Languages / Developer Tools",
+    "tier": 7,
+    "description": "Extend and maintain the Dictum language itself. Add new syntax, backends, optimizations, and tooling. This is the ultimate skill — building the tool that builds everything else.",
+    "deliverables": [
+      "New Dictum syntax feature (e.g., match expressions)",
+      "New backend emitter (e.g., Rust, Zig)",
+      "Grammar-constrained LLM integration",
+      "Dictum LSP server",
+      "Dictum package manager"
+    ],
+    "dictum_features": [
+      "C++ backend (self-hosting eventually)",
+      "Classes for AST, Lexer, Parser, Emitter",
+      "Template-based visitor patterns",
+      "Smart pointers for AST nodes",
+      "JSON for grammar definitions",
+      "File I/O for module system"
+    ],
+    "c_cpp_concepts": [
+      "Language design principles",
+      "Lexical analysis and parsing",
+      "Abstract syntax trees",
+      "Type systems and inference",
+      "Code generation and optimization",
+      "Language server protocol (LSP)",
+      "Package management",
+      "Self-hosting compilers"
+    ],
+    "example_snippet": "program DictumLexerStub:\n    shape Token holds:\n        Type as text\n        Value as text\n        Line as whole number\n        Column as whole number\n    end shape\n    \n    shape Lexer holds:\n        Source as text\n        Position as whole number\n        Line as whole number\n        \n        method next_token produces Token:\n            # Simplified tokenization\n            keep T as Token with \"EOF\" and \"\" and Line and 0\n            produce success with T\n        end method\n    end shape\n    \n    keep L as Lexer with \"keep X as whole number\" and 0 and 1\n    keep T as Token\n    call L.next_token giving T\n    print the text \"Token: \" and T.Type and newline\nend program",
+    "estimated_hours": 80,
+    "prerequisites": [
+      "skill_17",
+      "skill_35"
+    ]
+  }
+}

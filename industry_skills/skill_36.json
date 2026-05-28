@@ -1,0 +1,35 @@
+{
+  "name": "Embedded Linux Engineer",
+  "industry": "Embedded Systems / IoT",
+  "tier": 4,
+  "description": "Build systems on embedded Linux (Yocto, Buildroot). Handle device trees, kernel modules, systemd services, and containerization on edge.",
+  "deliverables": [
+    "Device tree overlay parser",
+    "Systemd service controller",
+    "Container runtime stub (cgroups)",
+    "OTA update handler"
+  ],
+  "dictum_features": [
+    "C backend",
+    "File I/O for config parsing",
+    "Process management",
+    "Network for updates",
+    "Signal handling"
+  ],
+  "c_cpp_concepts": [
+    "Device tree (DTS/DTB)",
+    "Linux kernel modules",
+    "Systemd unit files",
+    "cgroups and namespaces",
+    "U-Boot bootloader",
+    "Yocto/Buildroot workflow"
+  ],
+  "example_snippet": "program DeviceTree:\n    shape DeviceNode holds:\n        Name as text\n        Compatible as text\n        Reg as whole number with values\n        Status as text\n    end shape\n\n    action parse_status takes Node as const ref DeviceNode produces truth value:\n        produce success with Node.Status is equal to \"okay\"\n    end action\n\n    keep LedNode as DeviceNode with \"led0\" and \"gpio-leds\" and 0x1000 and 0x4 and \"okay\"\n    keep Active as truth value\n    call parse_status with LedNode giving Active\n    print the text \"LED node active: \" and Active and newline\nend program",
+  "estimated_hours": 40,
+  "prerequisites": [
+    "skill_09",
+    "skill_10"
+  ],
+  "status": "partial",
+  "status_note": "dictum_file.c, dictum_process.c, dictum_net.c, dictum_signal.c all implemented. Hardware-specific drivers require C imports."
+}

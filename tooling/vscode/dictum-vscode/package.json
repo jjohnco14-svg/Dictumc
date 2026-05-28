@@ -1,0 +1,142 @@
+{
+  "name": "dictum-vscode",
+  "displayName": "Dictum Language Support",
+  "description": "Natural language programming for systems code — Dictum language support",
+  "version": "0.1.0",
+  "publisher": "dictum-lang",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Programming Languages", "Snippets", "Debuggers"],
+  "keywords": ["dictum", "c", "cpp", "embedded", "systems"],
+  "activationEvents": [
+    "onLanguage:dictum"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [{
+      "id": "dictum",
+      "aliases": ["Dictum", "dictum"],
+      "extensions": [".dict", ".dictum"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "dictum",
+      "scopeName": "source.dictum",
+      "path": "./syntaxes/dictum.tmLanguage.json"
+    }],
+    "commands": [
+      {
+        "command": "dictum.transpile",
+        "title": "Dictum: Transpile to C/C++",
+        "icon": "$(play)"
+      },
+      {
+        "command": "dictum.transpileCompile",
+        "title": "Dictum: Transpile & Compile",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "dictum.insertSnippet",
+        "title": "Dictum: Insert stdlib snippet",
+        "icon": "$(snippet)"
+      },
+      {
+        "command": "dictum.runRepl",
+        "title": "Dictum: Start REPL",
+        "icon": "$(terminal)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "dictum.transpile",
+          "group": "navigation",
+          "when": "editorLangId == dictum"
+        }
+      ],
+      "commandPalette": [
+        {"command": "dictum.transpile", "when": "editorLangId == dictum"},
+        {"command": "dictum.transpileCompile", "when": "editorLangId == dictum"},
+        {"command": "dictum.insertSnippet", "when": "editorLangId == dictum"},
+        {"command": "dictum.runRepl"}
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "dictum.transpile",
+        "key": "ctrl+shift+t",
+        "mac": "cmd+shift+t",
+        "when": "editorTextFocus && editorLangId == dictum"
+      },
+      {
+        "command": "dictum.transpileCompile",
+        "key": "ctrl+shift+b",
+        "mac": "cmd+shift+b",
+        "when": "editorTextFocus && editorLangId == dictum"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "dictum",
+        "path": "./snippets/dictum.json"
+      }
+    ],
+    "configuration": {
+      "title": "Dictum",
+      "properties": {
+        "dictum.backend": {
+          "type": "string",
+          "default": "c",
+          "enum": ["c", "cpp"],
+          "description": "Default transpiler backend"
+        },
+        "dictum.cppStandard": {
+          "type": "number",
+          "default": 17,
+          "enum": [17, 20, 23],
+          "description": "C++ standard version"
+        },
+        "dictum.dictumcPath": {
+          "type": "string",
+          "default": "dictumc",
+          "description": "Path to dictumc transpiler executable"
+        },
+        "dictum.enableDiagnostics": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable real-time validation diagnostics"
+        },
+        "dictum.lsp.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable LSP server for advanced features"
+        },
+        "dictum.lsp.serverPath": {
+          "type": "string",
+          "default": "dictum-lsp",
+          "description": "Path to dictum-lsp server"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "20.x",
+    "typescript": "^5.3.0",
+    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "vsce": "^2.15.0"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  }
+}

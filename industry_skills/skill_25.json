@@ -1,0 +1,33 @@
+{
+  "name": "WebAssembly Systems Programmer",
+  "industry": "Web Platform / Edge Computing",
+  "tier": 3,
+  "description": "Compile Dictum to WebAssembly for browser and serverless edge computing. Build high-performance web modules and WASI applications.",
+  "deliverables": [
+    "WASM module from Dictum C output",
+    "Browser-based image processor",
+    "WASI command-line tool",
+    "WASM-JS interop module"
+  ],
+  "dictum_features": [
+    "--target wasm32",
+    "C backend (WASM compiles from C)",
+    "Memory export for JS interop",
+    "No file system (WASI for FS)"
+  ],
+  "c_cpp_concepts": [
+    "WebAssembly linear memory",
+    "WASI (WebAssembly System Interface)",
+    "Emscripten toolchain",
+    "WASM-JS FFI",
+    "Memory management in WASM",
+    "WAT (WebAssembly Text Format)"
+  ],
+  "example_snippet": "program WASMHello:\n    # Compiled with: --target wasm32\n    # Emscripten exports this for JS\n\n    import from C the action emscripten_console_log takes text produces nothing as js_log\n\n    action main produces whole number:\n        call js_log with \"Hello from Dictum in WASM!\"\n        produce success with 0\n    end action\nend program",
+  "estimated_hours": 30,
+  "prerequisites": [
+    "skill_01",
+    "skill_03"
+  ],
+  "status": "verified"
+}

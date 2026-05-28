@@ -1,0 +1,117 @@
+{
+  "Program scaffold": {
+    "prefix": ["program", "prog"],
+    "body": [
+      "program ${1:MyProgram}:",
+      "    $0",
+      "end program"
+    ],
+    "description": "Dictum program scaffold"
+  },
+  "Action definition": {
+    "prefix": ["action", "act"],
+    "body": [
+      "action ${1:my_action} takes ${2:Param} as ${3:whole number} produces ${4:whole number}:",
+      "    $0",
+      "    produce success with ${5:0}",
+      "end action"
+    ],
+    "description": "Dictum action with attempt/success pattern"
+  },
+  "Keep variable": {
+    "prefix": ["keep", "var"],
+    "body": ["keep ${1:Name} as ${2:whole number} with value ${3:0}"],
+    "description": "Declare a variable"
+  },
+  "If statement": {
+    "prefix": ["if"],
+    "body": [
+      "if ${1:Condition} then:",
+      "    $0",
+      "end if"
+    ],
+    "description": "If-then block"
+  },
+  "Attempt block": {
+    "prefix": ["attempt", "try"],
+    "body": [
+      "attempt",
+      "    call ${1:action} with ${2:args}",
+      "on success",
+      "    $0",
+      "on failure with ${3:Err}",
+      "    print the text "Error: " and ${3:Err} and newline",
+      "end attempt"
+    ],
+    "description": "Attempt/success/failure error handling"
+  },
+  "Shape definition": {
+    "prefix": ["shape", "struct"],
+    "body": [
+      "shape ${1:Name} holds:",
+      "    ${2:field} as ${3:whole number}",
+      "end shape"
+    ],
+    "description": "Dictum shape (struct)"
+  },
+  "For loop": {
+    "prefix": ["for", "loop"],
+    "body": [
+      "for each ${1:item} in ${2:collection} repeat:",
+      "    $0",
+      "end for"
+    ],
+    "description": "For-each loop"
+  },
+  "Repeat loop": {
+    "prefix": ["repeat", "for"],
+    "body": [
+      "repeat ${1:10} times using ${2:I}:",
+      "    $0",
+      "end repeat"
+    ],
+    "description": "Repeat N times"
+  },
+  "LLM snippet": {
+    "prefix": ["llm"],
+    "body": [
+      "keep Cfg as llm config",
+      "put "${1:cpu}" into Cfg.backend",
+      "keep Model as llm handle",
+      "call dictum_llm_load with "${2:model.gguf}" and Cfg and Model",
+      "keep Reply as text",
+      "call dictum_llm_chat with Model and "${3:user}" and "${4:Hello!}" giving Reply",
+      "print the text Reply and newline",
+      "call dictum_llm_unload with Model"
+    ],
+    "description": "LLM chatbot scaffold"
+  },
+  "Robot servo": {
+    "prefix": ["servo", "robot"],
+    "body": [
+      "keep ${1:Arm} as servo handle",
+      "call dictum_servo_init with ${2:9} and ${3:50} and ${1:Arm}",
+      "call dictum_servo_set_angle with ${1:Arm} and ${4:90}",
+      "call dictum_task_sleep with ${5:1000}",
+      "call dictum_servo_detach with ${1:Arm}"
+    ],
+    "description": "Robot servo control"
+  },
+  "C++ Class": {
+    "prefix": ["class", "shape"],
+    "body": [
+      "shape ${1:Name} holds:",
+      "    ${2:field} as ${3:whole number}",
+      "",
+      "    constructor takes ${4:Val} as ${3:whole number} produces nothing:",
+      "        put ${4:Val} into ${2:field}",
+      "    end constructor",
+      "",
+      "    method ${5:get_value} produces ${3:whole number}:",
+      "        produce success with ${2:field}",
+      "    end method",
+      "end shape"
+    ],
+    "description": "C++ class with constructor and method"
+  }
+}

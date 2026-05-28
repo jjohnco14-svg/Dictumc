@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dictum VibeCoder</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg-up: #111111;
+    --bg-hover: #1a1a1a;
+    --border: #222222;
+    --border-hover: #333333;
+    --text: #e0e0e0;
+    --text-dim: #666666;
+    --text-dimmer: #444444;
+    --accent: #d4a574;
+    --accent-dim: #8b7355;
+    --dictum: #c9a96e;
+    --c: #7aa2f7;
+    --cpp: #bb9af7;
+    --error: #f7768e;
+    --success: #9ece6a;
+    --warning: #e0af68;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Top Bar ── */
+  .topbar {
+    height: 40px;
+    background: var(--bg-up);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 12px;
+    flex-shrink: 0;
+    font-size: 13px;
+  }
+
+  .logo {
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .logo::before {
+    content: "◈";
+    color: var(--dictum);
+    font-size: 14px;
+  }
+
+  .divider {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+  }
+
+  .project-name {
+    color: var(--text-dim);
+    font-size: 12px;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn:hover {
+    border-color: var(--border-hover);
+    color: var(--text);
+  }
+
+  .btn:active {
+    background: var(--bg-hover);
+  }
+
+  .spacer { flex: 1; }
+
+  .backend-switch {
+    display: flex;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .backend-switch button {
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    padding: 4px 14px;
+    font-size: 11px;
+    cursor: pointer;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.15s;
+  }
+
+  .backend-switch button:hover { color: var(--text); }
+  .backend-switch button.active { background: var(--accent); color: var(--bg); }
+  .target-switch { display: flex; align-items: center; gap: 6px; }
+  .target-label { font-size: 14px; opacity: .7; }
+  .target-switch select {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 12px;
+    cursor: pointer;
+    outline: none;
+  }
+  .target-switch select:hover { border-color: var(--accent); }
+
+  /* ── Main Layout ── */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar (File Tree) ── */
+  .sidebar {
+    width: 220px;
+    background: var(--bg);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+
+  .sidebar-header {
+    padding: 10px 14px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-dimmer);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .sidebar-header button {
+    background: none;
+    border: none;
+    color: var(--text-dimmer);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 4px;
+  }
+
+  .sidebar-header button:hover { color: var(--text); }
+
+  .file-tree {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 0;
+  }
+
+  .folder-label {
+    padding: 6px 14px 2px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dimmer);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .folder-label::before {
+    content: "▾";
+    font-size: 10px;
+  }
+
+  .file-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 14px 5px 28px;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 0;
+    color: var(--text-dim);
+    transition: all 0.1s;
+    position: relative;
+  }
+
+  .file-item:hover {
+    background: var(--bg-hover);
+    color: var(--text);
+  }
+
+  .file-item.active {
+    background: var(--bg-hover);
+    color: var(--accent);
+  }
+
+  .file-item.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--accent);
+  }
+
+  .file-icon {
+    font-size: 12px;
+    width: 16px;
+    text-align: center;
+    opacity: 0.7;
+  }
+
+  .file-item.dict .file-icon { color: var(--dictum); }
+  .file-item.c .file-icon { color: var(--c); }
+  .file-item.cpp .file-icon { color: var(--cpp); }
+  .file-item.h .file-icon { color: var(--text-dimmer); }
+
+  .file-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .file-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  .file-dot.modified { background: var(--warning); }
+  .file-dot.generated { background: var(--success); }
+
+  /* Empty state */
+  .empty-tree {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-dimmer);
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .empty-tree button {
+    margin-top: 12px;
+    background: var(--accent);
+    border: none;
+    color: var(--bg);
+    padding: 6px 16px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* ── Center: Chat ── */
+  .center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border-right: 1px solid var(--border);
+  }
+
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .message {
+    max-width: 90%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .message.user {
+    align-self: flex-end;
+    background: var(--bg-up);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .message.ai {
+    align-self: flex-start;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+
+  .message .meta {
+    font-size: 11px;
+    color: var(--text-dimmer);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  .message.ai .meta { color: var(--accent-dim); }
+
+  .message pre {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 8px;
+    font-family: "SF Mono", Monaco, monospace;
+    font-size: 11px;
+    overflow-x: auto;
+    color: var(--text-dim);
+  }
+
+  .chat-input-bar {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-up);
+  }
+
+  .chat-input-wrap {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    transition: border-color 0.2s;
+  }
+
+  .chat-input-wrap:focus-within {
+    border-color: var(--accent-dim);
+  }
+
+  .chat-input-wrap textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 13px;
+    resize: none;
+    outline: none;
+    max-height: 120px;
+    font-family: inherit;
+    line-height: 1.5;
+  }
+
+  .chat-input-wrap textarea::placeholder {
+    color: var(--text-dimmer);
+  }
+
+  .send-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    background: var(--accent);
+    color: var(--bg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+
+  .send-btn:hover {
+    background: var(--dictum);
+  }
+
+  .send-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  /* ── Right: Code Panel ── */
+  .code-panel {
+    width: 50%;
+    min-width: 380px;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+
+  .code-tabs {
+    height: 36px;
+    background: var(--bg-up);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    gap: 2px;
+  }
+
+  .code-tab {
+    border: none;
+    background: transparent;
+    color: var(--text-dimmer);
+    padding: 6px 14px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    border-radius: 4px;
+    transition: all 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .code-tab:hover {
+    color: var(--text-dim);
+    background: var(--bg-hover);
+  }
+
+  .code-tab.active {
+    background: var(--bg-hover);
+    color: var(--text);
+  }
+
+  .code-tab.dictum-tab.active { color: var(--dictum); }
+  .code-tab.c-tab.active { color: var(--c); }
+
+  .tab-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 4px;
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-dimmer);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+
+  .tab-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-dim);
+  }
+
+  .code-content {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+  }
+
+  .code-view {
+    display: none;
+    padding: 16px;
+    font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    white-space: pre;
+    min-height: 100%;
+    tab-size: 4;
+  }
+
+  .code-view.active {
+    display: block;
+  }
+
+  /* Dictum token view */
+  .token-view {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    align-content: flex-start;
+  }
+
+  .token {
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 12.5px;
+    cursor: default;
+    transition: background 0.1s;
+  }
+
+  .token:hover {
+    background: var(--bg-hover);
+  }
+
+  .token.kw { color: var(--dictum); font-weight: 600; }
+  .token.ty { color: var(--c); }
+  .token.str { color: var(--success); }
+  .token.num { color: var(--cpp); }
+  .token.id { color: var(--text); }
+  .token.cm { color: var(--text-dimmer); font-style: italic; }
+  .token.nl { display: block; width: 100%; height: 0; }
+
+  /* C/C++ view with line numbers */
+  .c-view-wrap {
+    display: flex;
+    padding: 0;
+  }
+
+  .line-nums {
+    background: var(--bg-up);
+    color: var(--text-dimmer);
+    padding: 16px 10px;
+    text-align: right;
+    font-size: 12px;
+    line-height: 1.7;
+    user-select: none;
+    border-right: 1px solid var(--border);
+    min-width: 44px;
+  }
+
+  .c-code {
+    flex: 1;
+    padding: 16px;
+    overflow-x: auto;
+  }
+
+  .c-code .kw { color: var(--dictum); font-weight: 600; }
+  .c-code .ty { color: var(--c); }
+  .c-code .str { color: var(--success); }
+  .c-code .num { color: var(--cpp); }
+  .c-code .cm { color: var(--text-dimmer); font-style: italic; }
+  .c-code .pp { color: var(--accent); }
+  .c-code .fn { color: #bb9af7; }
+
+  /* Empty code state */
+  .empty-code {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-dimmer);
+    font-size: 12px;
+    gap: 8px;
+  }
+
+  /* ── Status Bar ── */
+  .status {
+    height: 24px;
+    background: var(--bg-up);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    font-size: 11px;
+    color: var(--text-dimmer);
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .status-item { display: flex; align-items: center; gap: 6px; }
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-dimmer);
+  }
+  .status-dot.ready { background: var(--success); }
+  .status-dot.busy { background: var(--warning); }
+  .status-dot.error { background: var(--error); }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+
+  /* ── Hidden file input ── */
+  #folderInput { display: none; }
+
+  /* ── Modals ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .modal-overlay.active {
+    display: flex;
+    opacity: 1;
+  }
+
+  .modal {
+    background: var(--bg-up);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 640px;
+    max-width: 90vw;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  .modal-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .modal-header h2 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    flex: 1;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-dimmer);
+    font-size: 18px;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-close:hover {
+    background: var(--bg-hover);
+    color: var(--text);
+  }
+
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  .modal-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    gap: 0;
+  }
+  .modal-tab {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-dimmer);
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .modal-tab:hover { color: var(--text-dim); }
+  .modal-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .modal-panel {
+    display: none;
+    padding: 20px;
+  }
+  .modal-panel.active { display: block; }
+
+  /* Form elements */
+  .form-group {
+    margin-bottom: 18px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .form-group input[type="text"],
+  .form-group input[type="number"],
+  .form-group input[type="password"],
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: var(--accent-dim);
+  }
+  .form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+    font-family: "SF Mono", Monaco, monospace;
+    font-size: 12px;
+  }
+  .form-group .hint {
+    font-size: 11px;
+    color: var(--text-dimmer);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .checkbox-row input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .checkbox-row label {
+    font-size: 13px;
+    color: var(--text-dim);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .modal-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  .btn-primary {
+    background: var(--accent);
+    border: none;
+    color: var(--bg);
+    padding: 6px 18px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 18px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-secondary:hover {
+    border-color: var(--border-hover);
+    color: var(--text);
+  }
+
+  /* Skills list */
+  .skill-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    transition: border-color 0.15s;
+  }
+  .skill-card:hover { border-color: var(--border-hover); }
+  .skill-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .skill-card-header .skill-icon {
+    font-size: 18px;
+  }
+  .skill-card-header .skill-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    flex: 1;
+  }
+  .skill-toggle {
+    background: var(--bg-up);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 40px;
+    height: 22px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .skill-toggle::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--text-dimmer);
+    transition: all 0.2s;
+  }
+  .skill-toggle.enabled {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .skill-toggle.enabled::after {
+    left: 20px;
+    background: var(--bg);
+  }
+  .skill-desc {
+    font-size: 12px;
+    color: var(--text-dimmer);
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .skill-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    color: var(--text-dimmer);
+  }
+  .skill-meta span {
+    background: var(--bg-up);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  .skill-add-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--bg);
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    color: var(--text-dimmer);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .skill-add-btn:hover {
+    border-color: var(--accent-dim);
+    color: var(--text-dim);
+  }
+
+  .integration-section {
+    margin-bottom: 20px;
+  }
+  .integration-section h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- File input for folder picker -->
+<input type="file" id="folderInput" webkitdirectory directory multiple>
+
+<!-- Top Bar -->
+<div class="topbar">
+  <div class="logo">Dictum</div>
+  <div class="divider"></div>
+  <button class="btn" id="btnOpen">📁 Open Folder</button>
+  <span class="project-name" id="projectName">No folder open</span>
+  <div class="spacer"></div>
+  <button class="btn" id="btnTranspile">⚡ Transpile</button>
+  <button class="btn" id="btnRun">▶ Run</button>
+  <div class="divider"></div>
+  <div class="backend-switch">
+    <button class="active" data-backend="c">C</button>
+    <button data-backend="cpp">C++</button>
+  </div>
+  <div class="divider"></div>
+  <div class="target-switch" title="QEMU execution target">
+    <span class="target-label">🖥</span>
+    <select id="targetSelect">
+      <option value="linux" selected>Linux x86-64 (native)</option>
+      <option value="arm64">ARM64 (QEMU)</option>
+      <option value="riscv64">RISC-V 64 (QEMU)</option>
+      <option value="mips">MIPS BE (QEMU)</option>
+      <option value="mipsel">MIPS LE (QEMU)</option>
+      <option value="ppc64le">PPC64LE (QEMU)</option>
+    </select>
+  </div>
+  <div class="divider"></div>
+  <button class="btn" id="btnSettings" title="Settings">⚙ Settings</button>
+  <button class="btn" id="btnSkills" title="Skills & Integration">🧩 Skills</button>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- Sidebar: File Tree -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      Explorer
+      <button id="btnRefresh" title="Refresh">↻</button>
+    </div>
+    <div class="file-tree" id="fileTree">
+      <div class="empty-tree">
+        No folder open<br>
+        <button id="btnOpenEmpty">Open Folder</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Center: Chat -->
+  <div class="center">
+    <div class="chat-messages" id="chatMessages">
+      <div class="message ai">
+        <div class="meta">Dictum</div>
+        Open a folder to start. Then describe what you want to build in natural language — I'll generate Dictum code and transpile it to C/C++.
+      </div>
+    </div>
+    <div class="chat-input-bar">
+      <div class="chat-input-wrap">
+        <textarea id="chatInput" rows="1" placeholder="Describe what to build..."></textarea>
+        <button class="send-btn" id="btnSend">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Code Panel -->
+  <div class="code-panel">
+    <div class="code-tabs">
+      <button class="code-tab dictum-tab active" id="tabDictum">
+        <span style="color:var(--dictum)">◈</span> Dictum
+      </button>
+      <button class="code-tab c-tab" id="tabC">
+        <span style="color:var(--c)">⚡</span> <span id="cLabel">C</span>
+      </button>
+      <div class="tab-actions">
+        <button class="tab-btn" id="btnCopy" title="Copy">⎘</button>
+        <button class="tab-btn" id="btnDownload" title="Download">⬇</button>
+      </div>
+    </div>
+    <div class="code-content">
+      <div class="code-view active" id="viewDictum">
+        <div class="empty-code">
+          <span style="font-size:24px;opacity:0.3">◈</span>
+          <span>No Dictum code yet</span>
+        </div>
+      </div>
+      <div class="code-view c-view-wrap" id="viewC">
+        <div class="line-nums" id="lineNums">1</div>
+        <div class="c-code" id="cCode">
+          <span class="cm">// No transpiled code yet</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Status Bar -->
+<div class="status">
+  <div class="status-item"><span class="status-dot ready" id="statusDot"></span><span id="statusText">Ready</span></div>
+  <div class="status-item" id="statusFile">—</div>
+  <div class="status-item" id="statusTokens">—</div>
+  <div class="spacer"></div>
+  <div class="status-item">Dictum v3.2</div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span style="font-size:18px">⚙</span>
+      <h2>Settings</h2>
+      <button class="modal-close" id="closeSettings">&times;</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" data-panel="settings-general">General</button>
+      <button class="modal-tab" data-panel="settings-api">API</button>
+      <button class="modal-tab" data-panel="settings-editor">Editor</button>
+    </div>
+    <div class="modal-body">
+      <!-- General -->
+      <div class="modal-panel active" id="settings-general">
+        <div class="form-group">
+          <label>Project Name</label>
+          <input type="text" id="settProjectName" placeholder="MyProject">
+          <div class="hint">Used for generated filenames and build targets.</div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Default Backend</label>
+            <select id="settDefaultBackend">
+              <option value="c">C (gcc/clang)</option>
+              <option value="cpp">C++ (g++/clang++)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>C++ Standard</label>
+            <select id="settCppStandard">
+              <option value="11">C++11</option>
+              <option value="14">C++14</option>
+              <option value="17" selected>C++17</option>
+              <option value="20">C++20</option>
+              <option value="23">C++23</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Build Flags</label>
+          <input type="text" id="settBuildFlags" placeholder="-O2 -Wall -Wextra">
+          <div class="hint">Extra compiler flags passed during transpile & run.</div>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="settAutoTranspile">
+          <label for="settAutoTranspile">Auto-transpile on file save</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="settAutoRun">
+          <label for="settAutoRun">Auto-run after successful transpile</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="settDarkMode" checked>
+          <label for="settDarkMode">Dark theme (always on for now)</label>
+        </div>
+      </div>
+
+      <!-- API -->
+      <div class="modal-panel" id="settings-api">
+        <div class="form-group">
+          <label>Backend Server URL</label>
+          <input type="text" id="settApiEndpoint" value="http://localhost:8765">
+          <div class="hint">Dictum backend server URL. Must expose /generate, /transpile, and /run.</div>
+        </div>
+
+        <div class="form-group">
+          <label>🔑 Anthropic API Key (BYOK)</label>
+          <input type="password" id="settApiKey" placeholder="sk-ant-api03-...">
+          <div class="hint">Your own Anthropic key — sent directly to api.anthropic.com, never stored on the Dictum server. Leave blank to use ANTHROPIC_API_KEY env var on the server.</div>
+        </div>
+
+        <div class="form-group">
+          <label>Model</label>
+          <select id="settModel">
+            <option value="claude-opus-4-5" selected>claude-opus-4-5 (best quality)</option>
+            <option value="claude-sonnet-4-5">claude-sonnet-4-5 (balanced)</option>
+            <option value="claude-haiku-4-5">claude-haiku-4-5 (fastest)</option>
+          </select>
+          <div class="hint">Model used for the Ask→Plan→Verify→Output pipeline.</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Timeout (seconds)</label>
+            <input type="number" id="settApiTimeout" value="60" min="10" max="300">
+          </div>
+          <div class="form-group">
+            <label>LLM Provider</label>
+            <select id="settLlmProvider">
+              <option value="anthropic" selected>Anthropic (BYOK)</option>
+              <option value="local">Local (Dictum backend)</option>
+              <option value="custom">Custom endpoint</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" id="customEndpointGroup" style="display:none">
+          <label>Custom LLM Endpoint</label>
+          <input type="text" id="settCustomEndpoint" placeholder="https://api.example.com/v1/chat/completions">
+        </div>
+
+        <div class="checkbox-row">
+          <input type="checkbox" id="settAutoTranspile" checked>
+          <label for="settAutoTranspile">Auto-transpile generated Dictum to C/C++</label>
+        </div>
+      </div>
+
+      <!-- Editor -->
+      <div class="modal-panel" id="settings-editor">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Font Size</label>
+            <input type="number" id="settFontSize" value="13" min="8" max="32">
+          </div>
+          <div class="form-group">
+            <label>Tab Size</label>
+            <input type="number" id="settTabSize" value="4" min="2" max="8">
+          </div>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="settLineNumbers" checked>
+          <label for="settLineNumbers">Show line numbers in C/C++ view</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="settWordWrap">
+          <label for="settWordWrap">Word wrap</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="settMinimap">
+          <label for="settMinimap">Show minimap (when editor is upgraded)</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" id="btnResetSettings">Reset</button>
+      <button class="btn-primary" id="btnSaveSettings">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- Skills & Integration Modal -->
+<div class="modal-overlay" id="skillsModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span style="font-size:18px">🧩</span>
+      <h2>Skills & Integration</h2>
+      <button class="modal-close" id="closeSkills">&times;</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" data-panel="skills-installed">Installed</button>
+      <button class="modal-tab" data-panel="skills-add">Add Skill</button>
+      <button class="modal-tab" data-panel="skills-integration">Integration</button>
+    </div>
+    <div class="modal-body">
+      <!-- Installed Skills -->
+      <div class="modal-panel active" id="skills-installed">
+        <div class="skill-card" data-skill="stdlib">
+          <div class="skill-card-header">
+            <span class="skill-icon">📚</span>
+            <span class="skill-name">Dictum Standard Library</span>
+            <div class="skill-toggle enabled" data-skill="stdlib"></div>
+          </div>
+          <div class="skill-desc">Core standard library with console, text, math, file, path, directory, CSV, JSON, HTTP, TLS, net, thread, mutex, event, timer, channel, process, pipe, signal, SHM, mmap, device, and semaphore modules.</div>
+          <div class="skill-meta">
+            <span>v2.2</span>
+            <span>Built-in</span>
+            <span>50 files</span>
+          </div>
+        </div>
+
+        <div class="skill-card" data-skill="edgeai">
+          <div class="skill-card-header">
+            <span class="skill-icon">🧠</span>
+            <span class="skill-name">Edge AI / ML</span>
+            <div class="skill-toggle" data-skill="edgeai"></div>
+          </div>
+          <div class="skill-desc">Tensor operations, inference helpers, and model loading for edge deployments. Adds neural network primitives to Dictum.</div>
+          <div class="skill-meta">
+            <span>v1.0</span>
+            <span>Optional</span>
+            <span>12 files</span>
+          </div>
+        </div>
+
+        <div class="skill-card" data-skill="embedded">
+          <div class="skill-card-header">
+            <span class="skill-icon">🔌</span>
+            <span class="skill-name">Embedded / IoT</span>
+            <div class="skill-toggle" data-skill="embedded"></div>
+          </div>
+          <div class="skill-desc">GPIO, I2C, SPI, UART, PWM, ADC bindings for microcontrollers. Target: ESP32, STM32, Raspberry Pi Pico.</div>
+          <div class="skill-meta">
+            <span>v1.1</span>
+            <span>Optional</span>
+            <span>8 files</span>
+          </div>
+        </div>
+
+        <div class="skill-card" data-skill="systems">
+          <div class="skill-card-header">
+            <span class="skill-icon">⚙️</span>
+            <span class="skill-name">Systems Programming</span>
+            <div class="skill-toggle" data-skill="systems"></div>
+          </div>
+          <div class="skill-desc">Low-level OS primitives: syscalls, memory mapping, ELF parsing, kernel module stubs. For OS-level vibecoding.</div>
+          <div class="skill-meta">
+            <span>v0.9</span>
+            <span>Beta</span>
+            <span>15 files</span>
+          </div>
+        </div>
+
+        <div class="skill-card" data-skill="general">
+          <div class="skill-card-header">
+            <span class="skill-icon">🧭</span>
+            <span class="skill-name">General — Plan / Verify / Output</span>
+            <div class="skill-toggle enabled" data-skill="general"></div>
+          </div>
+          <div class="skill-desc">Universal base skill. Enforces the Ask→Plan→Verify→Output pipeline, correct syntax, BYOK API patterns, and CLI compile commands. Always active.</div>
+          <div class="skill-meta">
+            <span>v1.0</span>
+            <span>Built-in</span>
+            <span>Always on</span>
+          </div>
+        </div>
+
+        <div class="skill-card" data-skill="medical">
+          <div class="skill-card-header">
+            <span class="skill-icon">🏥</span>
+            <span class="skill-name">Medical Device Firmware</span>
+            <div class="skill-toggle" data-skill="medical"></div>
+          </div>
+          <div class="skill-desc">IEC 62304 patterns, sensor validation, alarm management, watchdog integration, fail-safe state machines, and audit logging.</div>
+          <div class="skill-meta">
+            <span>v1.0</span>
+            <span>Industry</span>
+            <span>SKILL_MEDICAL.md</span>
+          </div>
+        </div>
+
+        <div class="skill-card" data-skill="robotics">
+          <div class="skill-card-header">
+            <span class="skill-icon">🤖</span>
+            <span class="skill-name">Robotics</span>
+            <div class="skill-toggle" data-skill="robotics"></div>
+          </div>
+          <div class="skill-desc">Kinematics, joint control, trajectory planning, sensor fusion, ROS-like communication, and safety stop patterns.</div>
+          <div class="skill-meta">
+            <span>v1.0</span>
+            <span>Industry</span>
+            <span>SKILL_ROBOTICS.md</span>
+          </div>
+        </div>
+
+        <div class="skill-card" data-skill="automotive">
+          <div class="skill-card-header">
+            <span class="skill-icon">🚗</span>
+            <span class="skill-name">Automotive / AUTOSAR</span>
+            <div class="skill-toggle" data-skill="automotive"></div>
+          </div>
+          <div class="skill-desc">AUTOSAR-aligned ECU patterns, CAN bus, MISRA C compliance, ASIL safety levels, and diagnostic services (UDS).</div>
+          <div class="skill-meta">
+            <span>v1.0</span>
+            <span>Industry</span>
+            <span>SKILL_AUTOMOTIVE.md</span>
+          </div>
+        </div>
+
+        <div class="skill-card" data-skill="industrial">
+          <div class="skill-card-header">
+            <span class="skill-icon">🏭</span>
+            <span class="skill-name">Industrial / ICS / PLC</span>
+            <div class="skill-toggle" data-skill="industrial"></div>
+          </div>
+          <div class="skill-desc">PLC-style scan loops, SCADA integration, Modbus/OPC-UA protocols, SIL safety, and historian patterns.</div>
+          <div class="skill-meta">
+            <span>v1.0</span>
+            <span>Industry</span>
+            <span>SKILL_INDUSTRIAL.md</span>
+          </div>
+        </div>
+
+        <div class="skill-card" data-skill="aerospace">
+          <div class="skill-card-header">
+            <span class="skill-icon">🚀</span>
+            <span class="skill-name">Aerospace & Avionics</span>
+            <div class="skill-toggle" data-skill="aerospace"></div>
+          </div>
+          <div class="skill-desc">DO-178C patterns, flight-critical state machines, ARINC 429/664, redundancy management, and FDIR.</div>
+          <div class="skill-meta">
+            <span>v1.0</span>
+            <span>Industry</span>
+            <span>SKILL_AEROSPACE.md</span>
+          </div>
+        </div>
+
+        <div class="skill-card" data-skill="telecom">
+          <div class="skill-card-header">
+            <span class="skill-icon">⚡</span>
+            <span class="skill-name">Telecom & Energy</span>
+            <div class="skill-toggle" data-skill="telecom"></div>
+          </div>
+          <div class="skill-desc">IEC 61850 relay logic, BMS cell balancing, inverter control, protection trip functions, and energy metering.</div>
+          <div class="skill-meta">
+            <span>v1.0</span>
+            <span>Industry</span>
+            <span>SKILL_TELECOM_ENERGY.md</span>
+          </div>
+        </div>
+
+        <div class="skill-card" data-skill="security">
+          <div class="skill-card-header">
+            <span class="skill-icon">🔐</span>
+            <span class="skill-name">Security & Cryptography</span>
+            <div class="skill-toggle" data-skill="security"></div>
+          </div>
+          <div class="skill-desc">Constant-time crypto, key management, secure boot, TrustZone/TEE, side-channel resistance, and FIPS 140-3 patterns.</div>
+          <div class="skill-meta">
+            <span>v1.0</span>
+            <span>Industry</span>
+            <span>SKILL_SECURITY.md</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Skill -->
+      <div class="modal-panel" id="skills-add">
+        <div class="form-group">
+          <label>Skill Name</label>
+          <input type="text" id="skillName" placeholder="e.g. my-custom-skill">
+        </div>
+        <div class="form-group">
+          <label>Source</label>
+          <select id="skillSourceType">
+            <option value="url">GitHub / URL</option>
+            <option value="local">Local Folder</option>
+            <option value="paste">Paste Code</option>
+          </select>
+        </div>
+        <div class="form-group" id="skillUrlGroup">
+          <label>Repository URL</label>
+          <input type="text" id="skillUrl" placeholder="https://github.com/user/dictum-skill-...">
+          <div class="hint">Supports GitHub repos and raw .zip / .tar.gz URLs.</div>
+        </div>
+        <div class="form-group" id="skillLocalGroup" style="display:none">
+          <label>Local Path</label>
+          <input type="text" id="skillLocalPath" placeholder="/path/to/skill">
+          <div class="hint">Absolute path to a folder containing skill.toml and .dict files.</div>
+        </div>
+        <div class="form-group" id="skillPasteGroup" style="display:none">
+          <label>Skill Code (skill.toml + .dict files)</label>
+          <textarea id="skillPaste" placeholder="# Paste your skill.toml and module code here..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Auto-enable after install</label>
+          <div class="checkbox-row">
+            <input type="checkbox" id="skillAutoEnable" checked>
+            <label for="skillAutoEnable">Enable immediately</label>
+          </div>
+        </div>
+        <button class="skill-add-btn" id="btnInstallSkill">
+          <span>⬇</span> Install Skill
+        </button>
+      </div>
+
+      <!-- Integration -->
+      <div class="modal-panel" id="skills-integration">
+        <div class="integration-section">
+          <h3>Transpiler Integration</h3>
+          <div class="form-group">
+            <label>Dictum Transpiler Path</label>
+            <input type="text" id="intTranspilerPath" placeholder="/usr/local/bin/dictum">
+            <div class="hint">Path to the dictum CLI transpiler. Used for offline transpilation.</div>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="intUseStdlib">
+            <label for="intUseStdlib">Always include standard library headers</label>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="intLinkMath">
+            <label for="intLinkMath">Link math library (-lm) automatically</label>
+          </div>
+        </div>
+
+        <div class="integration-section">
+          <h3>Build System</h3>
+          <div class="form-group">
+            <label>Build Tool</label>
+            <select id="intBuildTool">
+              <option value="make">Make</option>
+              <option value="cmake">CMake</option>
+              <option value="ninja">Ninja</option>
+              <option value="custom">Custom script</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Custom Build Command</label>
+            <input type="text" id="intBuildCommand" placeholder="make -C build">
+            <div class="hint">Only used when Build Tool is set to Custom.</div>
+          </div>
+        </div>
+
+        <div class="integration-section">
+          <h3>External Libraries</h3>
+          <div class="form-group">
+            <label>Include Paths (-I)</label>
+            <textarea id="intIncludePaths" placeholder="/usr/local/include
+/opt/homebrew/include"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Library Paths (-L)</label>
+            <textarea id="intLibPaths" placeholder="/usr/local/lib
+/opt/homebrew/lib"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Libraries to Link (-l)</label>
+            <input type="text" id="intLibs" placeholder="ssl crypto pthread">
+          </div>
+        </div>
+
+        <div class="integration-section">
+          <h3>Package Manager</h3>
+          <div class="form-group">
+            <label>Registry URL</label>
+            <input type="text" id="intRegistry" value="https://dictum.dev/registry">
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="intAutoUpdate">
+            <label for="intAutoUpdate">Auto-check for skill updates on startup</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" id="btnCloseSkills">Close</button>
+      <button class="btn-primary" id="btnSaveSkills">Save & Apply</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ── State ──
+const state = {
+  activeView: 'dictum',
+  backend: 'c',
+  target: 'linux',
+  projectPath: '',
+  files: [],
+  currentFile: null,
+  dictumCode: '',
+  cCode: '',
+  isGenerating: false,
+  apiEndpoint: 'http://localhost:8765',
+  apiKey: '',
+  model: 'claude-opus-4-5'
+};
+
+// ── DOM ──
+const $ = id => document.getElementById(id);
+
+// ── File Tree ──
+function renderFileTree(files) {
+  const tree = $('fileTree');
+  if (!files.length) {
+    tree.innerHTML = '<div class="empty-tree">No .dict files found<br><button id="btnOpenEmpty2">Open Folder</button></div>';
+    $('btnOpenEmpty2')?.addEventListener('click', openFolder);
+    return;
+  }
+
+  const folders = new Map();
+  folders.set('', []);
+
+  files.forEach(f => {
+    const parts = f.webkitRelativePath.split('/');
+    const name = parts.pop();
+    const dir = parts.join('/');
+    if (!folders.has(dir)) folders.set(dir, []);
+    folders.get(dir).push({name, path: f.webkitRelativePath, file: f});
+  });
+
+  let html = '';
+
+  function renderDir(dir, depth) {
+    const items = folders.get(dir) || [];
+    const subdirs = Array.from(folders.keys()).filter(d => d.startsWith(dir + '/') && d !== dir);
+
+    items.forEach(item => {
+      const ext = item.name.split('.').pop();
+      let cls = 'file-item';
+      let icon = '📄';
+      if (ext === 'dict') { cls += ' dict'; icon = '◈'; }
+      else if (ext === 'c') { cls += ' c'; icon = '⚡'; }
+      else if (ext === 'cpp' || ext === 'cc') { cls += ' cpp'; icon = '⚡'; }
+      else if (ext === 'h' || ext === 'hpp') { cls += ' h'; icon = '#'; }
+
+      const isActive = state.currentFile === item.path ? 'active' : '';
+      html += `<div class="${cls} ${isActive}" data-path="${item.path}" style="padding-left:${28 + depth * 12}px">
+        <span class="file-icon">${icon}</span>
+        <span class="file-name">${item.name}</span>
+      </div>`;
+    });
+
+    subdirs.forEach(sub => {
+      const name = sub.split('/').pop();
+      html += `<div class="folder-label" style="padding-left:${14 + depth * 12}px">${name}</div>`;
+      renderDir(sub, depth + 1);
+    });
+  }
+
+  renderDir('', 0);
+  tree.innerHTML = html;
+
+  // Click handlers
+  tree.querySelectorAll('.file-item').forEach(item => {
+    item.addEventListener('click', () => {
+      tree.querySelectorAll('.file-item').forEach(f => f.classList.remove('active'));
+      item.classList.add('active');
+      const path = item.dataset.path;
+      const file = files.find(f => f.webkitRelativePath === path);
+      if (file) loadFile(file);
+    });
+  });
+}
+
+async function loadFile(file) {
+  state.currentFile = file.webkitRelativePath;
+  $('statusFile').textContent = file.name;
+
+  const text = await file.text();
+
+  if (file.name.endsWith('.dict')) {
+    state.dictumCode = text;
+    renderDictum(text);
+    // Auto-transpile if it's dictum
+    transpile();
+  } else {
+    // Raw C/C++ file
+    state.cCode = text;
+    renderC(text);
+    setView('c');
+  }
+}
+
+// ── Open Folder ──
+function openFolder() {
+  $('folderInput').click();
+}
+
+$('folderInput').addEventListener('change', (e) => {
+  const files = Array.from(e.target.files);
+  state.files = files;
+
+  const path = files[0]?.webkitRelativePath.split('/')[0] || 'project';
+  state.projectPath = path;
+  $('projectName').textContent = path;
+
+  // Filter to relevant files
+  const relevant = files.filter(f => {
+    const name = f.name;
+    return name.endsWith('.dict') || name.endsWith('.c') || name.endsWith('.cpp')
+        || name.endsWith('.h') || name.endsWith('.hpp') || name === 'CMakeLists.txt'
+        || name === 'Dictum.toml';
+  });
+
+  renderFileTree(relevant);
+
+  // Auto-select first .dict file
+  const firstDict = relevant.find(f => f.name.endsWith('.dict'));
+  if (firstDict) {
+    setTimeout(() => {
+      const el = document.querySelector(`[data-path="${firstDict.webkitRelativePath}"]`);
+      if (el) el.click();
+    }, 50);
+  }
+});
+
+$('btnOpen').addEventListener('click', openFolder);
+$('btnOpenEmpty')?.addEventListener('click', openFolder);
+
+// ── Renderers ──
+function renderDictum(source) {
+  if (!source) {
+    $('viewDictum').innerHTML = '<div class="empty-code"><span style="font-size:24px;opacity:0.3">◈</span><span>No Dictum code</span></div>';
+    return;
+  }
+
+  const keywords = new Set(['program','module','shape','action','import','from','C','keep','as','with','value','values','all','no','room','for','put','into','if','then','otherwise','end','while','repeat','for','each','in','times','using','attempt','giving','on','success','failure','return','produce','assert','print','the','text','call','run','defer','release','is','equal','to','not','greater','less','at','least','most','empty','sum','difference','product','quotient','remainder','divided','by','modulo','count','length','bitwise','and','or','left','right','shift','of','tanh','true','false','nothing','newline','holds','takes','produces','alone','holding','plus','minus','unique','shared','weak','raw','handle','const','ref','move','method','constructor','destructor','public','private','protected','new','virtual','override','any','Type']);
+  const types = new Set(['whole','number','count','fractional','truth','value','byte','text','handle','to','bytes','u16','u32','i32','i64','u64','nothing','result']);
+
+  const lines = source.split('\n');
+  let html = '<div class="token-view">';
+  let tokenCount = 0;
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      html += '<span class="token nl"></span>';
+      return;
+    }
+    if (trimmed.startsWith('#')) {
+      html += `<span class="token cm">${escapeHtml(line)}</span><span class="token nl"></span>`;
+      return;
+    }
+
+    const words = line.split(/(\s+)/);
+    words.forEach(w => {
+      if (!w.trim()) {
+        html += w.replace(/ /g, '&nbsp;');
+        return;
+      }
+      const clean = w.replace(/[:,.]/g, '');
+      let cls = 'id';
+      if (keywords.has(clean)) cls = 'kw';
+      else if (types.has(clean)) cls = 'ty';
+      else if (/^\d/.test(clean)) cls = 'num';
+      else if (/^["']/.test(clean)) cls = 'str';
+      tokenCount++;
+      html += `<span class="token ${cls}">${escapeHtml(w)}</span>`;
+    });
+    html += '<span class="token nl"></span>';
+  });
+
+  html += '</div>';
+  $('viewDictum').innerHTML = html;
+  $('statusTokens').textContent = `${tokenCount} tokens`;
+}
+
+function renderC(source) {
+  if (!source) {
+    $('cCode').innerHTML = '<span class="cm">// No code</span>';
+    $('lineNums').textContent = '1';
+    return;
+  }
+
+  const lines = source.split('\n');
+  let nums = '';
+  let html = '';
+
+  lines.forEach((line, i) => {
+    nums += (i + 1) + '\n';
+    let colored = escapeHtml(line)
+      .replace(/(\/\/.*)/g, '<span class="cm">$1</span>')
+      .replace(/(#\w+)/g, '<span class="pp">$1</span>')
+      .replace(/(int|void|char|float|double|bool|size_t|uint8_t|uint16_t|uint32_t|int32_t|int64_t|uint64_t|struct|typedef|const|static|extern|return|if|else|for|while|do|break|continue|switch|case|default|sizeof|NULL)/g, '<span class="kw">$1</span>')
+      .replace(/([A-Za-z_]\w*)\s*(\()/g, '<span class="fn">$1</span>$2')
+      .replace(/"([^"]*)"/g, '<span class="str">"$1"</span>')
+      .replace(/(\d+)/g, '<span class="num">$1</span>');
+    if (!line.trim()) colored = '&nbsp;';
+    html += colored + '\n';
+  });
+
+  $('cCode').innerHTML = html;
+  $('lineNums').textContent = nums;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── View Switch ──
+function setView(view) {
+  state.activeView = view;
+  document.querySelectorAll('.code-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+
+  if (view === 'dictum') {
+    $('viewDictum').classList.add('active');
+    $('tabDictum').classList.add('active');
+  } else {
+    $('viewC').classList.add('active');
+    $('tabC').classList.add('active');
+  }
+}
+
+$('tabDictum').addEventListener('click', () => setView('dictum'));
+$('tabC').addEventListener('click', () => setView('c'));
+
+// ── Backend Switch ──
+document.getElementById('targetSelect').addEventListener('change', e => {
+  state.target = e.target.value;
+  const isQemu = state.target !== 'linux';
+  $('btnRun').title = isQemu ? `Run via QEMU (${state.target})` : 'Run natively';
+});
+
+document.querySelectorAll('.backend-switch button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.backend-switch button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.backend = btn.dataset.backend;
+    $('cLabel').textContent = state.backend === 'cpp' ? 'C++' : 'C';
+    // Re-transpile if we have dictum code
+    if (state.dictumCode) transpile();
+  });
+});
+
+// ── Chat ──
+function addMessage(text, from) {
+  const div = document.createElement('div');
+  div.className = `message ${from}`;
+  div.innerHTML = `<div class="meta">${from === 'user' ? 'You' : 'Dictum'}</div>${escapeHtml(text)}`;
+  $('chatMessages').appendChild(div);
+  $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
+  return div;
+}
+
+function addCodeMessage(text, from, code, lang) {
+  const div = document.createElement('div');
+  div.className = `message ${from}`;
+  const langColor = lang === 'dictum' ? 'color:var(--dictum)' : 'color:var(--c)';
+  div.innerHTML = `<div class="meta">${from === 'user' ? 'You' : 'Dictum'}</div>${escapeHtml(text)}<pre style="margin-top:8px">${escapeHtml(code.substring(0, 300))}${code.length > 300 ? '...' : ''}</pre>`;
+  $('chatMessages').appendChild(div);
+  $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
+}
+
+async function sendChat() {
+  const text = $('chatInput').value.trim();
+  if (!text || state.isGenerating) return;
+
+  addMessage(text, 'user');
+  $('chatInput').value = '';
+  $('chatInput').rows = 1;
+
+  state.isGenerating = true;
+  $('btnSend').disabled = true;
+  setStatus('busy', 'Generating...');
+
+  try {
+    // Collect enabled skills from the skills panel
+    const enabledSkills = ['general'];  // general is always on
+    document.querySelectorAll('#skills-installed .skill-toggle.enabled').forEach(t => {
+      const sid = t.dataset.skill;
+      if (sid && sid !== 'general' && sid !== 'stdlib') enabledSkills.push(sid);
+    });
+
+    const res = await fetch(`${state.apiEndpoint}/generate`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        prompt: text,
+        backend: state.backend,
+        project: state.projectPath,
+        currentFile: state.currentFile,
+        skills: enabledSkills,
+        api_key: state.apiKey,
+        model: state.model,
+        auto_transpile: true
+      })
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      addMessage(`⚠ Error: ${data.error || data.message || 'Unknown error'}`, 'ai');
+      setStatus('error', 'Generation failed');
+      state.isGenerating = false;
+      $('btnSend').disabled = false;
+      return;
+    }
+
+    // Show the full AI response (plan + code + compile commands)
+    if (data.message) {
+      addMessage(data.message, 'ai');
+    }
+
+    // Load Dictum code into editor
+    if (data.dictum) {
+      state.dictumCode = data.dictum;
+      renderDictum(data.dictum);
+      setView('dictum');
+    }
+
+    // Load transpiled C/C++ if auto-transpile succeeded
+    if (data.c) {
+      state.cCode = data.c;
+      renderC(state.cCode);
+    }
+
+    // Show transpile status
+    if (data.transpile_ok === false && data.transpile_error) {
+      addMessage(`⚠ Auto-transpile failed (Dictum code generated but has errors):\n${data.transpile_error}`, 'ai');
+    } else if (data.dictum && data.c) {
+      const skillBadge = enabledSkills.filter(s => s !== 'general').join(', ');
+      addMessage(`✓ Generated Dictum + transpiled to C${skillBadge ? ` [${skillBadge}]` : ''}`, 'ai');
+    }
+
+    // Show warnings
+    if (data.warnings && data.warnings.length) {
+      addMessage('⚠ Warnings: ' + data.warnings.join('; '), 'ai');
+    }
+
+    setStatus('ready', 'Ready');
+
+  } catch (err) {
+    addMessage(`API error: ${err.message}. Make sure your Dictum backend is running on ${state.apiEndpoint}`, 'ai');
+    setStatus('error', 'API Error');
+  }
+
+  state.isGenerating = false;
+  $('btnSend').disabled = false;
+}
+
+$('btnSend').addEventListener('click', sendChat);
+$('chatInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
+});
+$('chatInput').addEventListener('input', () => {
+  $('chatInput').rows = Math.min(5, Math.max(1, $('chatInput').value.split('\n').length));
+});
+
+// ── Transpile ──
+async function transpile() {
+  if (!state.dictumCode) return;
+
+  setStatus('busy', 'Transpiling...');
+
+  try {
+    const res = await fetch(`${state.apiEndpoint}/transpile`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        source: state.dictumCode,
+        backend: state.backend,
+        cppStandard: 17
+      })
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+    state.cCode = data.code;
+    renderC(data.code);
+    setView('c');
+    setStatus('ready', 'Transpiled');
+
+  } catch (err) {
+    // Show dictum view with error
+    setView('dictum');
+    addMessage(`Transpile failed: ${err.message}`, 'ai');
+    setStatus('error', 'Transpile failed');
+  }
+}
+
+$('btnTranspile').addEventListener('click', transpile);
+
+// ── Run ──
+async function run() {
+  if (!state.cCode) {
+    addMessage('No C/C++ code to run. Transpile first.', 'ai');
+    return;
+  }
+
+  setStatus('busy', 'Running...');
+
+  try {
+    const res = await fetch(`${state.apiEndpoint}/run`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        source: state.dictumCode,
+        backend: state.backend,
+        target: state.target
+      })
+    });
+
+    const data = await res.json();
+    const targetBadge = (data.target && data.target !== 'linux')
+      ? ` [QEMU: ${data.target_label || data.target}]`
+      : ' [native]';
+    if (data.ok) {
+      const output = data.output || '(no stdout)';
+      const exitInfo = `\nExit code: ${data.exit_code}`;
+      addCodeMessage(`Output${targetBadge}:`, 'ai', output + exitInfo, 'c');
+    } else {
+      addCodeMessage(`Error${targetBadge}:`, 'ai', data.error || 'Unknown error', 'c');
+    }
+    if (data.warnings && data.warnings.length) {
+      addMessage('⚠ Warnings: ' + data.warnings.join('; '), 'ai');
+    }
+    setStatus('ready', 'Ready');
+
+  } catch (err) {
+    addMessage(`Run failed: ${err.message}`, 'ai');
+    setStatus('error', 'Run failed');
+  }
+}
+
+$('btnRun').addEventListener('click', run);
+
+// ── Copy / Download ──
+$('btnCopy').addEventListener('click', () => {
+  const text = state.activeView === 'dictum' ? state.dictumCode : state.cCode;
+  navigator.clipboard.writeText(text);
+  setStatus('ready', 'Copied');
+  setTimeout(() => setStatus('ready', 'Ready'), 1000);
+});
+
+$('btnDownload').addEventListener('click', () => {
+  const isDictum = state.activeView === 'dictum';
+  const text = isDictum ? state.dictumCode : state.cCode;
+  const ext = isDictum ? '.dict' : (state.backend === 'cpp' ? '.cpp' : '.c');
+  const blob = new Blob([text], {type: 'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (state.currentFile?.replace('.dict', '') || 'main') + ext;
+  a.click();
+});
+
+// ── Status ──
+function setStatus(type, text) {
+  $('statusDot').className = 'status-dot ' + type;
+  $('statusText').textContent = text;
+}
+
+// ── Refresh ──
+$('btnRefresh').addEventListener('click', () => {
+  if (state.files.length) {
+    renderFileTree(state.files);
+  }
+});
+
+// ── Settings Modal ──
+const settingsModal = $('settingsModal');
+const skillsModal = $('skillsModal');
+
+function openModal(modal) {
+  modal.classList.add('active');
+}
+function closeModal(modal) {
+  modal.classList.remove('active');
+}
+
+$('btnSettings').addEventListener('click', () => openModal(settingsModal));
+$('closeSettings').addEventListener('click', () => closeModal(settingsModal));
+$('btnSaveSettings').addEventListener('click', () => {
+  // Save to state
+  state.apiEndpoint = $('settApiEndpoint').value.trim() || state.apiEndpoint;
+  state.apiKey  = $('settApiKey').value.trim();
+  state.model   = $('settModel').value || state.model;
+  state.settings = {
+    projectName: $('settProjectName').value,
+    defaultBackend: $('settDefaultBackend').value,
+    cppStandard: $('settCppStandard').value,
+    buildFlags: $('settBuildFlags').value,
+    autoTranspile: $('settAutoTranspile').checked,
+    autoRun: $('settAutoRun').checked,
+    apiEndpoint: $('settApiEndpoint').value,
+    apiKey: $('settApiKey').value,
+    apiTimeout: parseInt($('settApiTimeout').value),
+    llmProvider: $('settLlmProvider').value,
+    customEndpoint: $('settCustomEndpoint').value,
+    model: $('settModel').value,
+    streamResponse: $('settStreamResponse').checked,
+    fontSize: parseInt($('settFontSize').value),
+    tabSize: parseInt($('settTabSize').value),
+    lineNumbers: $('settLineNumbers').checked,
+    wordWrap: $('settWordWrap').checked,
+    minimap: $('settMinimap').checked
+  };
+  // Apply font size
+  document.querySelectorAll('.code-view').forEach(el => {
+    el.style.fontSize = state.settings.fontSize + 'px';
+  });
+  document.querySelectorAll('.c-view-wrap .c-code, .c-view-wrap .line-nums').forEach(el => {
+    el.style.fontSize = state.settings.fontSize + 'px';
+    el.style.lineHeight = (state.settings.fontSize * 1.3) + 'px';
+  });
+  closeModal(settingsModal);
+  setStatus('ready', 'Settings saved');
+  setTimeout(() => setStatus('ready', 'Ready'), 1500);
+});
+$('btnResetSettings').addEventListener('click', () => {
+  $('settApiEndpoint').value = 'http://localhost:8765';
+  $('settDefaultBackend').value = 'c';
+  $('settCppStandard').value = '17';
+  $('settBuildFlags').value = '';
+  $('settAutoTranspile').checked = false;
+  $('settAutoRun').checked = false;
+  $('settApiKey').value = '';
+  $('settApiTimeout').value = '30';
+  $('settLlmProvider').value = 'local';
+  $('settCustomEndpoint').value = '';
+  $('settModel').value = '';
+  $('settStreamResponse').checked = false;
+  $('settFontSize').value = '13';
+  $('settTabSize').value = '4';
+  $('settLineNumbers').checked = true;
+  $('settWordWrap').checked = false;
+  $('settMinimap').checked = false;
+});
+
+// Settings modal tabs
+document.querySelectorAll('#settingsModal .modal-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('#settingsModal .modal-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#settingsModal .modal-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    $(tab.dataset.panel).classList.add('active');
+  });
+});
+
+// LLM provider toggle
+$('settLlmProvider').addEventListener('change', (e) => {
+  $('customEndpointGroup').style.display = e.target.value === 'custom' ? 'block' : 'none';
+});
+
+// ── Skills Modal ──
+$('btnSkills').addEventListener('click', () => openModal(skillsModal));
+$('closeSkills').addEventListener('click', () => closeModal(skillsModal));
+$('btnCloseSkills').addEventListener('click', () => closeModal(skillsModal));
+$('btnSaveSkills').addEventListener('click', () => {
+  // Gather enabled skills
+  const enabled = [];
+  document.querySelectorAll('#skills-installed .skill-toggle.enabled').forEach(t => {
+    enabled.push(t.dataset.skill);
+  });
+  state.enabledSkills = enabled;
+  state.integration = {
+    transpilerPath: $('intTranspilerPath').value,
+    useStdlib: $('intUseStdlib').checked,
+    linkMath: $('intLinkMath').checked,
+    buildTool: $('intBuildTool').value,
+    buildCommand: $('intBuildCommand').value,
+    includePaths: $('intIncludePaths').value.split('\n').filter(s => s.trim()),
+    libPaths: $('intLibPaths').value.split('\n').filter(s => s.trim()),
+    libs: $('intLibs').value.split(/\s+/).filter(s => s.trim()),
+    registry: $('intRegistry').value,
+    autoUpdate: $('intAutoUpdate').checked
+  };
+  closeModal(skillsModal);
+  setStatus('ready', 'Skills updated');
+  setTimeout(() => setStatus('ready', 'Ready'), 1500);
+});
+
+// Skills modal tabs
+document.querySelectorAll('#skillsModal .modal-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('#skillsModal .modal-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#skillsModal .modal-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    $(tab.dataset.panel).classList.add('active');
+  });
+});
+
+// Skill toggles
+document.querySelectorAll('.skill-toggle').forEach(toggle => {
+  toggle.addEventListener('click', () => {
+    toggle.classList.toggle('enabled');
+  });
+});
+
+// Skill source type toggle
+$('skillSourceType').addEventListener('change', (e) => {
+  const val = e.target.value;
+  $('skillUrlGroup').style.display = val === 'url' ? 'block' : 'none';
+  $('skillLocalGroup').style.display = val === 'local' ? 'block' : 'none';
+  $('skillPasteGroup').style.display = val === 'paste' ? 'block' : 'none';
+});
+
+$('btnInstallSkill').addEventListener('click', () => {
+  const name = $('skillName').value.trim();
+  if (!name) {
+    alert('Enter a skill name');
+    return;
+  }
+  // In a real app, this would fetch/install. Here we simulate.
+  addMessage(`Installing skill "${name}"...`, 'ai');
+  setTimeout(() => {
+    addMessage(`Skill "${name}" installed successfully. Enable it in the Installed tab.`, 'ai');
+    $('skillName').value = '';
+    $('skillUrl').value = '';
+    $('skillLocalPath').value = '';
+    $('skillPaste').value = '';
+  }, 800);
+});
+
+// Close modals on overlay click
+settingsModal.addEventListener('click', (e) => {
+  if (e.target === settingsModal) closeModal(settingsModal);
+});
+skillsModal.addEventListener('click', (e) => {
+  if (e.target === skillsModal) closeModal(skillsModal);
+});
+
+// Escape key to close modals
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeModal(settingsModal);
+    closeModal(skillsModal);
+  }
+});
+
+</script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+{
+  "name": "GPU Compute Programmer",
+  "industry": "High-Performance Computing / AI",
+  "tier": 5,
+  "description": "Write GPU kernels and compute shaders using CUDA, OpenCL, or Vulkan Compute. Optimize memory coalescing, occupancy, and parallel algorithms.",
+  "deliverables": [
+    "Matrix multiplication CUDA kernel",
+    "Reduction algorithm on GPU",
+    "Image convolution shader",
+    "GPU-accelerated sorting"
+  ],
+  "dictum_features": [
+    "C++ backend",
+    "Unsafe for GPU memory",
+    "Raw handles for device buffers",
+    "Template-based kernel launches",
+    "C imports for CUDA/OpenCL"
+  ],
+  "c_cpp_concepts": [
+    "CUDA kernel programming",
+    "Thread hierarchy (grid, block, thread)",
+    "Shared memory and coalescing",
+    "Warp divergence",
+    "Occupancy optimization",
+    "CUDA streams and events"
+  ],
+  "example_snippet": "program GPUStub:\n    # Dictum transpiles to C++, then nvcc compiles CUDA\n    shape GPUBuffer holds:\n        DevicePtr as raw handle to byte\n        Size as count\n\n        method allocate takes Bytes as count produces result:\n            # Would call cudaMalloc\n            print the text \"Allocating \" and Bytes and \" bytes on GPU\" and newline\n            produce success with nothing\n        end method\n    end shape\n\n    keep Buf as GPUBuffer\n    call Buf.allocate with 1048576\n    print the text \"GPU buffer ready\" and newline\nend program",
+  "estimated_hours": 55,
+  "prerequisites": [
+    "skill_07",
+    "skill_28"
+  ],
+  "status": "verified"
+}

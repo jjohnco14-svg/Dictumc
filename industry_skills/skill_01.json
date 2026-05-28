@@ -1,0 +1,30 @@
+{
+  "name": "Console Application Developer",
+  "industry": "General Software",
+  "tier": 1,
+  "description": "Build command-line tools, scripts, and terminal applications using Dictum's natural-language syntax. Master printing, variables, arithmetic, conditionals, loops, arrays, functions, and structs.",
+  "deliverables": [
+    "CLI calculator with error handling",
+    "Text-based adventure game",
+    "File processing script",
+    "Data formatter utility"
+  ],
+  "dictum_features": [
+    "print, keep, put",
+    "if-then-otherwise",
+    "while, repeat, for-each",
+    "action ... takes ... produces",
+    "shape ... holds"
+  ],
+  "c_cpp_concepts": [
+    "stdio.h basics",
+    "Primitive types (int, double, bool)",
+    "Control flow (if, while, for)",
+    "Functions and structs",
+    "Arrays and pointers intro"
+  ],
+  "example_snippet": "program Calculator:\n    action add takes A as whole number, B as whole number produces whole number:\n        produce success with the sum of A and B\n    end action\n\n    keep Result as whole number\n    call add with 5 and 3 giving Result\n    print the text \"5 + 3 = \" and Result and newline\nend program",
+  "estimated_hours": 10,
+  "prerequisites": [],
+  "status": "verified"
+}

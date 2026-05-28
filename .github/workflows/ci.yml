@@ -1,0 +1,222 @@
+name: Dictum v5 CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# JOB OVERVIEW
+#
+#  python-unit          — pure Python tests (no compiler needed)
+#  c-integration        — transpile → gcc → run  (C backend, 279 tests)
+#  cpp-integration      — transpile → g++ → run  (C++ backend, C++17/20/23)
+#  polyglot-integration — PolyglotParser / linker / binding-gen / compile
+#  stdlib-build         — build dictum stdlib .a, run C test harness
+#  transpile-smoke      — end-to-end hello-world: C + C++ smoke
+# ─────────────────────────────────────────────────────────────────────────────
+
+jobs:
+
+  # ── 1. Pure Python unit + grammar + v4 regression ─────────────────────────
+  python-unit:
+    name: Python unit tests (${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      # Run only the tests that need no compiler.
+      # test_dictum, test_grammar, test_v4 are pure Python.
+      # Compiler-dependent files are run in c-integration, cpp-integration,
+      # and polyglot-integration jobs where the right tool is installed.
+      - name: Run pure-Python tests
+        run: |
+          python -m pytest \
+            tests/test_dictum.py tests/test_grammar.py tests/test_v4.py \
+            -v --tb=short --cov=dictumc --cov-report=xml \
+            -m "not c_integration and not cpp_integration and not polyglot"
+
+      - name: Upload coverage
+        if: matrix.python-version == '3.12'
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+
+  # ── 2. C backend integration — transpile → gcc → execute ──────────────────
+  c-integration:
+    name: C backend (gcc, Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install gcc
+        run: sudo apt-get update && sudo apt-get install -y gcc
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dictumc
+        run: pip install -e ".[dev]"
+
+      - name: Run C integration tests
+        run: |
+          python -m pytest tests/test_integration_c.py \
+            -v --tb=short
+
+  # ── 3. C++ backend integration — transpile → g++ → execute ────────────────
+  cpp-integration:
+    name: C++ backend (g++, Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install g++
+        run: sudo apt-get update && sudo apt-get install -y g++
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dictumc
+        run: pip install -e ".[dev]"
+
+      # test_integration_cpp.py already parametrizes across C++17/20/23 internally.
+      # Run the full file — all standards are covered in one job.
+      - name: Run C++ integration tests (C++17 / C++20 / C++23)
+        run: |
+          python -m pytest tests/test_integration_cpp.py \
+            -v --tb=short
+
+      # Fail hard if every test was skipped (g++ missing would cause this).
+      - name: Assert tests ran — not all skipped
+        run: |
+          result=$(python -m pytest tests/test_integration_cpp.py -v --tb=no -q 2>&1)
+          echo "$result"
+          echo "$result" | grep -q " passed" \
+            || (echo "ERROR: no C++ tests passed — g++ may be missing or all tests skipped" && exit 1)
+
+  # ── 4. Polyglot integration — parser / linker / binding-gen / gcc compile ──
+  polyglot-integration:
+    name: Polyglot (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Polyglot tests compile generated C bindings with gcc.
+      # g++ is also needed for the CXX=g++ Makefile assertion tests.
+      - name: Install gcc + g++
+        run: sudo apt-get update && sudo apt-get install -y gcc g++
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dictumc
+        run: pip install -e ".[dev]"
+
+      - name: Run polyglot tests
+        run: |
+          python -m pytest tests/test_polyglot.py \
+            -v --tb=short
+
+      # Same guard: polyglot compile tests must actually run, not all skip.
+      - name: Assert TestGeneratedCodeCompiles actually ran
+        run: |
+          python -m pytest tests/test_polyglot.py::TestGeneratedCodeCompiles \
+            -v --tb=short 2>&1 | grep -q "passed" \
+            || (echo "ERROR: TestGeneratedCodeCompiles had no passing tests — gcc missing?" && exit 1)
+
+  # ── 5. C stdlib build + C test harness ────────────────────────────────────
+  stdlib-build:
+    name: C stdlib build & test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install gcc + g++
+        run: sudo apt-get update && sudo apt-get install -y gcc g++
+
+      - name: Build C stdlib
+        run: make -C stdlib lib
+
+      - name: Build niche
+        run: make -C niche lib
+
+      - name: Run C stdlib tests
+        run: make -C stdlib test
+
+  # ── 6. End-to-end smoke: C + C++ hello-world through CLI ──────────────────
+  transpile-smoke:
+    name: Transpile → compile → run smoke (C + C++)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install gcc + g++
+        run: sudo apt-get update && sudo apt-get install -y gcc g++
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dictumc
+        run: pip install -e .
+
+      - name: Write hello.dict
+        run: |
+          cat > /tmp/hello.dict << 'EOF'
+          program Hello:
+              print the text "Hello from Dictum v5!" and newline
+          end program
+          EOF
+
+      - name: Smoke — C backend
+        run: |
+          python dictumc_cli.py /tmp/hello.dict --backend c --compile --output /tmp/hello_c
+          /tmp/hello_c
+
+      - name: Smoke — C++ backend (C++17)
+        run: |
+          python dictumc_cli.py /tmp/hello.dict --backend cpp --cpp-standard 17 --compile --output /tmp/hello_cpp17
+          /tmp/hello_cpp17
+
+      - name: Smoke — C++ backend (C++20)
+        run: |
+          python dictumc_cli.py /tmp/hello.dict --backend cpp --cpp-standard 20 --compile --output /tmp/hello_cpp20
+          /tmp/hello_cpp20

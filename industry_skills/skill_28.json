@@ -1,0 +1,34 @@
+{
+  "name": "Scientific Computing Programmer",
+  "industry": "Research / HPC / Simulation",
+  "tier": 4,
+  "description": "Implement numerical methods, simulations, and high-performance computing kernels. Work with linear algebra, differential equations, and parallel algorithms.",
+  "deliverables": [
+    "Matrix multiplication (naive + optimized)",
+    "Monte Carlo simulation",
+    "Heat equation solver",
+    "N-body gravity simulation"
+  ],
+  "dictum_features": [
+    "C++ backend",
+    "Template-based numerics",
+    "Unsafe for SIMD intrinsics",
+    "Thread pool for parallelization",
+    "Raw handles for large arrays"
+  ],
+  "c_cpp_concepts": [
+    "Numerical methods",
+    "Linear algebra (BLAS, LAPACK)",
+    "SIMD intrinsics (SSE, AVX)",
+    "OpenMP/MPI parallelization",
+    "Cache-friendly algorithms",
+    "Floating-point precision"
+  ],
+  "example_snippet": "program MatrixMult:\n    action multiply takes A as raw handle to fractional number, B as raw handle to fractional number, \n                      C as raw handle to fractional number, N as whole number produces nothing:\n        repeat N times using I:\n            repeat N times using J:\n                keep Sum as fractional number with value 0.0\n                repeat N times using K:\n                    keep AVal as fractional number\n                    put Index at the sum of the product of I and N and K of A into AVal\n                    keep BVal as fractional number\n                    put Index at the sum of the product of K and N and J of B into BVal\n                    put the sum of Sum and the product of AVal and BVal into Sum\n                end repeat\n                put Sum into Index at the sum of the product of I and N and J of C\n            end repeat\n        end repeat\n    end action\n\n    keep N as whole number with value 3\n    keep A as raw handle to fractional number with room for the product of N and N and 8\n    keep B as raw handle to fractional number with room for the product of N and N and 8\n    keep C as raw handle to fractional number with room for the product of N and N and 8\n\n    call multiply with A and B and C and N\n    print the text \"Matrix multiplication complete\" and newline\nend program",
+  "estimated_hours": 50,
+  "prerequisites": [
+    "skill_07",
+    "skill_06"
+  ],
+  "status": "verified"
+}

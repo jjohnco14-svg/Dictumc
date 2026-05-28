@@ -1,0 +1,35 @@
+{
+  "name": "Neuromorphic Computing Engineer",
+  "industry": "AI / Neuromorphic Hardware",
+  "tier": 6,
+  "description": "Program neuromorphic chips and spiking neural networks (SNNs). Implement leaky integrate-and-fire neurons, STDP learning, and event-based processing.",
+  "deliverables": [
+    "Leaky integrate-and-fire neuron",
+    "Spike-timing dependent plasticity (STDP)",
+    "Event-based vision processor",
+    "SNN inference engine"
+  ],
+  "dictum_features": [
+    "C++ backend",
+    "Template-based neuron models",
+    "Smart pointers for synapses",
+    "Unsafe for hardware spike registers",
+    "Deterministic timing loops"
+  ],
+  "c_cpp_concepts": [
+    "Spiking neural networks (SNN)",
+    "Leaky integrate-and-fire (LIF)",
+    "STDP learning rule",
+    "Event-based computation",
+    "Neuromorphic hardware (Loihi, TrueNorth)",
+    "Address-event representation (AER)"
+  ],
+  "example_snippet": "program LIFNeuron:\n    shape Neuron holds:\n        MembranePotential as fractional number\n        Threshold as fractional number\n        LeakRate as fractional number\n        RefractoryPeriod as whole number\n        LastSpikeTime as whole number\n    end shape\n\n    action update_neuron takes N as ref Neuron, InputCurrent as fractional number, \n                            CurrentTime as whole number produces truth value:\n        if the difference of CurrentTime and N.LastSpikeTime is less than N.RefractoryPeriod then:\n            produce success with false\n        end if\n        \n        put the sum of N.MembranePotential and InputCurrent into N.MembranePotential\n        put the difference of N.MembranePotential and N.LeakRate into N.MembranePotential\n        \n        if N.MembranePotential is greater than N.Threshold then:\n            put 0.0 into N.MembranePotential\n            put CurrentTime into N.LastSpikeTime\n            produce success with true\n        end if\n        \n        produce success with false\n    end action\n    \n    keep N1 as Neuron with 0.0 and 1.0 and 0.1 and 5 and 0\n    keep Spiked as truth value\n    call update_neuron with N1 and 0.5 and 10 giving Spiked\n    print the text \"Neuron spiked: \" and Spiked and newline\nend program",
+  "estimated_hours": 55,
+  "prerequisites": [
+    "skill_07",
+    "skill_22"
+  ],
+  "status": "partial",
+  "status_note": "C++ backend active (C++17/20/23, CI-tested). Timing via dictum_timer.c. Neuromorphic hardware registers require C imports."
+}

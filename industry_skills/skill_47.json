@@ -1,0 +1,34 @@
+{
+  "name": "Augmented Reality Systems Engineer",
+  "industry": "AR / VR / Mixed Reality",
+  "tier": 5,
+  "description": "Develop low-level systems for AR/VR headsets. Implement SLAM, hand tracking, display pipelines, and spatial audio.",
+  "deliverables": [
+    "IMU-based pose tracker",
+    "Display timing controller",
+    "Spatial audio renderer",
+    "Hand gesture recognizer stub"
+  ],
+  "dictum_features": [
+    "C++ backend for performance",
+    "Unsafe for GPU/display access",
+    "Template-based math (vectors, matrices)",
+    "Smart pointers for frame data",
+    "Thread pool for parallel tracking"
+  ],
+  "c_cpp_concepts": [
+    "SLAM (Simultaneous Localization and Mapping)",
+    "Sensor fusion (IMU + camera)",
+    "Display refresh timing",
+    "Foveated rendering",
+    "Spatial audio (HRTF)",
+    "Latency reduction techniques"
+  ],
+  "example_snippet": "program ARPose:\n    shape Pose holds:\n        PositionX as fractional number\n        PositionY as fractional number\n        PositionZ as fractional number\n        QuaternionW as fractional number\n        QuaternionX as fractional number\n        QuaternionY as fractional number\n        QuaternionZ as fractional number\n    end shape\n\n    action update_pose takes P as ref Pose, AccelX as fractional number, \n                         AccelY as fractional number, AccelZ as fractional number, \n                         Dt as fractional number produces nothing:\n        put the sum of P.PositionX and the product of AccelX and Dt into P.PositionX\n        put the sum of P.PositionY and the product of AccelY and Dt into P.PositionY\n        put the sum of P.PositionZ and the product of AccelZ and Dt into P.PositionZ\n    end action\n\n    keep CurrentPose as Pose with 0.0 and 0.0 and 0.0 and 1.0 and 0.0 and 0.0 and 0.0\n    call update_pose with CurrentPose and 0.1 and 0.0 and 9.8 and 0.016\n    print the text \"Position: (\" and CurrentPose.PositionX and \", \" and CurrentPose.PositionY and \", \" and CurrentPose.PositionZ and \")\" and newline\nend program",
+  "estimated_hours": 55,
+  "prerequisites": [
+    "skill_07",
+    "skill_15"
+  ],
+  "status": "verified"
+}

@@ -1,0 +1,34 @@
+{
+  "name": "Quantitative Finance Developer",
+  "industry": "FinTech / Quantitative Trading",
+  "tier": 4,
+  "description": "Build high-frequency trading systems, risk engines, and financial models. Optimize for microsecond latency and handle market data feeds.",
+  "deliverables": [
+    "Market data parser (FIX protocol)",
+    "Moving average calculator",
+    "Order book implementation",
+    "Risk limit checker"
+  ],
+  "dictum_features": [
+    "C++ backend for speed",
+    "Zero-copy parsing",
+    "Lock-free queues",
+    "Template-based math",
+    "Shared memory for IPC"
+  ],
+  "c_cpp_concepts": [
+    "FIX protocol parsing",
+    "Order book (price levels)",
+    "Lock-free data structures",
+    "Shared memory (shm_open)",
+    "CPU cache optimization",
+    "Memory-mapped files for logs"
+  ],
+  "example_snippet": "program OrderBook:\n    shape Order holds:\n        Price as fractional number\n        Quantity as whole number\n        Side as text\n    end shape\n\n    keep Bids as Order with values nothing and nothing and nothing\n\n    action add_bid takes Price as fractional number, Qty as whole number produces nothing:\n        keep NewOrder as Order with Price and Qty and \"buy\"\n        # Add to sorted order book\n        print the text \"Bid added: \" and Price and \" x \" and Qty and newline\n    end action\n\n    call add_bid with 100.5 and 500\n    call add_bid with 100.25 and 300\nend program",
+  "estimated_hours": 50,
+  "prerequisites": [
+    "skill_07",
+    "skill_06"
+  ],
+  "status": "verified"
+}

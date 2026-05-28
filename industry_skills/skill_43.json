@@ -1,0 +1,35 @@
+{
+  "name": "Industrial Control Systems Engineer",
+  "industry": "Manufacturing / Industrial Automation",
+  "tier": 5,
+  "description": "Program PLCs, SCADA systems, and industrial controllers. Implement ladder logic, PID control, and safety interlocks for factory automation.",
+  "deliverables": [
+    "PLC ladder logic simulator",
+    "SCADA data historian",
+    "Safety interlock controller",
+    "Modbus TCP client/server"
+  ],
+  "dictum_features": [
+    "C backend for real-time",
+    "Timer interrupts",
+    "Signal handling",
+    "Network sockets for Modbus",
+    "Deterministic execution"
+  ],
+  "c_cpp_concepts": [
+    "IEC 61131-3 standards",
+    "Ladder logic",
+    "Modbus protocol",
+    "OPC UA",
+    "Safety PLCs (SIL ratings)",
+    "Real-time Ethernet (EtherCAT, Profinet)"
+  ],
+  "example_snippet": "program SafetyInterlock:\n    shape MachineState holds:\n        EmergencyStop as truth value\n        GuardClosed as truth value\n        MotorRunning as truth value\n        Temperature as fractional number\n    end shape\n\n    action check_safety takes S as const ref MachineState produces truth value:\n        if S.EmergencyStop is equal to true then:\n            produce success with false\n        end if\n        if S.GuardClosed is equal to false then:\n            produce success with false\n        end if\n        if S.Temperature is greater than 80.0 then:\n            produce success with false\n        end if\n        produce success with true\n    end action\n\n    keep Press as MachineState with false and true and false and 65.0\n    keep Safe as truth value\n    call check_safety with Press giving Safe\n    print the text \"Machine safe to run: \" and Safe and newline\nend program",
+  "estimated_hours": 45,
+  "prerequisites": [
+    "skill_10",
+    "skill_13"
+  ],
+  "status": "partial",
+  "status_note": "dictum_timer.c, dictum_signal.c, dictum_net.c implemented. Real-time scheduling and hardware register access require C imports."
+}
