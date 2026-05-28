@@ -1,1 +1,0 @@
-# Error Handling\n\n## Attempt/Success/Failure\n\n```dictum\nattempt\n    call risky with Args\non success\n    print the text "ok" and newline\non failure with Err\n    print the text "error" and newline\nend attempt\n```\n
