@@ -1,0 +1,2871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dictum — AI-Native Systems Language</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────────
+   TOKENS
+───────────────────────────────────────────── */
+:root {
+  --void:     #050507;
+  --surface:  #0c0c10;
+  --panel:    #11111a;
+  --border:   #1e1e2e;
+  --border2:  #2a2a3e;
+  --muted:    #3a3a55;
+  --dim:      #5a5a80;
+  --text:     #d4d4e8;
+  --bright:   #eeeeff;
+  --gold:     #c8a96e;
+  --gold2:    #e8c98e;
+  --cyan:     #5cd8eb;
+  --violet:   #a78bfa;
+  --green:    #4ade80;
+  --red:      #f87171;
+  --amber:    #fbbf24;
+
+  --font-mono: 'IBM Plex Mono', 'Fira Code', monospace;
+  --font-ui:   'Syne', system-ui, sans-serif;
+
+  --r: 6px;
+  --r2: 10px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-ui);
+  background: var(--void);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─────────────────────────────────────────────
+   LANDING — HERO
+───────────────────────────────────────────── */
+#landing {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 60px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(5,5,7,0.85);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-logo {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-logo .glyph {
+  width: 28px;
+  height: 28px;
+  border: 1.5px solid var(--gold);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: var(--gold2);
+  clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  background: rgba(200,169,110,0.08);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+}
+
+.nav-links a {
+  color: var(--dim);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: color 0.15s;
+}
+
+.nav-links a:hover { color: var(--text); }
+
+.btn-primary {
+  background: var(--gold);
+  color: var(--void);
+  border: none;
+  padding: 8px 20px;
+  border-radius: var(--r);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.btn-primary:hover { background: var(--gold2); transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+
+.hero {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* grid bg */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(200,169,110,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,169,110,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+.hero-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 60px 80px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--gold);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hero-eyebrow::before {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 1px;
+  background: var(--gold);
+}
+
+.hero-h1 {
+  font-size: clamp(42px, 5vw, 68px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--bright);
+  margin-bottom: 24px;
+}
+
+.hero-h1 .accent {
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-sub {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--dim);
+  max-width: 480px;
+  margin-bottom: 40px;
+}
+
+.hero-sub strong { color: var(--text); font-weight: 600; }
+
+.hero-cta {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.btn-launch {
+  background: var(--gold);
+  color: var(--void);
+  border: none;
+  padding: 13px 28px;
+  border-radius: var(--r);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-launch:hover { background: var(--gold2); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(200,169,110,0.25); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--dim);
+  border: 1px solid var(--border2);
+  padding: 13px 24px;
+  border-radius: var(--r);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-ghost:hover { border-color: var(--muted); color: var(--text); }
+
+.hero-stats {
+  display: flex;
+  gap: 36px;
+  margin-top: 48px;
+  padding-top: 36px;
+  border-top: 1px solid var(--border);
+}
+
+.stat-item { display: flex; flex-direction: column; gap: 4px; }
+.stat-num { font-family: var(--font-mono); font-size: 24px; font-weight: 600; color: var(--bright); }
+.stat-label { font-size: 12px; color: var(--dim); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+
+/* hero right — code preview */
+.hero-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 80px 60px 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.code-card {
+  width: 100%;
+  max-width: 520px;
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-radius: var(--r2);
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(200,169,110,0.06);
+}
+
+.code-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot-r { background: #ff5f57; }
+.dot-y { background: #febc2e; }
+.dot-g { background: #28c840; }
+
+.code-card-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--dim);
+  margin-left: auto;
+}
+
+.code-body {
+  padding: 20px 24px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.75;
+  overflow-x: auto;
+}
+
+.code-section { margin-bottom: 16px; }
+.code-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  padding-left: 2px;
+}
+
+.kw { color: var(--violet); }
+.id { color: var(--cyan); }
+.ty { color: var(--gold); }
+.str { color: var(--green); }
+.cm { color: var(--muted); font-style: italic; }
+.op { color: var(--dim); }
+.arrow { color: var(--gold2); }
+
+.code-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+.code-divider::before, .code-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ─────────────────────────────────────────────
+   FEATURES STRIP
+───────────────────────────────────────────── */
+.features-strip {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 60px 80px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
+}
+
+.feature-item {}
+.feature-icon {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  margin-bottom: 16px;
+  background: var(--panel);
+}
+
+.feature-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--bright);
+  margin-bottom: 8px;
+}
+
+.feature-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--dim);
+}
+
+/* ─────────────────────────────────────────────
+   TIER CARDS
+───────────────────────────────────────────── */
+.tiers-section {
+  padding: 80px 80px;
+  text-align: center;
+}
+
+.section-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 38px;
+  font-weight: 800;
+  color: var(--bright);
+  margin-bottom: 14px;
+  letter-spacing: -0.02em;
+}
+
+.section-sub {
+  font-size: 16px;
+  color: var(--dim);
+  max-width: 500px;
+  margin: 0 auto 56px;
+  line-height: 1.6;
+}
+
+.tier-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.tier-card {
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-radius: var(--r2);
+  padding: 32px;
+  text-align: left;
+  transition: border-color 0.2s;
+}
+
+.tier-card:hover { border-color: var(--muted); }
+
+.tier-card.featured {
+  border-color: var(--gold);
+  box-shadow: 0 0 40px rgba(200,169,110,0.1);
+}
+
+.tier-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 3px;
+  margin-bottom: 20px;
+}
+
+.tier-badge.free { background: rgba(74,222,128,0.1); color: var(--green); }
+.tier-badge.pro  { background: rgba(200,169,110,0.15); color: var(--gold); }
+.tier-badge.team { background: rgba(167,139,250,0.1); color: var(--violet); }
+
+.tier-price {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--bright);
+  margin-bottom: 4px;
+  line-height: 1;
+}
+
+.tier-price span {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dim);
+}
+
+.tier-name {
+  font-size: 13px;
+  color: var(--dim);
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.tier-features {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.tier-features li {
+  font-size: 14px;
+  color: var(--text);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.4;
+}
+
+.tier-features li::before {
+  content: '✓';
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+.tier-features li.locked {
+  color: var(--dim);
+}
+
+.tier-features li.locked::before {
+  content: '—';
+  color: var(--muted);
+}
+
+.tier-btn {
+  width: 100%;
+  padding: 11px;
+  border-radius: var(--r);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tier-btn.outline {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text);
+}
+
+.tier-btn.outline:hover { border-color: var(--muted); }
+
+.tier-btn.gold {
+  background: var(--gold);
+  color: var(--void);
+  border: none;
+}
+
+.tier-btn.gold:hover { background: var(--gold2); }
+
+.tier-btn.violet {
+  background: rgba(167,139,250,0.15);
+  border: 1px solid rgba(167,139,250,0.3);
+  color: var(--violet);
+}
+
+.tier-btn.violet:hover { background: rgba(167,139,250,0.25); }
+
+/* ─────────────────────────────────────────────
+   EDITOR APP
+───────────────────────────────────────────── */
+#app {
+  display: none;
+  height: 100vh;
+  flex-direction: column;
+  background: var(--void);
+}
+
+/* topbar */
+.topbar {
+  height: 48px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.topbar-logo {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.topbar-logo .hex {
+  width: 22px;
+  height: 22px;
+  clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  background: rgba(200,169,110,0.15);
+  border: 1px solid var(--gold);
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+  color: var(--gold);
+}
+
+.sep { width: 1px; height: 20px; background: var(--border2); }
+
+.topbar-file {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--dim);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.topbar-file .dot-modified {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--amber);
+  display: none;
+}
+
+.topbar-file .dot-modified.visible { display: block; }
+
+.topbar-spacer { flex: 1; }
+
+.topbar-tier {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 3px;
+  background: rgba(74,222,128,0.1);
+  color: var(--green);
+  border: 1px solid rgba(74,222,128,0.2);
+}
+
+.topbar-tier.pro {
+  background: rgba(200,169,110,0.1);
+  color: var(--gold);
+  border-color: rgba(200,169,110,0.25);
+}
+
+.tbtn {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--dim);
+  padding: 5px 12px;
+  border-radius: var(--r);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.tbtn:hover { border-color: var(--muted); color: var(--text); }
+
+.tbtn.run {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--void);
+  font-weight: 700;
+}
+
+.tbtn.run:hover { background: var(--gold2); border-color: var(--gold2); }
+.tbtn.run:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* main layout */
+.editor-layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr auto;
+  overflow: hidden;
+}
+
+/* panes */
+.pane {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid var(--border);
+}
+
+.pane-header {
+  height: 36px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.pane-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.pane-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.pane-select {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  outline: none;
+}
+
+.pane-select:focus { border-color: var(--gold); }
+
+/* editor textarea */
+.editor-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+}
+
+.line-nums {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 44px;
+  padding: 16px 0;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  overflow: hidden;
+  pointer-events: none;
+  line-height: 1.65;
+  text-align: right;
+  padding-right: 10px;
+  z-index: 1;
+}
+
+#dictum-editor {
+  position: absolute;
+  inset: 0;
+  padding: 16px 16px 16px 60px;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text);
+  tab-size: 4;
+  caret-color: var(--gold);
+  z-index: 2;
+  overflow: auto;
+}
+
+#dictum-editor::selection { background: rgba(200,169,110,0.2); }
+
+/* output pane */
+.output-pane {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  grid-column: 2;
+  grid-row: 1 / 3;
+}
+
+.output-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+  flex-shrink: 0;
+}
+
+.output-tab {
+  padding: 10px 18px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.output-tab:hover { color: var(--text); }
+.output-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+.output-content {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+
+.output-panel {
+  display: none;
+  height: 100%;
+}
+
+.output-panel.active { display: flex; flex-direction: column; }
+
+/* C output */
+#c-output {
+  padding: 16px 20px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--text);
+  white-space: pre;
+  tab-size: 4;
+  overflow: auto;
+  height: 100%;
+}
+
+#c-output .c-kw { color: #569cd6; }
+#c-output .c-ty { color: #4ec9b0; }
+#c-output .c-fn { color: #dcdcaa; }
+#c-output .c-str { color: #ce9178; }
+#c-output .c-num { color: #b5cea8; }
+#c-output .c-cm { color: #6a9955; font-style: italic; }
+#c-output .c-pp { color: #c586c0; }
+
+/* terminal */
+.terminal {
+  flex: 1;
+  background: #0a0a0f;
+  padding: 16px 20px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #b0f0c0;
+  overflow: auto;
+  position: relative;
+}
+
+.terminal .t-prompt { color: var(--gold); }
+.terminal .t-cmd    { color: var(--dim); }
+.terminal .t-out    { color: #b0f0c0; }
+.terminal .t-err    { color: var(--red); }
+.terminal .t-warn   { color: var(--amber); }
+.terminal .t-info   { color: var(--cyan); }
+
+.terminal-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 8px;
+  color: var(--muted);
+}
+
+.terminal-empty .icon { font-size: 32px; }
+.terminal-empty .msg { font-size: 13px; font-weight: 600; }
+.terminal-empty .sub { font-size: 11px; color: var(--border2); }
+
+/* QEMU target bar */
+.qemu-bar {
+  height: 36px;
+  background: var(--panel);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 12px;
+  flex-shrink: 0;
+  grid-column: 1;
+}
+
+.qemu-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.target-pill {
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border2);
+  color: var(--dim);
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.target-pill.active {
+  background: rgba(200,169,110,0.1);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.target-pill.locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.target-pill .lock-icon { font-size: 10px; }
+
+.target-pill:not(.locked):hover {
+  border-color: var(--muted);
+  color: var(--text);
+}
+
+/* ─────────────────────────────────────────────
+   VALIDATION BAR
+───────────────────────────────────────────── */
+.statusbar {
+  height: 26px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 20px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--dim);
+  flex-shrink: 0;
+  grid-column: 1 / 3;
+}
+
+.status-item { display: flex; align-items: center; gap: 5px; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+.status-dot.ok { background: var(--green); }
+.status-dot.err { background: var(--red); }
+.status-dot.warn { background: var(--amber); }
+.status-dot.running { background: var(--cyan); animation: pulse 1s infinite; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ─────────────────────────────────────────────
+   UPGRADE MODAL
+───────────────────────────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(5,5,7,0.85);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-radius: var(--r2);
+  padding: 40px;
+  max-width: 460px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.7);
+}
+
+.modal-icon { font-size: 40px; margin-bottom: 20px; }
+.modal-title { font-size: 22px; font-weight: 800; color: var(--bright); margin-bottom: 10px; }
+.modal-desc { font-size: 14px; color: var(--dim); line-height: 1.6; margin-bottom: 28px; }
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* ─────────────────────────────────────────────
+   SAMPLES PANEL
+───────────────────────────────────────────── */
+.samples-drawer {
+  position: fixed;
+  right: -340px;
+  top: 48px;
+  bottom: 26px;
+  width: 320px;
+  background: var(--panel);
+  border-left: 1px solid var(--border2);
+  z-index: 50;
+  transition: right 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.samples-drawer.open { right: 0; }
+
+.samples-header {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.samples-title { font-size: 13px; font-weight: 700; color: var(--bright); }
+.samples-close {
+  background: none;
+  border: none;
+  color: var(--dim);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 2px 6px;
+}
+
+.samples-close:hover { color: var(--text); }
+
+.samples-list { overflow-y: auto; padding: 8px; }
+
+.sample-item {
+  padding: 12px 14px;
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: background 0.1s;
+  margin-bottom: 2px;
+  border: 1px solid transparent;
+}
+
+.sample-item:hover { background: var(--surface); border-color: var(--border); }
+.sample-item:active { background: rgba(200,169,110,0.05); }
+
+.sample-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.sample-desc { font-size: 11px; color: var(--dim); }
+.sample-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-top: 5px;
+}
+
+.sample-badge.free { background: rgba(74,222,128,0.1); color: var(--green); }
+.sample-badge.pro { background: rgba(200,169,110,0.1); color: var(--gold); }
+
+/* ─────────────────────────────────────────────
+   TOAST
+───────────────────────────────────────────── */
+.toast-area {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  pointer-events: none;
+}
+
+.toast {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 18px;
+  border-radius: 20px;
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  white-space: nowrap;
+  animation: toast-in 0.2s ease;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.toast.ok { border-color: rgba(74,222,128,0.3); color: var(--green); }
+.toast.err { border-color: rgba(248,113,113,0.3); color: var(--red); }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─────────────────────────────────────────────
+   CHAT PANEL
+───────────────────────────────────────────── */
+.chat-panel {
+  position: fixed;
+  right: 0;
+  top: 48px;
+  bottom: 26px;
+  width: 360px;
+  background: var(--panel);
+  border-left: 1px solid var(--border2);
+  display: flex;
+  flex-direction: column;
+  z-index: 60;
+  transform: translateX(100%);
+  transition: transform 0.22s cubic-bezier(.4,0,.2,1);
+}
+
+.chat-panel.open { transform: translateX(0); }
+
+.chat-header {
+  height: 44px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.chat-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--bright);
+  flex: 1;
+}
+
+.chat-skill-select {
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  outline: none;
+  max-width: 110px;
+}
+
+.chat-skill-select:focus { border-color: var(--gold); }
+
+.chat-icon-btn {
+  background: none;
+  border: none;
+  color: var(--dim);
+  cursor: pointer;
+  font-size: 15px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: color 0.15s;
+  line-height: 1;
+}
+
+.chat-icon-btn:hover { color: var(--text); background: var(--border); }
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scroll-behavior: smooth;
+}
+
+.chat-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 100%;
+}
+
+.chat-msg-role {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.chat-msg.user .chat-msg-role { color: var(--gold); }
+.chat-msg.assistant .chat-msg-role { color: var(--cyan); }
+
+.chat-msg-body {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 10px 13px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.chat-msg.user .chat-msg-body {
+  background: rgba(200,169,110,0.07);
+  border-color: rgba(200,169,110,0.18);
+}
+
+.chat-msg.assistant .chat-msg-body {
+  background: var(--surface);
+}
+
+.chat-msg-body code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: rgba(255,255,255,0.05);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--cyan);
+}
+
+/* code block inside chat */
+.chat-code-block {
+  margin: 8px 0 0;
+  background: #0a0a0f;
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.chat-code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 10px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.chat-code-block-lang {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.chat-code-apply {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gold);
+  background: rgba(200,169,110,0.1);
+  border: 1px solid rgba(200,169,110,0.25);
+  border-radius: 3px;
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.chat-code-apply:hover { background: rgba(200,169,110,0.2); }
+
+.chat-code-block pre {
+  padding: 10px 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text);
+  overflow-x: auto;
+  margin: 0;
+}
+
+.chat-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--muted);
+  padding: 24px;
+  text-align: center;
+}
+
+.chat-empty .icon { font-size: 28px; }
+.chat-empty .msg { font-size: 13px; font-weight: 600; color: var(--dim); }
+.chat-empty .sub { font-size: 12px; line-height: 1.5; }
+
+.chat-footer {
+  border-top: 1px solid var(--border);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.chat-context-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-context-toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--dim);
+  cursor: pointer;
+  user-select: none;
+  padding: 3px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+}
+
+.chat-context-toggle.active {
+  border-color: rgba(200,169,110,0.3);
+  color: var(--gold);
+  background: rgba(200,169,110,0.07);
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.chat-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  padding: 9px 12px;
+  resize: none;
+  outline: none;
+  line-height: 1.5;
+  max-height: 120px;
+  min-height: 38px;
+  transition: border-color 0.15s;
+}
+
+.chat-input:focus { border-color: var(--gold); }
+.chat-input::placeholder { color: var(--muted); }
+
+.chat-send {
+  background: var(--gold);
+  border: none;
+  color: var(--void);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.chat-send:hover { background: var(--gold2); }
+.chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.chat-thinking {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--cyan);
+  padding: 4px 0;
+}
+
+.chat-thinking-dots span {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--cyan);
+  margin: 0 1px;
+  animation: thinking-bounce 1.2s infinite;
+}
+
+.chat-thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+.chat-thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes thinking-bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* ── Settings modal (BYOK) ── */
+.settings-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(5,5,7,0.85);
+  backdrop-filter: blur(8px);
+  z-index: 210;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-modal-overlay.open { display: flex; }
+
+.settings-modal {
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-radius: var(--r2);
+  padding: 32px;
+  width: 480px;
+  max-width: 95vw;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.7);
+}
+
+.settings-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--bright);
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-group { margin-bottom: 20px; }
+
+.settings-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 7px;
+  display: block;
+}
+
+.settings-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.settings-input:focus { border-color: var(--gold); }
+.settings-input::placeholder { color: var(--muted); }
+
+.settings-hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
+.settings-hint a { color: var(--gold); text-decoration: none; }
+.settings-hint a:hover { text-decoration: underline; }
+
+.settings-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.preset-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--dim);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.preset-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(200,169,110,0.07);
+}
+
+.settings-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+/* ─────────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-right { display: none; }
+  .hero-left { padding: 60px 32px; }
+  .features-strip { grid-template-columns: 1fr; padding: 40px 32px; gap: 32px; }
+  .tier-grid { grid-template-columns: 1fr; }
+  .tiers-section { padding: 60px 32px; }
+
+  .editor-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr auto auto;
+  }
+
+  .output-pane { grid-column: 1; grid-row: 2; }
+  .qemu-bar { grid-column: 1; grid-row: 3; }
+  .statusbar { grid-column: 1; grid-row: 4; }
+  .nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+     LANDING
+════════════════════════════════════════════ -->
+<div id="landing">
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-logo">
+      <div class="glyph">◈</div>
+      Dictum
+    </div>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="https://github.com/jjohnco14-svg/Dictumc" target="_blank">GitHub</a></li>
+      <li><a href="#" onclick="openApp(); return false;">Playground</a></li>
+    </ul>
+    <button class="btn-primary" onclick="openApp()">Try Free →</button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <div class="hero-eyebrow">AI-native systems language</div>
+
+      <h1 class="hero-h1">
+        Write systems code<br>
+        in <span class="accent">plain English.</span><br>
+        Ship real C.
+      </h1>
+
+      <p class="hero-sub">
+        Dictum is not a transpiler. It's a language built so <strong>AI can generate, validate, and debug</strong>
+        systems-level programs without ever producing invalid C — because the grammar won't allow it.
+      </p>
+
+      <div class="hero-cta">
+        <button class="btn-launch" onclick="openApp()">
+          ▶ Open Playground
+        </button>
+        <a class="btn-ghost" href="https://github.com/jjohnco14-svg/Dictumc" target="_blank">
+          ★ Star on GitHub
+        </a>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-num">279</div>
+          <div class="stat-label">Unit tests</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">50</div>
+          <div class="stat-label">Industry skills</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">6</div>
+          <div class="stat-label">QEMU targets</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">C/C++</div>
+          <div class="stat-label">Clean output</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="code-card">
+        <div class="code-card-header">
+          <div class="dot dot-r"></div>
+          <div class="dot dot-y"></div>
+          <div class="dot dot-g"></div>
+          <span class="code-card-title">sensor_loop.dict</span>
+        </div>
+        <div class="code-body">
+          <div class="code-label">Dictum source</div>
+          <div><span class="kw">program</span> <span class="id">SensorMonitor</span><span class="op">:</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">use</span> <span class="ty">Console</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">use</span> <span class="ty">File</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">keep</span> <span class="id">Threshold</span> <span class="kw">as</span> <span class="ty">decimal number</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">with value</span> <span class="str">75.0</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">keep</span> <span class="id">Reading</span> <span class="kw">as</span> <span class="ty">decimal number</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">attempt</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">call</span> <span class="ty">File</span><span class="op">.</span><span class="id">read</span> <span class="kw">with</span> <span class="str">"/dev/sensor0"</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">giving</span> <span class="id">Reading</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> <span class="id">Reading</span> <span class="op">></span> <span class="id">Threshold</span> <span class="kw">then</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">call</span> <span class="ty">Console</span><span class="op">.</span><span class="id">write_line</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">with</span> <span class="str">"ALERT: over threshold"</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">end if</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">on failure with</span> <span class="id">Err</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">call</span> <span class="ty">Console</span><span class="op">.</span><span class="id">write_line</span> <span class="kw">with</span> <span class="str">"sensor unavail"</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">end attempt</span></div>
+          <div><span class="kw">end program</span></div>
+
+          <div class="code-divider">compiles to C11</div>
+
+          <div class="code-label">Generated C</div>
+          <div><span class="cm">// setjmp/longjmp error handling</span></div>
+          <div><span class="cm">// typed, bounds-checked, portable</span></div>
+          <div><span class="kw" style="color:#569cd6">double</span> <span class="id" style="color:#9cdcfe">Threshold</span> = <span class="str" style="color:#b5cea8">75.0</span>;</div>
+          <div><span class="kw" style="color:#569cd6">if</span> (<span class="id" style="color:#9cdcfe">setjmp</span>(<span class="id" style="color:#9cdcfe">_dictum_jmp</span>) == <span class="str" style="color:#b5cea8">0</span>) { ... }</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features-strip" id="features">
+    <div class="feature-item">
+      <div class="feature-icon">⚙</div>
+      <div class="feature-title">Grammar-Constrained AI</div>
+      <div class="feature-desc">The grammar engine exposes a state machine that feeds LLM token masking directly. AI literally cannot generate invalid Dictum — the grammar rejects bad tokens before they're emitted.</div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">🔒</div>
+      <div class="feature-title">Safe by Default, Unsafe by Choice</div>
+      <div class="feature-desc">All memory is tracked, bounds-checked, and ownership-verified by the validator. Unsafe blocks — raw pointers, extern ABI, transmute — are grammar-gated and validator-scoped.</div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">🎯</div>
+      <div class="feature-title">6 QEMU Cross-Targets</div>
+      <div class="feature-desc">Write once, run on ARM64, RISC-V, MIPS, PowerPC from the browser. No hardware required. Cross-compile and execute via QEMU user-mode, all from the playground.</div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="tiers-section" id="pricing">
+    <div class="section-eyebrow">Pricing</div>
+    <h2 class="section-title">Start free, scale when it matters</h2>
+    <p class="section-sub">The free tier is real — not crippled. You get the full language, validator, and C/C++ emitter. Pro unlocks QEMU targets, BYOK AI, and module marketplace access.</p>
+
+    <div class="tier-grid">
+      <!-- FREE -->
+      <div class="tier-card">
+        <div class="tier-badge free">Free</div>
+        <div class="tier-price">$0 <span>/ month</span></div>
+        <div class="tier-name">Forever free</div>
+        <ul class="tier-features">
+          <li>Full Dictum language + validator</li>
+          <li>C11 + C++17/20/23 emitter</li>
+          <li>Linux x86-64 execution</li>
+          <li>10 saved programs</li>
+          <li>Standard library modules</li>
+          <li>Grammar-constrained parsing</li>
+          <li class="locked">QEMU cross-targets (ARM64, RISC-V...)</li>
+          <li class="locked">BYOK AI integration</li>
+          <li class="locked">Module marketplace</li>
+          <li class="locked">Polyglot C+C++ projects</li>
+        </ul>
+        <button class="tier-btn outline" onclick="openApp()">Open Playground</button>
+      </div>
+
+      <!-- PRO -->
+      <div class="tier-card featured">
+        <div class="tier-badge pro">Pro</div>
+        <div class="tier-price">$19 <span>/ month</span></div>
+        <div class="tier-name">For serious builders</div>
+        <ul class="tier-features">
+          <li>Everything in Free</li>
+          <li>All 6 QEMU cross-targets</li>
+          <li>Bring your own API key (any LLM)</li>
+          <li>Unlimited saved programs</li>
+          <li>Module marketplace access</li>
+          <li>Polyglot C+C++ projects</li>
+          <li>Industry skill packs (embedded, medical, auto)</li>
+          <li>Priority compilation queue</li>
+          <li>Advanced debugging + validator traces</li>
+        </ul>
+        <button class="tier-btn gold" onclick="showUpgradeModal('pro')">Get Pro →</button>
+      </div>
+
+      <!-- TEAM -->
+      <div class="tier-card">
+        <div class="tier-badge team">Team</div>
+        <div class="tier-price">$49 <span>/ seat / mo</span></div>
+        <div class="tier-name">For engineering teams</div>
+        <ul class="tier-features">
+          <li>Everything in Pro</li>
+          <li>Shared module library</li>
+          <li>Private module publishing</li>
+          <li>Team workspaces</li>
+          <li>Audit logs</li>
+          <li>SSO / SAML</li>
+          <li>Custom skill pack deployment</li>
+          <li>SLA + dedicated support</li>
+        </ul>
+        <button class="tier-btn violet" onclick="showUpgradeModal('team')">Contact Sales</button>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /landing -->
+
+<!-- ════════════════════════════════════════════
+     EDITOR APP
+════════════════════════════════════════════ -->
+<div id="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <a href="#" class="topbar-logo" onclick="closeLanding(); return false;">
+      <div class="hex">◈</div>
+      Dictum
+    </a>
+    <div class="sep"></div>
+    <div class="topbar-file">
+      <span id="filename">program.dict</span>
+      <span class="dot-modified" id="dot-modified"></span>
+    </div>
+    <div class="topbar-spacer"></div>
+    <span class="topbar-tier" id="tier-badge">Free</span>
+    <button class="tbtn" onclick="toggleSamples()">📁 Examples</button>
+    <button class="tbtn" id="btn-validate" onclick="runValidate()">✓ Validate</button>
+    <button class="tbtn run" id="btn-run" onclick="runCode()">▶ Run</button>
+    <button class="tbtn" onclick="showUpgradeModal('pro')" style="border-color:rgba(200,169,110,0.3);color:var(--gold)">★ Upgrade</button>
+    <button class="tbtn" id="chat-toggle-btn" onclick="toggleChat()" style="border-color:rgba(92,216,235,0.3);color:var(--cyan)">◈ AI Chat</button>
+    <button class="tbtn" onclick="goLanding()">← Back</button>
+  </div>
+
+  <!-- LAYOUT -->
+  <div class="editor-layout">
+
+    <!-- DICTUM EDITOR -->
+    <div class="pane">
+      <div class="pane-header">
+        <span class="pane-label">Dictum</span>
+        <div class="pane-controls">
+          <select class="pane-select" id="backend-select" onchange="onBackendChange()">
+            <option value="c">→ C11</option>
+            <option value="cpp">→ C++17</option>
+          </select>
+        </div>
+      </div>
+      <div class="editor-wrap">
+        <div class="line-nums" id="line-nums">1</div>
+        <textarea id="dictum-editor"
+          spellcheck="false"
+          autocorrect="off"
+          autocapitalize="off"
+          oninput="onEditorInput()"
+          onscroll="syncScroll()"
+          onkeydown="handleTab(event)"
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- OUTPUT PANE -->
+    <div class="output-pane">
+      <div class="output-tabs">
+        <div class="output-tab active" onclick="switchTab('c-out')">C Output</div>
+        <div class="output-tab" onclick="switchTab('terminal')">Terminal</div>
+        <div class="output-tab" onclick="switchTab('ast')">AST</div>
+      </div>
+      <div class="output-content">
+
+        <div class="output-panel active" id="tab-c-out">
+          <div id="c-output"><span style="color:var(--muted);font-style:italic">// Transpiled C will appear here.
+// Write Dictum code and click Run or Validate.</span></div>
+        </div>
+
+        <div class="output-panel" id="tab-terminal">
+          <div class="terminal" id="terminal">
+            <div class="terminal-empty">
+              <div class="icon">◉</div>
+              <div class="msg">No execution yet</div>
+              <div class="sub">Click ▶ Run to compile and execute</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="output-panel" id="tab-ast">
+          <div id="ast-output" style="padding:16px 20px;font-family:var(--font-mono);font-size:12px;line-height:1.6;color:var(--text);white-space:pre;overflow:auto;height:100%"><span style="color:var(--muted);font-style:italic">// AST summary will appear here after Validate.</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- QEMU BAR (col 1, row 2) -->
+    <div class="qemu-bar">
+      <span class="qemu-label">Target</span>
+      <div class="target-pill active" id="target-linux" onclick="selectTarget('linux')">
+        🐧 linux x86-64
+      </div>
+      <div class="target-pill locked" id="target-arm64" onclick="targetClick('arm64')">
+        <span class="lock-icon">🔒</span> arm64
+      </div>
+      <div class="target-pill locked" id="target-riscv64" onclick="targetClick('riscv64')">
+        <span class="lock-icon">🔒</span> riscv64
+      </div>
+      <div class="target-pill locked" id="target-mips" onclick="targetClick('mips')">
+        <span class="lock-icon">🔒</span> mips
+      </div>
+    </div>
+
+    <!-- STATUS BAR -->
+    <div class="statusbar">
+      <div class="status-item">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-text">Ready</span>
+      </div>
+      <div class="status-item" style="margin-left:auto">
+        <span id="status-backend" style="color:var(--gold)">C11</span>
+      </div>
+      <div class="sep" style="height:12px;margin:0"></div>
+      <div class="status-item">
+        <span id="status-target">linux x86-64</span>
+      </div>
+      <div class="sep" style="height:12px;margin:0"></div>
+      <div class="status-item">
+        <span id="status-lines">0 lines</span>
+      </div>
+    </div>
+
+  </div><!-- /editor-layout -->
+
+</div><!-- /app -->
+
+<!-- SAMPLES DRAWER -->
+<div class="samples-drawer" id="samples-drawer">
+  <div class="samples-header">
+    <span class="samples-title">Examples</span>
+    <button class="samples-close" onclick="toggleSamples()">×</button>
+  </div>
+  <div class="samples-list" id="samples-list"></div>
+</div>
+
+<!-- UPGRADE MODAL -->
+<div class="modal-overlay" id="upgrade-modal">
+  <div class="modal">
+    <div class="modal-icon">🔒</div>
+    <div class="modal-title" id="modal-title">Pro Feature</div>
+    <div class="modal-desc" id="modal-desc">QEMU cross-compilation targets (ARM64, RISC-V, MIPS, PowerPC) are available on the Pro tier. Compile your Dictum programs and run them on embedded architectures from the browser.</div>
+    <div class="modal-actions">
+      <button class="tier-btn gold" style="width:auto;padding:10px 24px" onclick="closeModal()">Upgrade to Pro — $19/mo</button>
+      <button class="tier-btn outline" style="width:auto;padding:10px 20px" onclick="closeModal()">Not now</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT PANEL -->
+<div class="chat-panel" id="chat-panel">
+  <div class="chat-header">
+    <span class="chat-title">⚡ AI Assistant</span>
+    <select class="chat-skill-select" id="chat-skill">
+      <option value="general">General</option>
+      <option value="embedded">Embedded</option>
+      <option value="medical">Medical</option>
+      <option value="automotive">Automotive</option>
+      <option value="aerospace">Aerospace</option>
+      <option value="edgeai">Edge AI</option>
+    </select>
+    <button class="chat-icon-btn" onclick="clearChat()" title="Clear chat">🗑</button>
+    <button class="chat-icon-btn" onclick="openSettings()" title="API Settings">⚙</button>
+    <button class="chat-icon-btn" onclick="toggleChat()" title="Close">×</button>
+  </div>
+
+  <div class="chat-messages" id="chat-messages">
+    <div class="chat-empty" id="chat-empty">
+      <div class="icon">◈</div>
+      <div class="msg">Dictum AI Assistant</div>
+      <div class="sub">
+        Describe what you want to build in plain English.<br>
+        The AI generates valid Dictum code using the grammar engine.<br><br>
+        <span style="color:var(--gold)">⚙ Set your API key first</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-footer">
+    <div class="chat-context-row">
+      <div class="chat-context-toggle active" id="ctx-toggle" onclick="toggleContext()">
+        📄 Include editor code
+      </div>
+      <div class="chat-context-toggle" id="ctx-errors-toggle" onclick="toggleCtxErrors()">
+        ⚠ Include errors
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <textarea
+        class="chat-input"
+        id="chat-input"
+        placeholder="Describe what to build..."
+        rows="1"
+        onkeydown="chatKeydown(event)"
+        oninput="autoResizeChat(this)"
+      ></textarea>
+      <button class="chat-send" id="chat-send" onclick="sendChat()">▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL (BYOK) -->
+<div class="settings-modal-overlay" id="settings-modal">
+  <div class="settings-modal">
+    <div class="settings-title">⚙ AI Provider Settings</div>
+
+    <div class="settings-group">
+      <label class="settings-label">Custom URL</label>
+      <input class="settings-input" id="settings-api-url"
+        placeholder="https://api.anthropic.com"
+        value="https://api.anthropic.com" />
+      <div class="settings-hint">
+        Any custom API URL — Anthropic, OpenAI, Groq, Ollama, LM Studio, OpenRouter, or your own server.
+      </div>
+      <div class="settings-presets">
+        <button class="preset-btn" onclick="setPreset('anthropic')">Anthropic</button>
+        <button class="preset-btn" onclick="setPreset('openai')">OpenAI</button>
+        <button class="preset-btn" onclick="setPreset('groq')">Groq</button>
+        <button class="preset-btn" onclick="setPreset('ollama')">Ollama (local)</button>
+        <button class="preset-btn" onclick="setPreset('lmstudio')">LM Studio</button>
+        <button class="preset-btn" onclick="setPreset('openrouter')">OpenRouter</button>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <label class="settings-label">API Key</label>
+      <input class="settings-input" id="settings-api-key"
+        type="password"
+        placeholder="sk-ant-... or sk-... or (empty for local)" />
+      <div class="settings-hint">
+        Stored in your browser only — never sent to Dictum servers.<br>
+        For local Ollama / LM Studio, leave this empty.
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <label class="settings-label">Model</label>
+      <input class="settings-input" id="settings-model"
+        placeholder="claude-sonnet-4-6"
+        value="claude-sonnet-4-6" />
+      <div class="settings-hint">
+        Examples: <code style="color:var(--cyan);font-family:var(--font-mono)">claude-sonnet-4-6</code>,
+        <code style="color:var(--cyan);font-family:var(--font-mono)">gpt-4o</code>,
+        <code style="color:var(--cyan);font-family:var(--font-mono)">llama3.1:8b</code>,
+        <code style="color:var(--cyan);font-family:var(--font-mono)">deepseek-coder</code>
+      </div>
+    </div>
+
+    <div class="settings-actions">
+      <button class="btn-primary" onclick="saveSettings()">Save</button>
+      <button class="btn-ghost" onclick="closeSettings()">Cancel</button>
+      <button class="btn-ghost" style="margin-left:auto;color:var(--red);border-color:rgba(248,113,113,0.3)"
+        onclick="clearSettings()">Clear</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST AREA -->
+<div class="toast-area" id="toast-area"></div>
+
+<script>
+// ────────────────────────────────────────────────
+// CONFIG
+// ────────────────────────────────────────────────
+const API_BASE = window.DICTUM_API || 'http://localhost:8080';
+const TIER = 'free'; // swap to 'pro' when user upgrades
+
+let activeTarget = 'linux';
+let activeBackend = 'c';
+let samplesOpen = false;
+let validationPending = null;
+
+// ────────────────────────────────────────────────
+// SAMPLES DATA
+// ────────────────────────────────────────────────
+const SAMPLES = [
+  {
+    name: 'Hello World',
+    desc: 'Basic console output',
+    tier: 'free',
+    code: `program Hello:
+    use Console
+    keep Name as text with value "Dictum"
+    call Console.write_line with "Hello from " and Name
+end program`
+  },
+  {
+    name: 'Fibonacci',
+    desc: 'Recursive action',
+    tier: 'free',
+    code: `program Fibonacci:
+    use Console
+
+    action fib takes N as whole number produces whole number
+        if N is less than 2 then
+            produce success with N
+        end if
+        keep A as whole number
+        keep B as whole number
+        call fib with N minus 1 giving A
+        call fib with N minus 2 giving B
+        produce success with A plus B
+    end action
+
+    keep Result as whole number
+    call fib with 10 giving Result
+    print the whole number Result and newline
+end program`
+  },
+  {
+    name: 'File I/O',
+    desc: 'Read and write files with error handling',
+    tier: 'free',
+    code: `program FileDemo:
+    use File
+    use Console
+
+    keep Content as text with value ""
+    attempt
+        call File.write with "hello.txt" and "Hello from Dictum!\\n"
+        call File.read with "hello.txt" giving Content
+        call Console.write_line with Content
+    on failure with Err
+        call Console.write_line with "File error"
+    end attempt
+end program`
+  },
+  {
+    name: 'HTTP Client',
+    desc: 'Make HTTP GET requests',
+    tier: 'free',
+    code: `program HttpDemo:
+    use Http
+    use Console
+
+    keep Url as text with value "https://httpbin.org/json"
+    keep Response as text with value ""
+    attempt
+        call Http.get with Url giving Response
+        call Console.write_line with Response
+    on failure with Err
+        call Console.write_line with "Request failed"
+    end attempt
+end program`
+  },
+  {
+    name: 'Shape (Struct)',
+    desc: 'User-defined data shapes',
+    tier: 'free',
+    code: `program Shapes:
+    use Console
+
+    shape Point holds:
+        X as decimal number
+        Y as decimal number
+    end shape
+
+    keep P as Point
+    put 3.14 into P.X
+    put 2.71 into P.Y
+    call Console.write_line with "Point created"
+end program`
+  },
+  {
+    name: 'Threading',
+    desc: 'Concurrent execution with mutex',
+    tier: 'free',
+    code: `program Threads:
+    use Thread
+    use Mutex
+    use Console
+
+    keep Lock as whole number
+    call Mutex.create giving Lock
+    call Mutex.lock with Lock
+    call Console.write_line with "Critical section"
+    call Mutex.unlock with Lock
+    call Mutex.destroy with Lock
+end program`
+  },
+  {
+    name: 'Unsafe — Raw Pointer',
+    desc: 'Low-level unsafe block with extern',
+    tier: 'free',
+    code: `program LowLevel:
+    use Console
+
+    unsafe:
+        extern malloc takes Size as count produces raw pointer to byte
+        keep Buf as raw pointer to byte
+        call malloc with 64 giving Buf
+    end unsafe
+
+    call Console.write_line with "Raw allocation done"
+end program`
+  },
+  {
+    name: 'Sensor Loop (Embedded)',
+    desc: 'Embedded-style polling loop',
+    tier: 'free',
+    code: `program SensorLoop:
+    use Console
+
+    keep Reading as decimal number with value 0.0
+    keep Threshold as decimal number with value 75.0
+    keep Ticks as whole number with value 0
+
+    while Ticks is less than 10 repeat
+        put Reading plus 8.5 into Reading
+        put Ticks plus 1 into Ticks
+        if Reading is greater than Threshold then
+            call Console.write_line with "ALERT: threshold exceeded"
+        end if
+    end while
+    call Console.write_line with "Loop done"
+end program`
+  },
+  {
+    name: 'JSON Parsing',
+    desc: 'Parse and navigate JSON',
+    tier: 'free',
+    code: `program JsonDemo:
+    use Json
+    use Console
+
+    keep Raw as text with value "{\\\"name\\\": \\\"Dictum\\\", \\\"version\\\": 5}"
+    keep Handle as whole number
+    keep Name as text with value ""
+
+    attempt
+        call Json.parse with Raw giving Handle
+        call Json.get_string with Handle and "name" giving Name
+        call Console.write_line with Name
+        call Json.destroy with Handle
+    on failure with Err
+        call Console.write_line with "Parse failed"
+    end attempt
+end program`
+  }
+];
+
+// ────────────────────────────────────────────────
+// NAV
+// ────────────────────────────────────────────────
+function openApp() {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  if (!document.getElementById('dictum-editor').value) {
+    loadSample(SAMPLES[0]);
+  }
+  updateLineNums();
+}
+
+function goLanding() {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('landing').style.display = 'flex';
+}
+
+function closeLanding() {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+}
+
+// ────────────────────────────────────────────────
+// EDITOR
+// ────────────────────────────────────────────────
+function onEditorInput() {
+  updateLineNums();
+  document.getElementById('dot-modified').classList.add('visible');
+  updateStatusLines();
+  // debounced auto-validate
+  clearTimeout(validationPending);
+  validationPending = setTimeout(() => runValidate(true), 1200);
+}
+
+function updateLineNums() {
+  const ta = document.getElementById('dictum-editor');
+  const lines = ta.value.split('\n').length;
+  const nums = Array.from({length: lines}, (_, i) => i + 1).join('\n');
+  document.getElementById('line-nums').textContent = nums;
+  updateStatusLines();
+}
+
+function updateStatusLines() {
+  const ta = document.getElementById('dictum-editor');
+  const lines = ta.value.split('\n').length;
+  document.getElementById('status-lines').textContent = lines + ' lines';
+}
+
+function syncScroll() {
+  const ta = document.getElementById('dictum-editor');
+  document.getElementById('line-nums').scrollTop = ta.scrollTop;
+}
+
+function handleTab(e) {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const ta = document.getElementById('dictum-editor');
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    ta.value = ta.value.substring(0, start) + '    ' + ta.value.substring(end);
+    ta.selectionStart = ta.selectionEnd = start + 4;
+    onEditorInput();
+  }
+}
+
+function onBackendChange() {
+  activeBackend = document.getElementById('backend-select').value;
+  document.getElementById('status-backend').textContent = activeBackend === 'cpp' ? 'C++17' : 'C11';
+}
+
+// ────────────────────────────────────────────────
+// TARGETS
+// ────────────────────────────────────────────────
+function selectTarget(t) {
+  if (TIER === 'free' && t !== 'linux') {
+    showUpgradeModal('qemu');
+    return;
+  }
+  activeTarget = t;
+  document.querySelectorAll('.target-pill').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('target-' + t);
+  if (el) {
+    el.classList.add('active');
+    el.classList.remove('locked');
+  }
+  document.getElementById('status-target').textContent = t;
+}
+
+function targetClick(t) {
+  if (TIER === 'free') {
+    showUpgradeModal('qemu');
+    return;
+  }
+  selectTarget(t);
+}
+
+// ────────────────────────────────────────────────
+// TABS
+// ────────────────────────────────────────────────
+function switchTab(id) {
+  document.querySelectorAll('.output-tab').forEach((t, i) => {
+    const panels = ['c-out', 'terminal', 'ast'];
+    t.classList.toggle('active', panels[i] === id);
+  });
+  document.querySelectorAll('.output-panel').forEach(p => {
+    p.classList.toggle('active', p.id === 'tab-' + id);
+  });
+}
+
+// ────────────────────────────────────────────────
+// API CALLS
+// ────────────────────────────────────────────────
+async function runValidate(silent = false) {
+  const source = document.getElementById('dictum-editor').value.trim();
+  if (!source) return;
+
+  setStatus('running', 'Validating…');
+
+  try {
+    const res = await fetch(`${API_BASE}/api/transpile`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        source, backend: activeBackend,
+        cpp_standard: 17, stdlib: true, validate_code: true
+      })
+    });
+    const data = await res.json();
+
+    if (data.ok) {
+      setCOutput(data.code || '');
+      if (data.summary) {
+        document.getElementById('ast-output').textContent = data.summary;
+      }
+      setStatus('ok', 'Validation passed');
+      if (!silent) toast('Validation passed', 'ok');
+    } else {
+      setStatus('err', 'Validation error');
+      setCOutput('// Validation error:\n// ' + (data.error || 'Unknown error'));
+      if (!silent) toast(data.error || 'Validation failed', 'err');
+    }
+
+    // show warnings
+    if (data.warnings && data.warnings.length) {
+      const warn = data.warnings.map(w => `// ⚠ ${w}`).join('\n');
+      document.getElementById('c-output').innerHTML += '\n\n' + escapeHtml(warn);
+    }
+  } catch(e) {
+    setStatus('err', 'Server unavailable');
+    setCOutput('// Cannot reach the Dictum server.\n// Make sure backend_server.py is running on port 8765.');
+    if (!silent) toast('Server unavailable', 'err');
+  }
+}
+
+async function runCode() {
+  const source = document.getElementById('dictum-editor').value.trim();
+  if (!source) { toast('Write some Dictum code first', 'err'); return; }
+
+  const btn = document.getElementById('btn-run');
+  btn.disabled = true;
+  setStatus('running', 'Compiling…');
+  switchTab('terminal');
+
+  const terminal = document.getElementById('terminal');
+  terminal.innerHTML = '';
+
+  termLine(`$ dictumc program.dict --backend ${activeBackend} --compile --target ${activeTarget}`, 't-prompt');
+
+  try {
+    const res = await fetch(`${API_BASE}/api/run`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        source, backend: activeBackend,
+        cpp_standard: 17, stdlib: true,
+        validate_code: true, compile: true,
+        target: activeTarget
+      })
+    });
+    const data = await res.json();
+
+    if (data.ok) {
+      setCOutput(data.code || '');
+      setStatus('ok', `Ran on ${data.target_label || activeTarget}`);
+
+      if (data.warnings && data.warnings.length) {
+        data.warnings.forEach(w => termLine('⚠ ' + w, 't-warn'));
+      }
+
+      termLine(`Compiled → ${data.target_label || activeTarget}`, 't-info');
+      termLine('', '');
+
+      if (data.output) {
+        data.output.split('\n').forEach(l => termLine(l, 't-out'));
+      } else {
+        termLine('(no stdout output)', 't-cmd');
+      }
+
+      if (data.stderr) {
+        termLine('', '');
+        data.stderr.split('\n').filter(Boolean).forEach(l => termLine(l, 't-err'));
+      }
+
+      termLine('', '');
+      termLine(`Exit code: ${data.exit_code}`, data.exit_code === 0 ? 't-info' : 't-err');
+      toast(data.exit_code === 0 ? 'Ran successfully' : `Exit code ${data.exit_code}`, data.exit_code === 0 ? 'ok' : 'err');
+    } else {
+      setStatus('err', 'Compile error');
+      termLine('Error: ' + (data.error || 'Unknown'), 't-err');
+      toast('Compile failed', 'err');
+    }
+  } catch(e) {
+    setStatus('err', 'Server unavailable');
+    termLine('Cannot reach server. Is backend_server.py running?', 't-err');
+    termLine('', '');
+    termLine('Quick start:', 't-info');
+    termLine('  pip install dictum-lang[server]', 't-cmd');
+    termLine('  python ui/backend_server.py', 't-cmd');
+    toast('Server unavailable', 'err');
+  }
+
+  btn.disabled = false;
+  document.getElementById('dot-modified').classList.remove('visible');
+}
+
+// ────────────────────────────────────────────────
+// OUTPUT HELPERS
+// ────────────────────────────────────────────────
+function setCOutput(code) {
+  const el = document.getElementById('c-output');
+  el.innerHTML = syntaxHighlightC(code);
+}
+
+function syntaxHighlightC(code) {
+  if (!code) return '<span style="color:var(--muted);font-style:italic">// No output</span>';
+  // minimal syntax highlighting
+  return escapeHtml(code)
+    .replace(/\b(int|double|float|char|void|bool|uint8_t|int32_t|size_t|const|static|return|if|else|while|for|struct|typedef|include|define|ifdef|endif|extern|NULL)\b/g, '<span class="c-kw">$1</span>')
+    .replace(/(#\w+)/g, '<span class="c-pp">$1</span>')
+    .replace(/(&quot;[^&]*&quot;)/g, '<span class="c-str">$1</span>')
+    .replace(/\b(\d+\.?\d*)\b/g, '<span class="c-num">$1</span>')
+    .replace(/(\/\/[^\n]*)/g, '<span class="c-cm">$1</span>');
+}
+
+function termLine(text, cls) {
+  const terminal = document.getElementById('terminal');
+  // remove empty state
+  const emptyEl = terminal.querySelector('.terminal-empty');
+  if (emptyEl) emptyEl.remove();
+
+  const div = document.createElement('div');
+  div.className = cls;
+  div.textContent = text;
+  terminal.appendChild(div);
+  terminal.scrollTop = terminal.scrollHeight;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ────────────────────────────────────────────────
+// STATUS
+// ────────────────────────────────────────────────
+function setStatus(state, text) {
+  const dot = document.getElementById('status-dot');
+  dot.className = 'status-dot ' + state;
+  document.getElementById('status-text').textContent = text;
+}
+
+// ────────────────────────────────────────────────
+// SAMPLES
+// ────────────────────────────────────────────────
+function buildSamplesList() {
+  const list = document.getElementById('samples-list');
+  list.innerHTML = '';
+  SAMPLES.forEach((s, i) => {
+    const item = document.createElement('div');
+    item.className = 'sample-item';
+    item.innerHTML = `
+      <div class="sample-name">${s.name}</div>
+      <div class="sample-desc">${s.desc}</div>
+      <span class="sample-badge ${s.tier}">${s.tier}</span>
+    `;
+    item.onclick = () => { loadSample(s); toggleSamples(); };
+    list.appendChild(item);
+  });
+}
+
+function loadSample(s) {
+  document.getElementById('dictum-editor').value = s.code;
+  document.getElementById('filename').textContent = s.name.toLowerCase().replace(/\s+/g,'-') + '.dict';
+  document.getElementById('dot-modified').classList.remove('visible');
+  updateLineNums();
+  runValidate(true);
+}
+
+function toggleSamples() {
+  samplesOpen = !samplesOpen;
+  document.getElementById('samples-drawer').classList.toggle('open', samplesOpen);
+}
+
+// ────────────────────────────────────────────────
+// MODALS + TOASTS
+// ────────────────────────────────────────────────
+const MODAL_COPY = {
+  pro: {
+    icon: '⭐',
+    title: 'Upgrade to Pro',
+    desc: 'Unlock QEMU cross-targets (ARM64, RISC-V, MIPS, PowerPC), BYOK AI integration, unlimited workspaces, and module marketplace access. Pro is $19/month.'
+  },
+  qemu: {
+    icon: '🎯',
+    title: 'QEMU Targets — Pro Feature',
+    desc: 'Cross-compile and execute your Dictum programs on ARM64, RISC-V 64-bit, MIPS, and PowerPC targets from the browser. No hardware required. Available on the Pro tier.'
+  },
+  team: {
+    icon: '🏢',
+    title: 'Dictum Team',
+    desc: 'Shared module libraries, private skill packs, team workspaces, SSO, and dedicated support. Contact us at hello@dictum-lang.dev to discuss pricing for your team.'
+  }
+};
+
+function showUpgradeModal(type) {
+  const copy = MODAL_COPY[type] || MODAL_COPY.pro;
+  document.getElementById('modal-icon').textContent = copy.icon;
+  document.getElementById('modal-title').textContent = copy.title;
+  document.getElementById('modal-desc').textContent = copy.desc;
+  document.getElementById('upgrade-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('upgrade-modal').classList.remove('open');
+}
+
+document.getElementById('upgrade-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('upgrade-modal')) closeModal();
+});
+
+function toast(msg, type) {
+  const area = document.getElementById('toast-area');
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type || '');
+  el.textContent = msg;
+  area.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// ────────────────────────────────────────────────
+// SETTINGS (BYOK — stored in localStorage)
+// ────────────────────────────────────────────────
+const PRESETS = {
+  anthropic:  { url: 'https://api.anthropic.com',              model: 'claude-sonnet-4-6' },
+  openai:     { url: 'https://api.openai.com/v1',              model: 'gpt-4o' },
+  groq:       { url: 'https://api.groq.com/openai/v1',         model: 'llama-3.1-8b-instant' },
+  ollama:     { url: 'http://localhost:11434/v1',               model: 'llama3.1:8b' },
+  lmstudio:   { url: 'http://localhost:1234/v1',                model: 'local-model' },
+  openrouter: { url: 'https://openrouter.ai/api/v1',           model: 'anthropic/claude-sonnet-4-6' },
+};
+
+function getSettings() {
+  return {
+    url:   localStorage.getItem('dictum_api_url')   || 'https://api.anthropic.com',
+    key:   localStorage.getItem('dictum_api_key')   || '',
+    model: localStorage.getItem('dictum_api_model') || 'claude-sonnet-4-6',
+  };
+}
+
+function saveSettings() {
+  const url   = document.getElementById('settings-api-url').value.trim();
+  const key   = document.getElementById('settings-api-key').value.trim();
+  const model = document.getElementById('settings-model').value.trim();
+  if (!url) { toast('API URL required', 'err'); return; }
+  localStorage.setItem('dictum_api_url',   url);
+  localStorage.setItem('dictum_api_key',   key);
+  localStorage.setItem('dictum_api_model', model);
+  closeSettings();
+  toast('Settings saved', 'ok');
+}
+
+function clearSettings() {
+  localStorage.removeItem('dictum_api_url');
+  localStorage.removeItem('dictum_api_key');
+  localStorage.removeItem('dictum_api_model');
+  document.getElementById('settings-api-url').value  = 'https://api.anthropic.com';
+  document.getElementById('settings-api-key').value  = '';
+  document.getElementById('settings-model').value    = 'claude-sonnet-4-6';
+  toast('Settings cleared', 'ok');
+}
+
+function setPreset(name) {
+  const p = PRESETS[name];
+  if (!p) return;
+  document.getElementById('settings-api-url').value = p.url;
+  document.getElementById('settings-model').value   = p.model;
+}
+
+function openSettings() {
+  const s = getSettings();
+  document.getElementById('settings-api-url').value = s.url;
+  document.getElementById('settings-api-key').value = s.key;
+  document.getElementById('settings-model').value   = s.model;
+  document.getElementById('settings-modal').classList.add('open');
+}
+
+function closeSettings() {
+  document.getElementById('settings-modal').classList.remove('open');
+}
+
+document.getElementById('settings-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('settings-modal')) closeSettings();
+});
+
+// ────────────────────────────────────────────────
+// CHAT STATE
+// ────────────────────────────────────────────────
+let chatOpen      = false;
+let chatHistory   = [];   // [{role, content}]
+let ctxEnabled    = true;
+let ctxErrEnabled = false;
+let chatThinking  = false;
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  document.getElementById('chat-panel').classList.toggle('open', chatOpen);
+  document.getElementById('chat-toggle-btn').style.background =
+    chatOpen ? 'rgba(92,216,235,0.1)' : '';
+}
+
+function clearChat() {
+  chatHistory = [];
+  const msgs = document.getElementById('chat-messages');
+  msgs.innerHTML = '';
+  msgs.appendChild(buildEmptyState());
+}
+
+function toggleContext() {
+  ctxEnabled = !ctxEnabled;
+  document.getElementById('ctx-toggle').classList.toggle('active', ctxEnabled);
+}
+
+function toggleCtxErrors() {
+  ctxErrEnabled = !ctxErrEnabled;
+  document.getElementById('ctx-errors-toggle').classList.toggle('active', ctxErrEnabled);
+}
+
+function autoResizeChat(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function chatKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
+}
+
+// ────────────────────────────────────────────────
+// CHAT SEND
+// ────────────────────────────────────────────────
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const text  = input.value.trim();
+  if (!text || chatThinking) return;
+
+  const s = getSettings();
+  if (!s.key && !s.url.includes('localhost') && !s.url.includes('127.0.0.1')) {
+    openSettings();
+    toast('Set your API key first', 'err');
+    return;
+  }
+
+  // Build user message — optionally inject editor context
+  let userContent = text;
+  if (ctxEnabled) {
+    const code = document.getElementById('dictum-editor').value.trim();
+    if (code) userContent += `\n\n[Current editor code]\n\`\`\`dictum\n${code}\n\`\`\``;
+  }
+  if (ctxErrEnabled) {
+    const cOut = document.getElementById('c-output').textContent.trim();
+    if (cOut && cOut.includes('error')) {
+      userContent += `\n\n[Current errors]\n${cOut.slice(0, 600)}`;
+    }
+  }
+
+  // Append to history and render
+  chatHistory.push({ role: 'user', content: userContent });
+  appendChatMsg('user', text);   // show only the visible text, not injected context
+  input.value = '';
+  input.style.height = 'auto';
+
+  // Show thinking indicator
+  chatThinking = true;
+  document.getElementById('chat-send').disabled = true;
+  const thinkingEl = appendThinking();
+
+  // Determine if Anthropic native or OpenAI-compatible
+  const isAnthropic = s.url.includes('anthropic.com');
+  const skill = document.getElementById('chat-skill').value;
+
+  try {
+    let assistantText = '';
+
+    if (isAnthropic) {
+      assistantText = await callAnthropic(s, skill);
+    } else {
+      assistantText = await callOpenAICompat(s, skill);
+    }
+
+    chatHistory.push({ role: 'assistant', content: assistantText });
+    thinkingEl.remove();
+    appendChatMsg('assistant', assistantText);
+
+  } catch(err) {
+    thinkingEl.remove();
+    appendChatMsg('assistant', `Error: ${err.message}\n\nCheck your API URL and key in ⚙ Settings.`);
+  }
+
+  chatThinking = false;
+  document.getElementById('chat-send').disabled = false;
+}
+
+// ────────────────────────────────────────────────
+// API CALLERS
+// ────────────────────────────────────────────────
+function buildSystemPrompt(skill) {
+  return `You are a Dictum AI assistant. Dictum is an AI-native systems programming language that compiles to C11 or C++17/20/23.
+
+Dictum syntax basics:
+- Programs: program Name: ... end program
+- Variables: keep X as whole number with value 5
+- Actions (functions): action name takes Param as type produces type
+- Control flow: if ... then / while ... repeat / for each X in Y repeat
+- Modules: use Http / use File / use Console / use Json / use Thread
+- Error handling: attempt ... on failure with Err ... end attempt
+- Unsafe: unsafe: extern ... transmute ... end unsafe
+
+Skill context: ${skill.toUpperCase()}
+
+When generating code:
+1. Always emit valid Dictum in a \`\`\`dictum block
+2. Explain what the code does briefly
+3. If the user asks to fix or improve their code, show the corrected version
+4. Keep explanations concise — this is a code assistant, not a tutorial
+
+Never emit raw C. Always use Dictum syntax.`;
+}
+
+async function callAnthropic(s, skill) {
+  // Use the server-side /api/generate endpoint — keeps API key server-side
+  // If user has a key in settings, pass it through; server uses it or falls back to env
+  const res = await fetch(`${API_BASE}/api/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      prompt:        chatHistory[chatHistory.length - 1].content,
+      backend:       activeBackend,
+      cpp_standard:  17,
+      skills:        [document.getElementById('chat-skill').value],
+      api_key:       s.key,
+      model:         s.model,
+      auto_transpile: false,
+    }),
+  });
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.error || 'Generation failed');
+  return data.message;
+}
+
+async function callOpenAICompat(s, skill) {
+  // Direct browser → OpenAI-compatible endpoint
+  // Works for: OpenAI, Groq, Ollama, LM Studio, OpenRouter, etc.
+  const messages = [
+    { role: 'system', content: buildSystemPrompt(skill) },
+    ...chatHistory.map(m => ({ role: m.role, content: m.content })),
+  ];
+
+  const res = await fetch(`${s.url}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(s.key ? { 'Authorization': `Bearer ${s.key}` } : {}),
+    },
+    body: JSON.stringify({
+      model:       s.model,
+      messages,
+      max_tokens:  2048,
+      temperature: 0.3,
+      stream:      false,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`HTTP ${res.status}: ${err.slice(0, 200)}`);
+  }
+
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content || '(empty response)';
+}
+
+// ────────────────────────────────────────────────
+// CHAT RENDER
+// ────────────────────────────────────────────────
+function buildEmptyState() {
+  const div = document.createElement('div');
+  div.className = 'chat-empty';
+  div.id = 'chat-empty';
+  div.innerHTML = `
+    <div class="icon">◈</div>
+    <div class="msg">Dictum AI Assistant</div>
+    <div class="sub">
+      Describe what you want to build in plain English.<br>
+      The AI generates valid Dictum code using the grammar engine.<br><br>
+      <span style="color:var(--gold)">⚙ Set your API key first</span>
+    </div>`;
+  return div;
+}
+
+function appendChatMsg(role, content) {
+  const msgs = document.getElementById('chat-messages');
+  const empty = document.getElementById('chat-empty');
+  if (empty) empty.remove();
+
+  const wrapper = document.createElement('div');
+  wrapper.className = `chat-msg ${role}`;
+
+  const roleEl = document.createElement('div');
+  roleEl.className = 'chat-msg-role';
+  roleEl.textContent = role === 'user' ? 'You' : 'Dictum AI';
+  wrapper.appendChild(roleEl);
+
+  // Parse content: split on ```lang ... ``` blocks
+  const parts = parseMessageContent(content);
+  parts.forEach(part => {
+    if (part.type === 'text') {
+      const body = document.createElement('div');
+      body.className = 'chat-msg-body';
+      body.textContent = part.content;
+      wrapper.appendChild(body);
+    } else if (part.type === 'code') {
+      const block = document.createElement('div');
+      block.className = 'chat-code-block';
+      block.innerHTML = `
+        <div class="chat-code-block-header">
+          <span class="chat-code-block-lang">${part.lang}</span>
+          ${part.lang === 'dictum' || part.lang === 'dict'
+            ? `<button class="chat-code-apply" onclick="applyCode(this)">↓ Apply to editor</button>`
+            : ''}
+        </div>
+        <pre>${escapeHtml(part.content)}</pre>`;
+      wrapper.appendChild(block);
+    }
+  });
+
+  msgs.appendChild(wrapper);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function parseMessageContent(text) {
+  const parts = [];
+  const re = /```(\w*)\n([\s\S]*?)```/g;
+  let last = 0, m;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) {
+      parts.push({ type: 'text', content: text.slice(last, m.index).trim() });
+    }
+    parts.push({ type: 'code', lang: m[1] || 'text', content: m[2] });
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) {
+    const remaining = text.slice(last).trim();
+    if (remaining) parts.push({ type: 'text', content: remaining });
+  }
+  return parts.filter(p => p.content);
+}
+
+function applyCode(btn) {
+  const pre = btn.closest('.chat-code-block').querySelector('pre');
+  if (!pre) return;
+  document.getElementById('dictum-editor').value = pre.textContent;
+  updateLineNums();
+  runValidate(true);
+  toast('Code applied to editor', 'ok');
+}
+
+function appendThinking() {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'chat-thinking';
+  div.innerHTML = `
+    <span>Thinking</span>
+    <span class="chat-thinking-dots">
+      <span></span><span></span><span></span>
+    </span>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+buildSamplesList();
+updateLineNums();
+
+// Show app directly if URL has #play
+if (location.hash === '#play') openApp();
+</script>
+</body>
+</html>

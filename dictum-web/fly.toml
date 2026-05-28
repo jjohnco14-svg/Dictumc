@@ -1,0 +1,58 @@
+# fly.toml — Dictum Web on fly.io
+# Free tier: 3 shared VMs, 256MB RAM, persistent volume
+# Deploy: fly launch && fly deploy
+#
+# First-time setup:
+#   fly auth login
+#   fly launch          (auto-detects Dockerfile)
+#   fly volumes create dictum_data --size 1    (workspace DB persistence)
+#   fly deploy
+
+app = "dictum-web"
+primary_region = "sin"   # Singapore — closest to Philippines
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8080"
+  # ANTHROPIC_API_KEY — set via: fly secrets set ANTHROPIC_API_KEY=sk-...
+  # Leave unset to enforce pure BYOK (users provide own key in UI)
+
+[mounts]
+  source      = "dictum_data"
+  destination = "/data"
+  # workspace.db will be written here for persistence across deploys
+
+[[services]]
+  internal_port = 8080
+  protocol      = "tcp"
+  auto_stop_machines  = true    # free tier: sleep after inactivity
+  auto_start_machines = true    # wake on first request (~2s cold start)
+  min_machines_running = 0      # free tier: scale to zero
+
+  [[services.ports]]
+    port     = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port     = 443
+    handlers = ["tls", "http"]
+
+  [services.concurrency]
+    type       = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+  [[services.http_checks]]
+    interval = "30s"
+    timeout  = "10s"
+    method   = "GET"
+    path     = "/api/health"
+    grace_period = "30s"
+
+[[vm]]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1
