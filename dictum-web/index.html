@@ -1640,118 +1640,248 @@ body {
 }
 
 /* ── Settings modal (BYOK) ── */
+/* ── Provider Picker Modal ───────────────────────────────────────────── */
 .settings-modal-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(5,5,7,0.85);
+  background: rgba(5,5,7,0.88);
   backdrop-filter: blur(8px);
   z-index: 210;
   align-items: center;
   justify-content: center;
 }
-
 .settings-modal-overlay.open { display: flex; }
 
 .settings-modal {
   background: var(--panel);
   border: 1px solid var(--border2);
   border-radius: var(--r2);
-  padding: 32px;
-  width: 520px;
-  max-width: 95vw;
+  width: 560px;
+  max-width: 96vw;
+  max-height: 92vh;
+  overflow-y: auto;
   box-shadow: 0 40px 100px rgba(0,0,0,0.7);
+  display: flex;
+  flex-direction: column;
 }
-
-.settings-title {
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--bright);
-  margin-bottom: 22px;
+.sm-header {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border);
 }
-
-.settings-group { margin-bottom: 20px; }
-
-.settings-label {
+.sm-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--bright);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sm-close {
+  background: none;
+  border: none;
+  color: var(--dim);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: var(--r);
+}
+.sm-close:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+.sm-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  padding: 0 22px;
+}
+.sm-tab {
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 600;
-  color: var(--dim);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 7px;
-  display: block;
+  letter-spacing: 0.08em;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  color: var(--dim);
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  transition: color .15s;
 }
-
-.settings-input {
+.sm-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+.sm-tab:hover:not(.active) { color: var(--text); }
+.sm-pane { display: none; padding: 18px 22px; }
+.sm-pane.active { display: block; }
+.sm-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.sm-chip {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 3px 9px;
+  border-radius: 50px;
+  border: 1px solid var(--border2);
+  cursor: pointer;
+  color: var(--dim);
+  background: transparent;
+  transition: all .12s;
+}
+.sm-chip.active, .sm-chip:hover {
+  background: rgba(200,169,110,0.12);
+  color: var(--gold);
+  border-color: rgba(200,169,110,0.4);
+}
+.sm-search-wrap { position: relative; margin-bottom: 10px; }
+.sm-search-wrap::before {
+  content: '⌕';
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--dim);
+  font-size: 16px;
+  pointer-events: none;
+}
+.sm-search {
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--border2);
   border-radius: var(--r);
   color: var(--text);
   font-family: var(--font-mono);
-  font-size: 13px;
-  padding: 9px 12px;
+  font-size: 12px;
+  padding: 8px 10px 8px 30px;
   outline: none;
-  transition: border-color 0.15s;
   box-sizing: border-box;
+  transition: border-color .15s;
 }
-
-.settings-input:focus { border-color: var(--gold); }
-.settings-input::placeholder { color: var(--muted); }
-
-.settings-hint {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 5px;
-  line-height: 1.5;
+.sm-search:focus { border-color: var(--gold); }
+.sm-search::placeholder { color: var(--muted); }
+.sm-pgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
 }
-
-.settings-hint a { color: var(--gold); text-decoration: none; }
-.settings-hint a:hover { text-decoration: underline; }
-
-/* model fetch row */
-.model-fetch-row {
+.sm-pcard {
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 8px 10px;
+  cursor: pointer;
   display: flex;
+  align-items: center;
   gap: 8px;
-  align-items: stretch;
+  transition: border-color .12s, background .12s;
+  background: transparent;
 }
-.model-fetch-row .settings-input { flex: 1; }
-.btn-fetch-models {
+.sm-pcard:hover { border-color: var(--border2); background: rgba(255,255,255,0.03); }
+.sm-pcard.selected { border-color: var(--gold); background: rgba(200,169,110,0.07); }
+.sm-pcard.selected .sm-pname { color: var(--gold); }
+.sm-plogo {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: #fff;
+}
+.sm-pname { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sm-pfree {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--green);
+  background: rgba(74,222,128,0.1);
+  padding: 1px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+.sm-no-results { font-size: 12px; color: var(--muted); padding: 1.5rem 0; text-align: center; }
+.sm-divider { height: 1px; background: var(--border); margin: 14px 0; }
+.sm-selected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(200,169,110,0.1);
+  color: var(--gold);
+  border: 1px solid rgba(200,169,110,0.3);
+  border-radius: var(--r);
+  padding: 5px 12px;
   font-family: var(--font-mono);
   font-size: 11px;
-  padding: 0 14px;
-  border-radius: var(--r);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.sm-field { margin-bottom: 12px; }
+.sm-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  display: block;
+  margin-bottom: 5px;
+}
+.sm-input {
+  width: 100%;
+  background: var(--surface);
   border: 1px solid var(--border2);
+  border-radius: var(--r);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color .15s;
+  box-sizing: border-box;
+}
+.sm-input:focus { border-color: var(--gold); }
+.sm-input::placeholder { color: var(--muted); }
+.sm-input[readonly] { color: var(--dim); cursor: default; }
+select.sm-input { cursor: pointer; }
+.sm-hint { font-size: 10px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+.sm-hint a { color: var(--gold); text-decoration: none; }
+.sm-hint a:hover { text-decoration: underline; }
+.sm-model-row { display: flex; gap: 6px; }
+.sm-model-row .sm-input { flex: 1; }
+.sm-fetch-btn {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0 12px;
+  border-radius: var(--r);
+  border: 1px solid rgba(92,216,235,0.35);
   background: transparent;
   color: var(--cyan);
-  border-color: rgba(92,216,235,0.35);
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.15s;
+  transition: all .15s;
   flex-shrink: 0;
 }
-.btn-fetch-models:hover {
-  background: rgba(92,216,235,0.08);
-  border-color: var(--cyan);
-}
-.btn-fetch-models:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-/* model dropdown list */
-.model-list-wrap {
-  margin-top: 8px;
-  display: none;
-  flex-direction: column;
-  gap: 4px;
-}
-.model-list-wrap.visible { display: flex; }
-.model-search-input {
+.sm-fetch-btn:hover { background: rgba(92,216,235,0.08); border-color: var(--cyan); }
+.sm-fetch-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.sm-model-list-wrap { margin-top: 6px; display: none; flex-direction: column; gap: 4px; }
+.sm-model-list-wrap.visible { display: flex; }
+.sm-model-search {
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--border2);
@@ -1763,49 +1893,40 @@ body {
   outline: none;
   box-sizing: border-box;
 }
-.model-search-input:focus { border-color: var(--gold); }
-.model-list {
-  max-height: 160px;
+.sm-model-search:focus { border-color: var(--gold); }
+.sm-model-list {
+  max-height: 150px;
   overflow-y: auto;
   background: var(--surface);
   border: 1px solid var(--border2);
   border-radius: var(--r);
   scrollbar-width: thin;
 }
-.model-list-item {
+.sm-model-item {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 11px;
   padding: 7px 12px;
   cursor: pointer;
   color: var(--text);
   border-bottom: 1px solid rgba(255,255,255,0.04);
-  transition: background 0.1s;
+  transition: background .1s;
   display: flex;
   justify-content: space-between;
   gap: 8px;
 }
-.model-list-item:last-child { border-bottom: none; }
-.model-list-item:hover { background: rgba(92,216,235,0.07); color: var(--cyan); }
-.model-list-item.selected { background: rgba(200,169,110,0.1); color: var(--gold); }
-.model-list-item .model-owner {
-  font-size: 10px;
-  color: var(--muted);
-  flex-shrink: 0;
-}
-.model-fetch-status {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  margin-top: 4px;
-  color: var(--muted);
-  min-height: 16px;
-}
-.model-fetch-status.err { color: var(--red, #f87171); }
-.model-fetch-status.ok  { color: var(--green, #4ade80); }
-
-.settings-actions {
+.sm-model-item:last-child { border-bottom: none; }
+.sm-model-item:hover { background: rgba(92,216,235,0.07); color: var(--cyan); }
+.sm-model-item.selected { background: rgba(200,169,110,0.1); color: var(--gold); }
+.sm-model-item .sm-model-owner { font-size: 9px; color: var(--muted); flex-shrink: 0; }
+.sm-fetch-status { font-family: var(--font-mono); font-size: 10px; margin-top: 4px; color: var(--muted); min-height: 14px; }
+.sm-fetch-status.err { color: var(--red); }
+.sm-fetch-status.ok  { color: var(--green); }
+.sm-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 24px;
+  gap: 8px;
+  padding: 14px 22px 18px;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
 }
 
 /* ─────────────────────────────────────────────
@@ -2277,71 +2398,101 @@ body {
 <!-- SETTINGS MODAL (BYOK) -->
 <div class="settings-modal-overlay" id="settings-modal">
   <div class="settings-modal">
-    <div class="settings-title">⚙ API Settings</div>
 
-    <div class="settings-group">
-      <label class="settings-label">Base URL</label>
-      <input class="settings-input" id="settings-api-url"
-        placeholder="https://api.openai.com/v1"
-        value=""
-        oninput="updateProviderBadge(this.value)" />
-      <div class="settings-hint">
-        Any OpenAI-compatible endpoint — Anthropic, OpenAI, Groq, Ollama, LM Studio, OpenRouter, or your own server.<br>
-        Examples: <code style="color:var(--cyan);font-family:var(--font-mono)">http://localhost:1234/v1</code> &nbsp;·&nbsp;
-        <code style="color:var(--cyan);font-family:var(--font-mono)">https://api.groq.com/openai/v1</code>
+    <div class="sm-header">
+      <div class="sm-title">⚙ API Settings</div>
+      <button class="sm-close" onclick="closeSettings()" aria-label="Close">✕</button>
+    </div>
+
+    <div class="sm-tabs">
+      <button class="sm-tab active" id="sm-tab-providers" onclick="smSwitchTab('providers')">Provider</button>
+      <button class="sm-tab" id="sm-tab-manual" onclick="smSwitchTab('manual')">Manual / Custom</button>
+    </div>
+
+    <div class="sm-pane active" id="sm-pane-providers">
+      <div class="sm-chips" id="sm-chip-list"></div>
+      <div class="sm-search-wrap">
+        <input class="sm-search" id="sm-psearch" placeholder="Search providers…" oninput="smFilterProviders(this.value)" autocomplete="off"/>
+      </div>
+      <div class="sm-pgrid" id="sm-pgrid"></div>
+
+      <div id="sm-selected-info" style="display:none">
+        <div class="sm-divider"></div>
+        <div class="sm-selected-badge" id="sm-selected-badge">◈ <span id="sm-badge-text"></span></div>
+
+        <div class="sm-field">
+          <label class="sm-label">Base URL</label>
+          <input class="sm-input" id="sm-p-url" readonly/>
+        </div>
+        <div class="sm-field">
+          <label class="sm-label">API Key</label>
+          <input class="sm-input" id="sm-p-key" type="password" placeholder="Paste your key here (stored locally only)"/>
+          <div class="sm-hint" id="sm-p-key-hint"></div>
+        </div>
+        <div class="sm-field">
+          <label class="sm-label">Model</label>
+          <div class="sm-model-row">
+            <input class="sm-input" id="sm-p-model" placeholder="Type or fetch from endpoint…"/>
+            <button class="sm-fetch-btn" id="sm-p-fetch-btn" onclick="smFetchModels('p')">↓ Fetch</button>
+          </div>
+          <div class="sm-fetch-status" id="sm-p-fetch-status"></div>
+          <div class="sm-model-list-wrap" id="sm-p-model-list-wrap">
+            <input class="sm-model-search" id="sm-p-model-search" placeholder="Filter models…" oninput="smFilterModelList('p', this.value)"/>
+            <div class="sm-model-list" id="sm-p-model-list"></div>
+          </div>
+          <div class="sm-hint" id="sm-p-model-hint"></div>
+        </div>
+        <div class="sm-field" id="sm-p-fmt-row">
+          <label class="sm-label">API Format</label>
+          <select class="sm-input" id="sm-p-format">
+            <option value="openai">OpenAI-compatible</option>
+            <option value="anthropic">Anthropic Messages API</option>
+          </select>
+          <div class="sm-hint">Auto-set per provider. Change only if needed.</div>
+        </div>
       </div>
     </div>
 
-    <div class="settings-group">
-      <label class="settings-label">API Key</label>
-      <input class="settings-input" id="settings-api-key"
-        type="password"
-        placeholder="sk-... or (empty for local servers)" />
-      <div class="settings-hint">
-        Stored in your browser only — never sent to Dictum servers.
-        Leave empty for Ollama / LM Studio.
+    <div class="sm-pane" id="sm-pane-manual">
+      <div class="sm-field">
+        <label class="sm-label">Base URL</label>
+        <input class="sm-input" id="sm-m-url" placeholder="https://api.openai.com/v1"/>
+        <div class="sm-hint">Any OpenAI-compatible or Anthropic endpoint.</div>
+      </div>
+      <div class="sm-field">
+        <label class="sm-label">API Key</label>
+        <input class="sm-input" id="sm-m-key" type="password" placeholder="sk-… or leave empty for local servers"/>
+        <div class="sm-hint">Stored in your browser only — never sent to Dictum servers.</div>
+      </div>
+      <div class="sm-field">
+        <label class="sm-label">Model</label>
+        <div class="sm-model-row">
+          <input class="sm-input" id="sm-m-model" placeholder="Type a model ID or fetch from endpoint…"/>
+          <button class="sm-fetch-btn" id="sm-m-fetch-btn" onclick="smFetchModels('m')">↓ Fetch</button>
+        </div>
+        <div class="sm-fetch-status" id="sm-m-fetch-status"></div>
+        <div class="sm-model-list-wrap" id="sm-m-model-list-wrap">
+          <input class="sm-model-search" id="sm-m-model-search" placeholder="Filter models…" oninput="smFilterModelList('m', this.value)"/>
+          <div class="sm-model-list" id="sm-m-model-list"></div>
+        </div>
+      </div>
+      <div class="sm-field">
+        <label class="sm-label">API Format</label>
+        <select class="sm-input" id="sm-m-format">
+          <option value="">Auto-detect</option>
+          <option value="openai">OpenAI-compatible</option>
+          <option value="anthropic">Anthropic Messages API</option>
+        </select>
+        <div class="sm-hint">Leave on Auto-detect unless you need to force a format. NVIDIA NIM is auto-detected from the URL.</div>
       </div>
     </div>
 
-    <div class="settings-group">
-      <label class="settings-label">Model</label>
-      <div class="model-fetch-row">
-        <input class="settings-input" id="settings-model"
-          placeholder="Type a model ID or fetch from your endpoint…" />
-        <button class="btn-fetch-models" id="btn-fetch-models" onclick="fetchModels()">
-          ↓ Fetch models
-        </button>
-      </div>
-      <div class="model-fetch-status" id="model-fetch-status"></div>
-      <div class="model-list-wrap" id="model-list-wrap">
-        <input class="model-search-input" id="model-search"
-          placeholder="Filter models…"
-          oninput="filterModels(this.value)" />
-        <div class="model-list" id="model-list"></div>
-      </div>
-    </div>
-
-    <!-- API Format (auto-detected but user can override) -->
-    <div class="settings-group">
-      <label class="settings-label">API Format</label>
-      <select class="settings-input" id="settings-api-format">
-        <option value="">Auto-detect</option>
-        <option value="anthropic">Anthropic Messages API</option>
-        <option value="openai">OpenAI-compatible / NIM</option>
-      </select>
-      <div class="settings-hint">
-        Leave on Auto-detect unless you need to force a format.
-        NVIDIA NIM is auto-detected from the URL.
-      </div>
-      <div id="nim-badge" style="display:none;margin-top:8px;font-family:var(--font-mono);font-size:11px;padding:4px 10px;border-radius:4px;background:rgba(118,185,0,0.1);border:1px solid rgba(118,185,0,0.4);color:#76b900;font-weight:600"></div>
-    </div>
-
-    <div class="settings-actions">
-      <button class="btn-primary" onclick="saveSettings()">Save</button>
+    <div class="sm-actions">
+      <button class="btn-ghost" style="margin-right:auto;color:var(--red);border-color:rgba(248,113,113,0.25)" onclick="clearSettings()">Reset</button>
       <button class="btn-ghost" onclick="closeSettings()">Cancel</button>
-      <button class="btn-ghost" style="margin-left:auto;color:var(--red);border-color:rgba(248,113,113,0.3)"
-        onclick="clearSettings()">Reset</button>
+      <button class="btn-primary" onclick="saveSettings()">Save</button>
     </div>
+
   </div>
 </div>
 
@@ -2887,9 +3038,229 @@ function toast(msg, type) {
 }
 
 // ────────────────────────────────────────────────
-// SETTINGS (BYOK — stored in localStorage)
+// PROVIDER PICKER — SETTINGS (BYOK)
 // ────────────────────────────────────────────────
-// ── Settings helpers ──────────────────────────────────────────────────────
+
+const SM_PROVIDERS = [
+  {id:'openai',      name:'OpenAI',           cat:'Cloud', tag:'Popular', free:false, url:'https://api.openai.com/v1',                              fmt:'openai',     bg:'#10a37f', keyHint:'Get key → platform.openai.com/api-keys',             models:'gpt-4o,gpt-4o-mini,gpt-4-turbo,o1,o1-mini'},
+  {id:'anthropic',   name:'Anthropic',         cat:'Cloud', tag:'Popular', free:false, url:'https://api.anthropic.com',                              fmt:'anthropic',  bg:'#c96442', keyHint:'Get key → console.anthropic.com',                    models:'claude-sonnet-4-20250514,claude-opus-4-20250514,claude-haiku-4-5-20251001'},
+  {id:'groq',        name:'Groq',              cat:'Cloud', tag:'Free',    free:true,  url:'https://api.groq.com/openai/v1',                         fmt:'openai',     bg:'#f55036', keyHint:'Free key → console.groq.com',                        models:'llama-3.3-70b-versatile,llama-3.1-8b-instant,mixtral-8x7b-32768,gemma2-9b-it'},
+  {id:'openrouter',  name:'OpenRouter',        cat:'Cloud', tag:'Popular', free:false, url:'https://openrouter.ai/api/v1',                           fmt:'openai',     bg:'#6c67f1', keyHint:'Get key → openrouter.ai/keys (free models available)',models:'openai/gpt-4o,anthropic/claude-sonnet-4,google/gemini-2.0-flash,meta-llama/llama-3.3-70b-instruct:free'},
+  {id:'google',      name:'Google AI Studio',  cat:'Cloud', tag:'Free',    free:true,  url:'https://generativelanguage.googleapis.com/v1beta/openai', fmt:'openai',     bg:'#4285f4', keyHint:'Free key → aistudio.google.com/apikey',             models:'gemini-2.0-flash,gemini-1.5-pro,gemini-1.5-flash'},
+  {id:'together',    name:'Together AI',       cat:'Cloud', tag:'',        free:false, url:'https://api.together.xyz/v1',                            fmt:'openai',     bg:'#7c3aed', keyHint:'Get key → api.together.ai/settings/api-keys',       models:'meta-llama/Llama-3-70b-chat-hf,mistralai/Mixtral-8x22B-Instruct-v0.1'},
+  {id:'fireworks',   name:'Fireworks AI',      cat:'Cloud', tag:'',        free:false, url:'https://api.fireworks.ai/inference/v1',                  fmt:'openai',     bg:'#e25117', keyHint:'Get key → fireworks.ai/account/api-keys',           models:'accounts/fireworks/models/llama-v3p1-70b-instruct'},
+  {id:'mistral',     name:'Mistral AI',        cat:'Cloud', tag:'',        free:false, url:'https://api.mistral.ai/v1',                              fmt:'openai',     bg:'#fa6832', keyHint:'Get key → console.mistral.ai/api-keys',             models:'mistral-large-latest,mistral-medium-latest,open-mistral-7b'},
+  {id:'cohere',      name:'Cohere',            cat:'Cloud', tag:'',        free:false, url:'https://api.cohere.com/compatibility/v1',                fmt:'openai',     bg:'#39594d', keyHint:'Get key → dashboard.cohere.com/api-keys',           models:'command-r-plus,command-r,command'},
+  {id:'nvidia',      name:'NVIDIA NIM',        cat:'Cloud', tag:'',        free:false, url:'https://integrate.api.nvidia.com/v1',                    fmt:'openai',     bg:'#76b900', keyHint:'Get key → build.nvidia.com/nim',                    models:'meta/llama-3.1-70b-instruct,nvidia/llama-3.1-nemotron-70b-instruct'},
+  {id:'deepseek',    name:'DeepSeek',          cat:'Cloud', tag:'',        free:false, url:'https://api.deepseek.com/v1',                            fmt:'openai',     bg:'#4d6bfe', keyHint:'Get key → platform.deepseek.com',                  models:'deepseek-chat,deepseek-coder,deepseek-reasoner'},
+  {id:'xai',         name:'xAI / Grok',        cat:'Cloud', tag:'',        free:false, url:'https://api.x.ai/v1',                                   fmt:'openai',     bg:'#111111', keyHint:'Get key → console.x.ai',                            models:'grok-2,grok-2-mini,grok-beta'},
+  {id:'perplexity',  name:'Perplexity',        cat:'Cloud', tag:'',        free:false, url:'https://api.perplexity.ai',                              fmt:'openai',     bg:'#20808d', keyHint:'Get key → perplexity.ai/settings/api',             models:'llama-3.1-sonar-large-128k-online,sonar-pro'},
+  {id:'cerebras',    name:'Cerebras',          cat:'Cloud', tag:'Fast',    free:false, url:'https://api.cerebras.ai/v1',                             fmt:'openai',     bg:'#ff6b35', keyHint:'Get key → cloud.cerebras.ai',                      models:'llama3.1-70b,llama3.1-8b'},
+  {id:'sambanova',   name:'SambaNova',         cat:'Cloud', tag:'Fast',    free:false, url:'https://api.sambanova.ai/v1',                            fmt:'openai',     bg:'#0057b8', keyHint:'Get key → cloud.sambanova.ai',                     models:'Meta-Llama-3.3-70B-Instruct,Meta-Llama-3.1-405B-Instruct'},
+  {id:'huggingface', name:'HuggingFace',       cat:'Cloud', tag:'Free',    free:true,  url:'https://router.huggingface.co/v1',                       fmt:'openai',     bg:'#ff9d00', keyHint:'Free key → huggingface.co/settings/tokens',        models:'meta-llama/Llama-3.3-70B-Instruct,Qwen/Qwen2.5-72B-Instruct'},
+  {id:'cloudflare',  name:'Cloudflare AI',     cat:'Cloud', tag:'Free',    free:true,  url:'https://api.cloudflare.com/client/v4/accounts/{ACCOUNT_ID}/ai/v1', fmt:'openai', bg:'#f48120', keyHint:'Free on Workers AI — replace {ACCOUNT_ID} in the URL', models:'@cf/meta/llama-3.1-8b-instruct,@cf/qwen/qwen1.5-14b-chat-awq'},
+  {id:'ollama',      name:'Ollama',            cat:'Local', tag:'Local',   free:true,  url:'http://localhost:11434/v1',                              fmt:'openai',     bg:'#333333', keyHint:'No key needed — leave blank',                      models:'llama3.2,phi4,mistral,gemma2,qwen2.5:14b'},
+  {id:'lmstudio',    name:'LM Studio',         cat:'Local', tag:'Local',   free:true,  url:'http://localhost:1234/v1',                               fmt:'openai',     bg:'#5b5bd6', keyHint:'No key needed — enable Local Server in LM Studio',  models:''},
+  {id:'jan',         name:'Jan',               cat:'Local', tag:'Local',   free:true,  url:'http://localhost:1337/v1',                               fmt:'openai',     bg:'#3a86ff', keyHint:'No key needed — start Jan app and enable API server',models:''},
+  {id:'llamacpp',    name:'llama.cpp server',  cat:'Local', tag:'Local',   free:true,  url:'http://localhost:8080/v1',                               fmt:'openai',     bg:'#9b59b6', keyHint:'No key needed — run with --api flag',              models:''},
+  {id:'localai',     name:'LocalAI',           cat:'Local', tag:'Local',   free:true,  url:'http://localhost:8080/v1',                               fmt:'openai',     bg:'#27ae60', keyHint:'No key needed',                                     models:'gpt-4,gpt-3.5-turbo'},
+];
+
+const SM_CATS = ['All','Popular','Free','Local','Fast'];
+let _smSelectedCat = 'All';
+let _smSelectedProvider = null;
+let _smAllModelsP = [];
+let _smAllModelsM = [];
+
+function smSwitchTab(name) {
+  document.querySelectorAll('.sm-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sm-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sm-pane-' + name).classList.add('active');
+  document.getElementById('sm-tab-' + name).classList.add('active');
+}
+
+function smInitChips() {
+  const cl = document.getElementById('sm-chip-list');
+  if (!cl) return;
+  cl.innerHTML = '';
+  SM_CATS.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'sm-chip' + (c === 'All' ? ' active' : '');
+    b.textContent = c;
+    b.onclick = () => {
+      _smSelectedCat = c;
+      document.querySelectorAll('.sm-chip').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      smFilterProviders(document.getElementById('sm-psearch').value);
+    };
+    cl.appendChild(b);
+  });
+}
+
+function smFilterProviders(q) {
+  let list = SM_PROVIDERS;
+  if (_smSelectedCat !== 'All')
+    list = list.filter(p => p.tag === _smSelectedCat || p.cat === _smSelectedCat);
+  if (q) {
+    const lq = q.toLowerCase();
+    list = list.filter(p => p.name.toLowerCase().includes(lq) || p.id.includes(lq));
+  }
+  smRenderProviders(list);
+}
+
+function smRenderProviders(list) {
+  const g = document.getElementById('sm-pgrid');
+  if (!g) return;
+  g.innerHTML = '';
+  if (!list.length) {
+    g.innerHTML = '<div class="sm-no-results">No providers match</div>';
+    return;
+  }
+  list.forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'sm-pcard' + (_smSelectedProvider === p.id ? ' selected' : '');
+    const initials = p.name.slice(0, 2).toUpperCase();
+    d.innerHTML =
+      `<div class="sm-plogo" style="background:${p.bg}">${initials}</div>` +
+      `<span class="sm-pname">${escapeHtml(p.name)}</span>` +
+      (p.free ? '<span class="sm-pfree">free</span>' : '');
+    d.onclick = () => smSelectProvider(p);
+    g.appendChild(d);
+  });
+}
+
+function smSelectProvider(p) {
+  _smSelectedProvider = p.id;
+  smFilterProviders(document.getElementById('sm-psearch').value);
+  document.getElementById('sm-selected-info').style.display = 'block';
+  document.getElementById('sm-badge-text').textContent = p.name + ' selected';
+  document.getElementById('sm-p-url').value = p.url;
+  document.getElementById('sm-p-key').value = localStorage.getItem('dictum_api_key_' + p.id) || '';
+  document.getElementById('sm-p-key').placeholder =
+    (p.free && p.cat === 'Local') ? 'Leave empty — no key needed' : 'Paste your API key here';
+  document.getElementById('sm-p-key-hint').textContent = p.keyHint || '';
+  document.getElementById('sm-p-format').value = p.fmt || 'openai';
+  document.getElementById('sm-p-fmt-row').style.display = 'block';
+  const savedModel = localStorage.getItem('dictum_api_model_' + p.id) || '';
+  const defaultModel = p.models ? p.models.split(',')[0] : '';
+  document.getElementById('sm-p-model').value = savedModel || defaultModel;
+  const hint = document.getElementById('sm-p-model-hint');
+  if (p.models && p.cat !== 'Local') {
+    hint.textContent = 'Suggested: ' + p.models.split(',').slice(0, 3).join(', ');
+  } else if (p.cat === 'Local') {
+    hint.textContent = 'Click ↓ Fetch after starting your local server.';
+  } else {
+    hint.textContent = '';
+  }
+  document.getElementById('sm-p-model-list-wrap').classList.remove('visible');
+  document.getElementById('sm-p-fetch-status').textContent = '';
+  document.getElementById('sm-p-fetch-status').className = 'sm-fetch-status';
+  _smAllModelsP = [];
+}
+
+async function smFetchModels(pane) {
+  const urlEl  = pane === 'p' ? 'sm-p-url'  : 'sm-m-url';
+  const keyEl  = pane === 'p' ? 'sm-p-key'  : 'sm-m-key';
+  const btnId  = pane === 'p' ? 'sm-p-fetch-btn' : 'sm-m-fetch-btn';
+  const statId = pane === 'p' ? 'sm-p-fetch-status' : 'sm-m-fetch-status';
+  const wrapId = pane === 'p' ? 'sm-p-model-list-wrap' : 'sm-m-model-list-wrap';
+  const modelId= pane === 'p' ? 'sm-p-model' : 'sm-m-model';
+
+  const url    = document.getElementById(urlEl).value.trim();
+  const key    = document.getElementById(keyEl).value.trim();
+  const btn    = document.getElementById(btnId);
+  const status = document.getElementById(statId);
+  const wrap   = document.getElementById(wrapId);
+
+  if (!url) { toast('Enter a Base URL first', 'err'); return; }
+
+  btn.disabled    = true;
+  btn.textContent = '…';
+  status.className   = 'sm-fetch-status';
+  status.textContent = 'Fetching models…';
+  wrap.classList.remove('visible');
+
+  const base = url.replace(/\/+$/, '')
+    .replace(/\/(v1\/chat\/completions|v1\/messages|chat\/completions|messages)$/, '')
+    .replace(/\/v1$/, '');
+  const endpoint = `${base}/v1/models`;
+
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (key) headers['Authorization'] = `Bearer ${key}`;
+    if (base.includes('anthropic.com')) {
+      headers['anthropic-version'] = '2023-06-01';
+      headers['x-api-key']         = key;
+      headers['anthropic-dangerous-direct-browser-access'] = 'true';
+      delete headers['Authorization'];
+    }
+    const res = await fetch(endpoint, { headers });
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`HTTP ${res.status}: ${txt.slice(0, 180)}`);
+    }
+    const data = await res.json();
+    let models = [];
+    if (Array.isArray(data.data)) {
+      models = data.data.map(m => ({ id: m.id || m.name || String(m), owner: m.owned_by || m.display_name || '' }));
+    } else if (Array.isArray(data.models)) {
+      models = data.models.map(m => ({ id: typeof m === 'string' ? m : (m.id || m.name || String(m)), owner: m.owned_by || '' }));
+    } else if (Array.isArray(data)) {
+      models = data.map(m => ({ id: typeof m === 'string' ? m : (m.id || m.name || String(m)), owner: m.owned_by || '' }));
+    }
+    if (!models.length) throw new Error('No models returned by this endpoint');
+    models.sort((a, b) => {
+      const ca = /chat|instruct|turbo|sonnet|opus|haiku|gpt-4|llama|qwen|mistral/i.test(a.id) ? 0 : 1;
+      const cb = /chat|instruct|turbo|sonnet|opus|haiku|gpt-4|llama|qwen|mistral/i.test(b.id) ? 0 : 1;
+      return ca - cb || a.id.localeCompare(b.id);
+    });
+    if (pane === 'p') _smAllModelsP = models; else _smAllModelsM = models;
+    status.className   = 'sm-fetch-status ok';
+    status.textContent = `✓ ${models.length} model${models.length !== 1 ? 's' : ''} found`;
+    document.getElementById(pane === 'p' ? 'sm-p-model-search' : 'sm-m-model-search').value = '';
+    smRenderModelList(pane, models);
+    wrap.classList.add('visible');
+  } catch(err) {
+    status.className   = 'sm-fetch-status err';
+    status.textContent = `✗ ${err.message}`;
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = '↓ Fetch';
+  }
+}
+
+function smRenderModelList(pane, models) {
+  const listId   = pane === 'p' ? 'sm-p-model-list'    : 'sm-m-model-list';
+  const modelId  = pane === 'p' ? 'sm-p-model'         : 'sm-m-model';
+  const statusId = pane === 'p' ? 'sm-p-fetch-status'  : 'sm-m-fetch-status';
+  const list     = document.getElementById(listId);
+  const current  = document.getElementById(modelId).value.trim();
+  list.innerHTML  = '';
+  if (!models.length) {
+    list.innerHTML = '<div class="sm-model-item" style="color:var(--muted);cursor:default">No matches</div>';
+    return;
+  }
+  models.forEach(m => {
+    const el = document.createElement('div');
+    el.className = 'sm-model-item' + (m.id === current ? ' selected' : '');
+    el.innerHTML = '<span>' + escapeHtml(m.id) + '</span>' + (m.owner ? '<span class="sm-model-owner">' + escapeHtml(m.owner) + '</span>' : '');
+    el.onclick = () => {
+      document.getElementById(modelId).value = m.id;
+      list.querySelectorAll('.sm-model-item').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById(statusId).textContent = `Selected: ${m.id}`;
+      document.getElementById(statusId).className   = 'sm-fetch-status ok';
+    };
+    list.appendChild(el);
+  });
+}
+
+function smFilterModelList(pane, query) {
+  const all = pane === 'p' ? _smAllModelsP : _smAllModelsM;
+  const q   = query.toLowerCase();
+  const filtered = q ? all.filter(m => m.id.toLowerCase().includes(q) || (m.owner||'').toLowerCase().includes(q)) : all;
+  smRenderModelList(pane, filtered);
+}
 
 function getSettings() {
   return {
@@ -2901,188 +3272,65 @@ function getSettings() {
 }
 
 function saveSettings() {
-  const url    = document.getElementById('settings-api-url').value.trim();
-  const key    = document.getElementById('settings-api-key').value.trim();
-  const model  = document.getElementById('settings-model').value.trim();
-  const format = document.getElementById('settings-api-format')?.value || '';
+  const activePane = document.querySelector('.sm-pane.active').id;
+  let url, key, model, format;
+  if (activePane === 'sm-pane-providers') {
+    if (!_smSelectedProvider) { toast('Choose a provider first', 'err'); return; }
+    url    = document.getElementById('sm-p-url').value.trim();
+    key    = document.getElementById('sm-p-key').value.trim();
+    model  = document.getElementById('sm-p-model').value.trim();
+    format = document.getElementById('sm-p-format').value;
+    localStorage.setItem('dictum_api_key_'   + _smSelectedProvider, key);
+    localStorage.setItem('dictum_api_model_' + _smSelectedProvider, model);
+  } else {
+    url    = document.getElementById('sm-m-url').value.trim();
+    key    = document.getElementById('sm-m-key').value.trim();
+    model  = document.getElementById('sm-m-model').value.trim();
+    format = document.getElementById('sm-m-format').value;
+  }
   if (!url)   { toast('Base URL is required', 'err'); return; }
   if (!model) { toast('Model ID is required', 'err'); return; }
   localStorage.setItem('dictum_api_url',    url);
   localStorage.setItem('dictum_api_key',    key);
   localStorage.setItem('dictum_api_model',  model);
   localStorage.setItem('dictum_api_format', format);
-  document.getElementById('model-list-wrap').classList.remove('visible');
-  // Auto-detect NIM and show badge
-  if (isNIM(url)) {
-    toast('NVIDIA NIM detected — using OpenAI format', 'ok');
-  }
   closeSettings();
-  toast('Settings saved', 'ok');
+  const prov = SM_PROVIDERS.find(x => x.id === _smSelectedProvider);
+  toast('Settings saved' + (prov ? ' — ' + prov.name : ''), 'ok');
 }
 
 function clearSettings() {
   ['dictum_api_url','dictum_api_key','dictum_api_model','dictum_api_format'].forEach(k => localStorage.removeItem(k));
-  document.getElementById('settings-api-url').value  = '';
-  document.getElementById('settings-api-key').value  = '';
-  document.getElementById('settings-model').value    = '';
-  document.getElementById('model-list-wrap').classList.remove('visible');
-  document.getElementById('model-fetch-status').textContent = '';
-  document.getElementById('model-fetch-status').className   = 'model-fetch-status';
+  _smSelectedProvider = null;
+  document.getElementById('sm-selected-info').style.display = 'none';
+  ['sm-p-url','sm-p-key','sm-p-model','sm-m-url','sm-m-key','sm-m-model'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  _smAllModelsP = []; _smAllModelsM = [];
+  document.getElementById('sm-p-model-list-wrap').classList.remove('visible');
+  document.getElementById('sm-m-model-list-wrap').classList.remove('visible');
+  document.getElementById('sm-p-fetch-status').textContent = '';
+  document.getElementById('sm-m-fetch-status').textContent = '';
+  smFilterProviders('');
   toast('Settings reset', 'ok');
 }
 
 function openSettings() {
   const s = getSettings();
-  document.getElementById('settings-api-url').value  = s.url;
-  document.getElementById('settings-api-key').value  = s.key;
-  document.getElementById('settings-model').value    = s.model;
-  const fmtEl = document.getElementById('settings-api-format');
-  if (fmtEl) fmtEl.value = s.format || (isAnthropic(s.url) ? 'anthropic' : 'openai');
-  document.getElementById('model-list-wrap').classList.remove('visible');
-  document.getElementById('model-fetch-status').textContent = '';
-  document.getElementById('model-fetch-status').className   = 'model-fetch-status';
-  // Show/hide NIM badge
-  updateProviderBadge(s.url);
+  const match = SM_PROVIDERS.find(p => s.url && s.url.startsWith(p.url.split('{')[0].replace(/\/v1$/, '')));
+  if (match) {
+    smSwitchTab('providers');
+    smSelectProvider(match);
+    document.getElementById('sm-p-key').value   = s.key;
+    document.getElementById('sm-p-model').value = s.model;
+  } else if (s.url) {
+    smSwitchTab('manual');
+    document.getElementById('sm-m-url').value    = s.url;
+    document.getElementById('sm-m-key').value    = s.key;
+    document.getElementById('sm-m-model').value  = s.model;
+    document.getElementById('sm-m-format').value = s.format || '';
+  }
   document.getElementById('settings-modal').classList.add('open');
-}
-
-function updateProviderBadge(url) {
-  const badge = document.getElementById('nim-badge');
-  if (!badge) return;
-  if (isNIM(url)) {
-    badge.style.display = 'inline-block';
-    badge.textContent   = '⚡ NVIDIA NIM detected — will use OpenAI format';
-  } else if (isAnthropic(url)) {
-    badge.style.display = 'inline-block';
-    badge.textContent   = '◈ Anthropic detected';
-    badge.style.color   = '#c8a96e';
-    badge.style.borderColor = 'rgba(200,169,110,0.4)';
-    badge.style.background  = 'rgba(200,169,110,0.08)';
-  } else {
-    badge.style.display = 'none';
-  }
-}
-
-// ── Model fetcher ─────────────────────────────────────────────────────────
-
-let _allModels = [];   // [{id, owned_by}]
-
-async function fetchModels() {
-  const url = document.getElementById('settings-api-url').value.trim();
-  const key = document.getElementById('settings-api-key').value.trim();
-  if (!url) { toast('Enter a Base URL first', 'err'); return; }
-
-  const btn    = document.getElementById('btn-fetch-models');
-  const status = document.getElementById('model-fetch-status');
-  const wrap   = document.getElementById('model-list-wrap');
-
-  btn.disabled = true;
-  btn.textContent = '…';
-  status.className   = 'model-fetch-status';
-  status.textContent = 'Fetching models…';
-  wrap.classList.remove('visible');
-
-  // Normalise base: strip trailing slash + any known API path suffixes
-  const base = url.replace(/\/+$/, '')
-    .replace(/\/(v1\/chat\/completions|v1\/messages|chat\/completions|completions|messages)$/, '')
-    .replace(/\/v1$/, '');
-  const endpoint = `${base}/v1/models`;
-
-  try {
-    const headers = { 'Content-Type': 'application/json' };
-    if (key) headers['Authorization'] = `Bearer ${key}`;
-    // Anthropic needs a version header but also supports the /models endpoint
-    if (base.includes('anthropic.com')) {
-      headers['anthropic-version']  = '2023-06-01';
-      headers['x-api-key']          = key;
-      headers['anthropic-dangerous-direct-browser-access'] = 'true';
-      delete headers['Authorization'];
-    }
-
-    const res = await fetch(endpoint, { headers });
-    if (!res.ok) {
-      const txt = await res.text();
-      throw new Error(`HTTP ${res.status}: ${txt.slice(0, 180)}`);
-    }
-    const data = await res.json();
-
-    // Normalise: OpenAI returns {data:[{id,owned_by}]}, Anthropic returns {data:[{id,display_name}]}
-    let models = [];
-    if (Array.isArray(data.data)) {
-      models = data.data.map(m => ({
-        id:       m.id || m.name || String(m),
-        owner:    m.owned_by || m.display_name || '',
-      }));
-    } else if (Array.isArray(data.models)) {
-      // Some local servers use {models:[...]}
-      models = data.models.map(m => ({
-        id:    typeof m === 'string' ? m : (m.id || m.name || String(m)),
-        owner: m.owned_by || '',
-      }));
-    } else if (Array.isArray(data)) {
-      models = data.map(m => ({
-        id:    typeof m === 'string' ? m : (m.id || m.name || String(m)),
-        owner: m.owned_by || '',
-      }));
-    }
-
-    if (!models.length) throw new Error('No models returned by this endpoint');
-
-    // Sort: put chat/instruct models first
-    models.sort((a, b) => {
-      const chatA = /chat|instruct|turbo|sonnet|opus|haiku|gpt-4|llama|qwen|mistral/i.test(a.id) ? 0 : 1;
-      const chatB = /chat|instruct|turbo|sonnet|opus|haiku|gpt-4|llama|qwen|mistral/i.test(b.id) ? 0 : 1;
-      return chatA - chatB || a.id.localeCompare(b.id);
-    });
-
-    _allModels = models;
-    status.className   = 'model-fetch-status ok';
-    status.textContent = `✓ ${models.length} model${models.length !== 1 ? 's' : ''} found`;
-    document.getElementById('model-search').value = '';
-    renderModelList(models);
-    wrap.classList.add('visible');
-
-  } catch(err) {
-    status.className   = 'model-fetch-status err';
-    status.textContent = `✗ ${err.message}`;
-  } finally {
-    btn.disabled    = false;
-    btn.textContent = '↓ Fetch models';
-  }
-}
-
-function renderModelList(models) {
-  const list    = document.getElementById('model-list');
-  const current = document.getElementById('settings-model').value.trim();
-  list.innerHTML = '';
-
-  if (!models.length) {
-    list.innerHTML = '<div class="model-list-item" style="color:var(--muted);cursor:default">No matches</div>';
-    return;
-  }
-
-  models.forEach(m => {
-    const el = document.createElement('div');
-    el.className = 'model-list-item' + (m.id === current ? ' selected' : '');
-    el.innerHTML = '<span>' + escapeHtml(m.id) + '</span>' + (m.owner ? '<span class="model-owner">' + escapeHtml(m.owner) + '</span>' : '');
-    el.onclick = () => {
-      document.getElementById('settings-model').value = m.id;
-      // highlight selected
-      list.querySelectorAll('.model-list-item').forEach(x => x.classList.remove('selected'));
-      el.classList.add('selected');
-      document.getElementById('model-fetch-status').textContent = `Selected: ${m.id}`;
-      document.getElementById('model-fetch-status').className   = 'model-fetch-status ok';
-    };
-    list.appendChild(el);
-  });
-}
-
-function filterModels(query) {
-  const q = query.toLowerCase();
-  const filtered = q ? _allModels.filter(m =>
-    m.id.toLowerCase().includes(q) || (m.owner||'').toLowerCase().includes(q)
-  ) : _allModels;
-  renderModelList(filtered);
 }
 
 function closeSettings() {
@@ -3092,6 +3340,9 @@ function closeSettings() {
 document.getElementById('settings-modal').addEventListener('click', e => {
   if (e.target === document.getElementById('settings-modal')) closeSettings();
 });
+
+smInitChips();
+smRenderProviders(SM_PROVIDERS);
 
 // ────────────────────────────────────────────────
 // CHAT STATE
