@@ -1420,7 +1420,7 @@ body {
   border: 1px solid var(--border2);
   border-radius: var(--r2);
   padding: 32px;
-  width: 480px;
+  width: 520px;
   max-width: 95vw;
   box-shadow: 0 40px 100px rgba(0,0,0,0.7);
 }
@@ -1459,6 +1459,7 @@ body {
   padding: 9px 12px;
   outline: none;
   transition: border-color 0.15s;
+  box-sizing: border-box;
 }
 
 .settings-input:focus { border-color: var(--gold); }
@@ -1474,30 +1475,94 @@ body {
 .settings-hint a { color: var(--gold); text-decoration: none; }
 .settings-hint a:hover { text-decoration: underline; }
 
-.settings-presets {
+/* model fetch row */
+.model-fetch-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 8px;
+  align-items: stretch;
 }
-
-.preset-btn {
+.model-fetch-row .settings-input { flex: 1; }
+.btn-fetch-models {
   font-family: var(--font-mono);
   font-size: 11px;
-  padding: 4px 10px;
-  border-radius: 3px;
+  padding: 0 14px;
+  border-radius: var(--r);
   border: 1px solid var(--border2);
   background: transparent;
-  color: var(--dim);
+  color: var(--cyan);
+  border-color: rgba(92,216,235,0.35);
   cursor: pointer;
+  white-space: nowrap;
   transition: all 0.15s;
+  flex-shrink: 0;
+}
+.btn-fetch-models:hover {
+  background: rgba(92,216,235,0.08);
+  border-color: var(--cyan);
+}
+.btn-fetch-models:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
-.preset-btn:hover {
-  border-color: var(--gold);
-  color: var(--gold);
-  background: rgba(200,169,110,0.07);
+/* model dropdown list */
+.model-list-wrap {
+  margin-top: 8px;
+  display: none;
+  flex-direction: column;
+  gap: 4px;
 }
+.model-list-wrap.visible { display: flex; }
+.model-search-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 7px 10px;
+  outline: none;
+  box-sizing: border-box;
+}
+.model-search-input:focus { border-color: var(--gold); }
+.model-list {
+  max-height: 160px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  scrollbar-width: thin;
+}
+.model-list-item {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 7px 12px;
+  cursor: pointer;
+  color: var(--text);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.1s;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.model-list-item:last-child { border-bottom: none; }
+.model-list-item:hover { background: rgba(92,216,235,0.07); color: var(--cyan); }
+.model-list-item.selected { background: rgba(200,169,110,0.1); color: var(--gold); }
+.model-list-item .model-owner {
+  font-size: 10px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.model-fetch-status {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  margin-top: 4px;
+  color: var(--muted);
+  min-height: 16px;
+}
+.model-fetch-status.err { color: var(--red, #f87171); }
+.model-fetch-status.ok  { color: var(--green, #4ade80); }
 
 .settings-actions {
   display: flex;
@@ -1923,24 +1988,17 @@ body {
 <!-- SETTINGS MODAL (BYOK) -->
 <div class="settings-modal-overlay" id="settings-modal">
   <div class="settings-modal">
-    <div class="settings-title">⚙ AI Provider Settings</div>
+    <div class="settings-title">⚙ API Settings</div>
 
     <div class="settings-group">
-      <label class="settings-label">Custom URL</label>
+      <label class="settings-label">Base URL</label>
       <input class="settings-input" id="settings-api-url"
-        placeholder="https://api.anthropic.com"
-        value="https://api.anthropic.com" />
+        placeholder="https://api.openai.com/v1"
+        value="" />
       <div class="settings-hint">
-        Any custom API URL — Anthropic, OpenAI, Groq, Ollama, LM Studio, OpenRouter, or your own server.
-      </div>
-      <div class="settings-presets">
-        <button class="preset-btn" onclick="setPreset('anthropic')">Anthropic</button>
-        <button class="preset-btn" onclick="setPreset('openai')">OpenAI</button>
-        <button class="preset-btn" onclick="setPreset('groq')">Groq</button>
-        <button class="preset-btn" onclick="setPreset('nvidia')">NVIDIA NIM</button>
-        <button class="preset-btn" onclick="setPreset('ollama')">Ollama (local)</button>
-        <button class="preset-btn" onclick="setPreset('lmstudio')">LM Studio</button>
-        <button class="preset-btn" onclick="setPreset('openrouter')">OpenRouter</button>
+        Any OpenAI-compatible endpoint — Anthropic, OpenAI, Groq, Ollama, LM Studio, OpenRouter, or your own server.<br>
+        Examples: <code style="color:var(--cyan);font-family:var(--font-mono)">http://localhost:1234/v1</code> &nbsp;·&nbsp;
+        <code style="color:var(--cyan);font-family:var(--font-mono)">https://api.groq.com/openai/v1</code>
       </div>
     </div>
 
@@ -1948,23 +2006,28 @@ body {
       <label class="settings-label">API Key</label>
       <input class="settings-input" id="settings-api-key"
         type="password"
-        placeholder="sk-ant-... or sk-... or (empty for local)" />
+        placeholder="sk-... or (empty for local servers)" />
       <div class="settings-hint">
-        Stored in your browser only — never sent to Dictum servers.<br>
-        For local Ollama / LM Studio, leave this empty.
+        Stored in your browser only — never sent to Dictum servers.
+        Leave empty for Ollama / LM Studio.
       </div>
     </div>
 
     <div class="settings-group">
       <label class="settings-label">Model</label>
-      <input class="settings-input" id="settings-model"
-        placeholder="claude-sonnet-4-6"
-        value="claude-sonnet-4-6" />
-      <div class="settings-hint">
-        Examples: <code style="color:var(--cyan);font-family:var(--font-mono)">claude-sonnet-4-6</code>,
-        <code style="color:var(--cyan);font-family:var(--font-mono)">gpt-4o</code>,
-        <code style="color:var(--cyan);font-family:var(--font-mono)">llama3.1:8b</code>,
-        <code style="color:var(--cyan);font-family:var(--font-mono)">deepseek-coder</code>
+      <div class="model-fetch-row">
+        <input class="settings-input" id="settings-model"
+          placeholder="Type a model ID or fetch from your endpoint…" />
+        <button class="btn-fetch-models" id="btn-fetch-models" onclick="fetchModels()">
+          ↓ Fetch models
+        </button>
+      </div>
+      <div class="model-fetch-status" id="model-fetch-status"></div>
+      <div class="model-list-wrap" id="model-list-wrap">
+        <input class="model-search-input" id="model-search"
+          placeholder="Filter models…"
+          oninput="filterModels(this.value)" />
+        <div class="model-list" id="model-list"></div>
       </div>
     </div>
 
@@ -1972,7 +2035,7 @@ body {
       <button class="btn-primary" onclick="saveSettings()">Save</button>
       <button class="btn-ghost" onclick="closeSettings()">Cancel</button>
       <button class="btn-ghost" style="margin-left:auto;color:var(--red);border-color:rgba(248,113,113,0.3)"
-        onclick="clearSettings()">Clear</button>
+        onclick="clearSettings()">Reset</button>
     </div>
   </div>
 </div>
@@ -2002,8 +2065,10 @@ const SAMPLES = [
     tier: 'free',
     code: `program Hello:
     use Console
+    use Text
     keep Name as text with value "Dictum"
-    call Console.write_line with "Hello from " and Name
+    keep Msg as text with value call Text.join with "Hello from " and Name
+    call Console.write_line with Msg
 end program`
   },
   {
@@ -2512,21 +2577,13 @@ function toast(msg, type) {
 // ────────────────────────────────────────────────
 // SETTINGS (BYOK — stored in localStorage)
 // ────────────────────────────────────────────────
-const PRESETS = {
-  anthropic:  { url: 'https://api.anthropic.com',              model: 'claude-sonnet-4-6' },
-  openai:     { url: 'https://api.openai.com/v1',              model: 'gpt-4o' },
-  groq:       { url: 'https://api.groq.com/openai/v1',         model: 'llama-3.1-8b-instant' },
-  nvidia:     { url: 'https://integrate.api.nvidia.com/v1',    model: 'meta/llama-3.1-8b-instruct' },
-  ollama:     { url: 'http://localhost:11434/v1',               model: 'llama3.1:8b' },
-  lmstudio:   { url: 'http://localhost:1234/v1',                model: 'local-model' },
-  openrouter: { url: 'https://openrouter.ai/api/v1',           model: 'anthropic/claude-sonnet-4-6' },
-};
+// ── Settings helpers ──────────────────────────────────────────────────────
 
 function getSettings() {
   return {
-    url:   localStorage.getItem('dictum_api_url')   || 'https://api.anthropic.com',
+    url:   localStorage.getItem('dictum_api_url')   || '',
     key:   localStorage.getItem('dictum_api_key')   || '',
-    model: localStorage.getItem('dictum_api_model') || 'claude-sonnet-4-6',
+    model: localStorage.getItem('dictum_api_model') || '',
   };
 }
 
@@ -2534,37 +2591,157 @@ function saveSettings() {
   const url   = document.getElementById('settings-api-url').value.trim();
   const key   = document.getElementById('settings-api-key').value.trim();
   const model = document.getElementById('settings-model').value.trim();
-  if (!url) { toast('API URL required', 'err'); return; }
+  if (!url) { toast('Base URL is required', 'err'); return; }
+  if (!model) { toast('Model ID is required', 'err'); return; }
   localStorage.setItem('dictum_api_url',   url);
   localStorage.setItem('dictum_api_key',   key);
   localStorage.setItem('dictum_api_model', model);
+  // collapse model list
+  document.getElementById('model-list-wrap').classList.remove('visible');
   closeSettings();
   toast('Settings saved', 'ok');
 }
 
 function clearSettings() {
-  localStorage.removeItem('dictum_api_url');
-  localStorage.removeItem('dictum_api_key');
-  localStorage.removeItem('dictum_api_model');
-  document.getElementById('settings-api-url').value  = 'https://api.anthropic.com';
+  ['dictum_api_url','dictum_api_key','dictum_api_model'].forEach(k => localStorage.removeItem(k));
+  document.getElementById('settings-api-url').value  = '';
   document.getElementById('settings-api-key').value  = '';
-  document.getElementById('settings-model').value    = 'claude-sonnet-4-6';
-  toast('Settings cleared', 'ok');
-}
-
-function setPreset(name) {
-  const p = PRESETS[name];
-  if (!p) return;
-  document.getElementById('settings-api-url').value = p.url;
-  document.getElementById('settings-model').value   = p.model;
+  document.getElementById('settings-model').value    = '';
+  document.getElementById('model-list-wrap').classList.remove('visible');
+  document.getElementById('model-fetch-status').textContent = '';
+  document.getElementById('model-fetch-status').className   = 'model-fetch-status';
+  toast('Settings reset', 'ok');
 }
 
 function openSettings() {
   const s = getSettings();
-  document.getElementById('settings-api-url').value = s.url;
-  document.getElementById('settings-api-key').value = s.key;
-  document.getElementById('settings-model').value   = s.model;
+  document.getElementById('settings-api-url').value  = s.url;
+  document.getElementById('settings-api-key').value  = s.key;
+  document.getElementById('settings-model').value    = s.model;
+  document.getElementById('model-list-wrap').classList.remove('visible');
+  document.getElementById('model-fetch-status').textContent = '';
+  document.getElementById('model-fetch-status').className   = 'model-fetch-status';
   document.getElementById('settings-modal').classList.add('open');
+}
+
+// ── Model fetcher ─────────────────────────────────────────────────────────
+
+let _allModels = [];   // [{id, owned_by}]
+
+async function fetchModels() {
+  const url = document.getElementById('settings-api-url').value.trim();
+  const key = document.getElementById('settings-api-key').value.trim();
+  if (!url) { toast('Enter a Base URL first', 'err'); return; }
+
+  const btn    = document.getElementById('btn-fetch-models');
+  const status = document.getElementById('model-fetch-status');
+  const wrap   = document.getElementById('model-list-wrap');
+
+  btn.disabled = true;
+  btn.textContent = '…';
+  status.className   = 'model-fetch-status';
+  status.textContent = 'Fetching models…';
+  wrap.classList.remove('visible');
+
+  // Normalise base: strip trailing slash, strip /chat/completions etc.
+  const base = url.replace(/\/+$/, '').replace(/\/(chat\/completions|completions|messages)$/, '');
+  const endpoint = `${base}/models`;
+
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (key) headers['Authorization'] = `Bearer ${key}`;
+    // Anthropic needs a version header but also supports the /models endpoint
+    if (base.includes('anthropic.com')) {
+      headers['anthropic-version']  = '2023-06-01';
+      headers['x-api-key']          = key;
+      headers['anthropic-dangerous-direct-browser-access'] = 'true';
+      delete headers['Authorization'];
+    }
+
+    const res = await fetch(endpoint, { headers });
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`HTTP ${res.status}: ${txt.slice(0, 180)}`);
+    }
+    const data = await res.json();
+
+    // Normalise: OpenAI returns {data:[{id,owned_by}]}, Anthropic returns {data:[{id,display_name}]}
+    let models = [];
+    if (Array.isArray(data.data)) {
+      models = data.data.map(m => ({
+        id:       m.id || m.name || String(m),
+        owner:    m.owned_by || m.display_name || '',
+      }));
+    } else if (Array.isArray(data.models)) {
+      // Some local servers use {models:[...]}
+      models = data.models.map(m => ({
+        id:    typeof m === 'string' ? m : (m.id || m.name || String(m)),
+        owner: m.owned_by || '',
+      }));
+    } else if (Array.isArray(data)) {
+      models = data.map(m => ({
+        id:    typeof m === 'string' ? m : (m.id || m.name || String(m)),
+        owner: m.owned_by || '',
+      }));
+    }
+
+    if (!models.length) throw new Error('No models returned by this endpoint');
+
+    // Sort: put chat/instruct models first
+    models.sort((a, b) => {
+      const chatA = /chat|instruct|turbo|sonnet|opus|haiku|gpt-4|llama|qwen|mistral/i.test(a.id) ? 0 : 1;
+      const chatB = /chat|instruct|turbo|sonnet|opus|haiku|gpt-4|llama|qwen|mistral/i.test(b.id) ? 0 : 1;
+      return chatA - chatB || a.id.localeCompare(b.id);
+    });
+
+    _allModels = models;
+    status.className   = 'model-fetch-status ok';
+    status.textContent = `✓ ${models.length} model${models.length !== 1 ? 's' : ''} found`;
+    document.getElementById('model-search').value = '';
+    renderModelList(models);
+    wrap.classList.add('visible');
+
+  } catch(err) {
+    status.className   = 'model-fetch-status err';
+    status.textContent = `✗ ${err.message}`;
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = '↓ Fetch models';
+  }
+}
+
+function renderModelList(models) {
+  const list    = document.getElementById('model-list');
+  const current = document.getElementById('settings-model').value.trim();
+  list.innerHTML = '';
+
+  if (!models.length) {
+    list.innerHTML = '<div class="model-list-item" style="color:var(--muted);cursor:default">No matches</div>';
+    return;
+  }
+
+  models.forEach(m => {
+    const el = document.createElement('div');
+    el.className = 'model-list-item' + (m.id === current ? ' selected' : '');
+    el.innerHTML = `<span>${escapeHtml(m.id)}</span>${m.owner ? `<span class="model-owner">${escapeHtml(m.owner)}</span>` : ''}`;
+    el.onclick = () => {
+      document.getElementById('settings-model').value = m.id;
+      // highlight selected
+      list.querySelectorAll('.model-list-item').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById('model-fetch-status').textContent = `Selected: ${m.id}`;
+      document.getElementById('model-fetch-status').className   = 'model-fetch-status ok';
+    };
+    list.appendChild(el);
+  });
+}
+
+function filterModels(query) {
+  const q = query.toLowerCase();
+  const filtered = q ? _allModels.filter(m =>
+    m.id.toLowerCase().includes(q) || (m.owner||'').toLowerCase().includes(q)
+  ) : _allModels;
+  renderModelList(filtered);
 }
 
 function closeSettings() {
@@ -2629,6 +2806,16 @@ async function sendChat() {
   if (!text || chatThinking) return;
 
   const s = getSettings();
+  if (!s.url) {
+    openSettings();
+    toast('Configure your API URL and model first', 'err');
+    return;
+  }
+  if (!s.model) {
+    openSettings();
+    toast('No model selected — fetch or type a model ID in Settings', 'err');
+    return;
+  }
   if (!s.key && !s.url.includes('localhost') && !s.url.includes('127.0.0.1')) {
     openSettings();
     toast('Set your API key first', 'err');
@@ -2648,37 +2835,25 @@ async function sendChat() {
     }
   }
 
-  // Append to history and render
   chatHistory.push({ role: 'user', content: userContent });
-  appendChatMsg('user', text);   // show only the visible text, not injected context
+  appendChatMsg('user', text);
   input.value = '';
   input.style.height = 'auto';
 
-  // Show thinking indicator
   chatThinking = true;
   document.getElementById('chat-send').disabled = true;
   const thinkingEl = appendThinking();
 
-  // Determine if Anthropic native or OpenAI-compatible
-  const isAnthropic = s.url.includes('anthropic.com');
   const skill = document.getElementById('chat-skill').value;
 
   try {
-    let assistantText = '';
-
-    if (isAnthropic) {
-      assistantText = await callAnthropic(s, skill);
-    } else {
-      assistantText = await callOpenAICompat(s, skill);
-    }
-
+    const assistantText = await callAPI(s, skill);
     chatHistory.push({ role: 'assistant', content: assistantText });
     thinkingEl.remove();
     appendChatMsg('assistant', assistantText);
-
   } catch(err) {
     thinkingEl.remove();
-    appendChatMsg('assistant', `Error: ${err.message}\n\nCheck your API URL and key in ⚙ Settings.`);
+    appendChatMsg('assistant', `Error: ${err.message}\n\nCheck your Base URL, API Key, and Model in ⚙ Settings.`);
   }
 
   chatThinking = false;
@@ -2686,7 +2861,7 @@ async function sendChat() {
 }
 
 // ────────────────────────────────────────────────
-// API CALLERS
+// API CALLER  (single unified path)
 // ────────────────────────────────────────────────
 function buildSystemPrompt(skill) {
   return `You are a Dictum AI assistant. Dictum is an AI-native systems programming language that compiles to C11 or C++17/20/23.
@@ -2711,41 +2886,26 @@ When generating code:
 Never emit raw C. Always use Dictum syntax.`;
 }
 
-async function callAnthropic(s, skill) {
-  // Use the server-side /api/generate endpoint — keeps API key server-side
-  // If user has a key in settings, pass it through; server uses it or falls back to env
-  const res = await fetch(`${API_BASE}/api/generate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      prompt:        chatHistory[chatHistory.length - 1].content,
-      backend:       activeBackend,
-      cpp_standard:  17,
-      skills:        [document.getElementById('chat-skill').value],
-      api_key:       s.key,
-      model:         s.model,
-      auto_transpile: false,
-    }),
-  });
-  const data = await res.json();
-  if (!data.ok) throw new Error(data.error || 'Generation failed');
-  return data.message;
-}
+async function callAPI(s, skill) {
+  // Normalise base URL: strip trailing slash + known path suffixes
+  const base = s.url.replace(/\/+$/, '')
+                     .replace(/\/(chat\/completions|completions|messages|v1)$/, '');
+  // Always append /v1 if the base doesn't already have it (handles bare hosts like localhost:1234)
+  const apiBase = base.endsWith('/v1') ? base : `${base}/v1`;
 
-async function callOpenAICompat(s, skill) {
-  // Direct browser → OpenAI-compatible endpoint
-  // Works for: OpenAI, Groq, Ollama, LM Studio, OpenRouter, etc.
   const messages = [
     { role: 'system', content: buildSystemPrompt(skill) },
     ...chatHistory.map(m => ({ role: m.role, content: m.content })),
   ];
 
-  const res = await fetch(`${s.url}/chat/completions`, {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(s.key ? { 'Authorization': `Bearer ${s.key}` } : {}),
+  };
+
+  const res = await fetch(`${apiBase}/chat/completions`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(s.key ? { 'Authorization': `Bearer ${s.key}` } : {}),
-    },
+    headers,
     body: JSON.stringify({
       model:       s.model,
       messages,
