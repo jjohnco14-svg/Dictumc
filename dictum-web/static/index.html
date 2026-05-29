@@ -669,9 +669,79 @@ body {
 .editor-layout {
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 180px 1fr 1fr;
   grid-template-rows: 1fr auto;
   overflow: hidden;
+}
+
+/* file tree sidebar */
+.file-tree {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.file-tree-header {
+  height: 36px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  flex-shrink: 0;
+}
+.file-tree-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.file-tree-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 0;
+}
+.file-tree-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--dim);
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all 0.12s;
+  user-select: none;
+  justify-content: space-between;
+}
+.file-tree-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+.file-tree-item.active { color: var(--gold); border-left-color: var(--gold); background: rgba(200,169,110,0.07); }
+.file-tree-item-left { display: flex; align-items: center; gap: 7px; }
+.file-tree-icon { font-size: 13px; flex-shrink: 0; }
+.file-tree-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.file-tree-dl {
+  opacity: 0;
+  font-size: 11px;
+  color: var(--cyan);
+  padding: 2px 5px;
+  border-radius: 3px;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+.file-tree-item:hover .file-tree-dl { opacity: 1; }
+.file-tree-section {
+  padding: 10px 12px 4px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
 }
 
 /* panes */
@@ -776,7 +846,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  grid-column: 2;
+  grid-column: 3;
   grid-row: 1 / 3;
 }
 
@@ -803,6 +873,22 @@ body {
 
 .output-tab:hover { color: var(--text); }
 .output-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+.tab-dl-btn {
+  margin-left: auto;
+  margin-right: 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--cyan);
+  cursor: pointer;
+  transition: all 0.15s;
+  align-self: center;
+}
+.tab-dl-btn:hover { background: rgba(92,216,235,0.08); border-color: var(--cyan); }
 
 .output-content {
   flex: 1;
@@ -882,7 +968,7 @@ body {
   padding: 0 14px;
   gap: 12px;
   flex-shrink: 0;
-  grid-column: 1;
+  grid-column: 2;
 }
 
 .qemu-label {
@@ -942,7 +1028,7 @@ body {
   font-size: 11px;
   color: var(--dim);
   flex-shrink: 0;
-  grid-column: 1 / 3;
+  grid-column: 2 / 4;
 }
 
 .status-item { display: flex; align-items: center; gap: 5px; }
@@ -1290,6 +1376,158 @@ body {
 }
 
 .chat-empty .icon { font-size: 28px; }
+
+/* agentic phase badge */
+.chat-phase-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 2px 7px;
+  border-radius: 3px;
+  margin-bottom: 6px;
+}
+.phase-detect   { background: rgba(92,216,235,0.12); color: var(--cyan); border: 1px solid rgba(92,216,235,0.3); }
+.phase-ask      { background: rgba(200,169,110,0.12); color: var(--gold); border: 1px solid rgba(200,169,110,0.3); }
+.phase-plan     { background: rgba(139,92,246,0.12);  color: #a78bfa;     border: 1px solid rgba(139,92,246,0.3); }
+.phase-code     { background: rgba(74,222,128,0.12);  color: var(--green); border: 1px solid rgba(74,222,128,0.3); }
+.phase-compile  { background: rgba(251,146,60,0.12);  color: var(--amber); border: 1px solid rgba(251,146,60,0.3); }
+
+.chat-plan-block {
+  background: rgba(139,92,246,0.07);
+  border: 1px solid rgba(139,92,246,0.25);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin: 4px 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+.chat-plan-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.plan-approve-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 5px 14px;
+  border-radius: 4px;
+  border: 1px solid rgba(74,222,128,0.4);
+  background: rgba(74,222,128,0.08);
+  color: var(--green);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.plan-approve-btn:hover { background: rgba(74,222,128,0.16); }
+.plan-revise-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 5px 14px;
+  border-radius: 4px;
+  border: 1px solid rgba(248,113,113,0.4);
+  background: transparent;
+  color: var(--red);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.plan-revise-btn:hover { background: rgba(248,113,113,0.08); }
+
+.chat-skill-chip {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: rgba(200,169,110,0.1);
+  border: 1px solid rgba(200,169,110,0.3);
+  color: var(--gold);
+  margin: 2px;
+}
+.chat-std-chip {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: rgba(92,216,235,0.1);
+  border: 1px solid rgba(92,216,235,0.3);
+  color: var(--cyan);
+  margin: 2px;
+}
+
+/* auto-fix UI */
+.fix-attempt-card {
+  background: rgba(251,146,60,0.06);
+  border: 1px solid rgba(251,146,60,0.3);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin: 6px 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.fix-attempt-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.fix-attempt-badge {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: rgba(251,146,60,0.15);
+  border: 1px solid rgba(251,146,60,0.4);
+  color: var(--amber);
+}
+.fix-attempt-dots {
+  display: flex;
+  gap: 4px;
+}
+.fix-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border2);
+  transition: background 0.2s;
+}
+.fix-dot.active   { background: var(--amber); }
+.fix-dot.done     { background: var(--green); }
+.fix-dot.failed   { background: var(--red); }
+.fix-error-text {
+  color: var(--red);
+  font-size: 11px;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  opacity: 0.85;
+}
+.fix-success-card {
+  background: rgba(74,222,128,0.06);
+  border: 1px solid rgba(74,222,128,0.3);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin: 6px 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--green);
+}
+.fix-exhausted-card {
+  background: rgba(248,113,113,0.06);
+  border: 1px solid rgba(248,113,113,0.3);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin: 6px 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--red);
+}
 .chat-empty .msg { font-size: 13px; font-weight: 600; color: var(--dim); }
 .chat-empty .sub { font-size: 12px; line-height: 1.5; }
 
@@ -1583,12 +1821,13 @@ body {
 
   .editor-layout {
     grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr auto auto;
+    grid-template-rows: auto 1fr 1fr auto auto;
   }
 
-  .output-pane { grid-column: 1; grid-row: 2; }
-  .qemu-bar { grid-column: 1; grid-row: 3; }
-  .statusbar { grid-column: 1; grid-row: 4; }
+  .file-tree { display: none; }
+  .output-pane { grid-column: 1; grid-row: 3; }
+  .qemu-bar { grid-column: 1; grid-row: 4; }
+  .statusbar { grid-column: 1; grid-row: 5; }
   .nav-links { display: none; }
 }
 </style>
@@ -1840,12 +2079,52 @@ body {
       </div>
     </div>
 
+    <!-- FILE TREE -->
+    <div class="file-tree" id="file-tree">
+      <div class="file-tree-header">
+        <span class="file-tree-title">Explorer</span>
+      </div>
+      <div class="file-tree-list" id="file-tree-list">
+        <div class="file-tree-section">Source</div>
+        <div class="file-tree-item active" id="ftree-dict" onclick="ftreeSelect('dict')">
+          <div class="file-tree-item-left">
+            <span class="file-tree-icon">📄</span>
+            <span class="file-tree-name">program.dict</span>
+          </div>
+          <span class="file-tree-dl" onclick="ftreeDownload('dict', event)" title="Download">⬇</span>
+        </div>
+        <div class="file-tree-section">Output</div>
+        <div class="file-tree-item" id="ftree-c" onclick="ftreeSelect('c')">
+          <div class="file-tree-item-left">
+            <span class="file-tree-icon">⚙</span>
+            <span class="file-tree-name" id="ftree-c-name">output.c</span>
+          </div>
+          <span class="file-tree-dl" onclick="ftreeDownload('c', event)" title="Download">⬇</span>
+        </div>
+        <div class="file-tree-item" id="ftree-ast" onclick="ftreeSelect('ast-view')">
+          <div class="file-tree-item-left">
+            <span class="file-tree-icon">🌳</span>
+            <span class="file-tree-name">ast.txt</span>
+          </div>
+          <span class="file-tree-dl" onclick="ftreeDownload('ast', event)" title="Download">⬇</span>
+        </div>
+        <div class="file-tree-item" id="ftree-terminal" onclick="ftreeSelect('terminal-view')">
+          <div class="file-tree-item-left">
+            <span class="file-tree-icon">▶</span>
+            <span class="file-tree-name">terminal.log</span>
+          </div>
+          <span class="file-tree-dl" onclick="ftreeDownload('terminal', event)" title="Download">⬇</span>
+        </div>
+      </div>
+    </div>
+
     <!-- OUTPUT PANE -->
     <div class="output-pane">
       <div class="output-tabs">
         <div class="output-tab active" onclick="switchTab('c-out')">C Output</div>
         <div class="output-tab" onclick="switchTab('terminal')">Terminal</div>
         <div class="output-tab" onclick="switchTab('ast')">AST</div>
+        <button class="tab-dl-btn" id="tab-dl-btn" onclick="downloadActiveTab()" title="Download current tab">⬇ Download</button>
       </div>
       <div class="output-content">
 
@@ -2333,6 +2612,11 @@ function switchTab(id) {
   document.querySelectorAll('.output-panel').forEach(p => {
     p.classList.toggle('active', p.id === 'tab-' + id);
   });
+  // Sync file tree
+  const treeMap = { 'c-out': 'ftree-c', 'terminal': 'ftree-terminal', 'ast': 'ftree-ast' };
+  document.querySelectorAll('.file-tree-item').forEach(el => el.classList.remove('active'));
+  const tEl = document.getElementById(treeMap[id]);
+  if (tEl) tEl.classList.add('active');
 }
 
 // ────────────────────────────────────────────────
@@ -2360,6 +2644,7 @@ async function runValidate(silent = false) {
       if (data.summary) {
         document.getElementById('ast-output').textContent = data.summary;
       }
+      updateFileTree();
       setStatus('ok', 'Validation passed');
       if (!silent) toast('Validation passed', 'ok');
     } else {
@@ -2409,6 +2694,7 @@ async function runCode() {
 
     if (data.ok) {
       setCOutput(data.code || '');
+      updateFileTree();
       setStatus('ok', `Ran on ${data.target_label || activeTarget}`);
 
       if (data.warnings && data.warnings.length) {
@@ -2723,7 +3009,7 @@ function renderModelList(models) {
   models.forEach(m => {
     const el = document.createElement('div');
     el.className = 'model-list-item' + (m.id === current ? ' selected' : '');
-    el.innerHTML = `<span>${escapeHtml(m.id)}</span>${m.owner ? `<span class="model-owner">${escapeHtml(m.owner)}</span>` : ''}`;
+    el.innerHTML = '<span>' + escapeHtml(m.id) + '</span>' + (m.owner ? '<span class="model-owner">' + escapeHtml(m.owner) + '</span>' : '');
     el.onclick = () => {
       document.getElementById('settings-model').value = m.id;
       // highlight selected
@@ -2768,12 +3054,7 @@ function toggleChat() {
     chatOpen ? 'rgba(92,216,235,0.1)' : '';
 }
 
-function clearChat() {
-  chatHistory = [];
-  const msgs = document.getElementById('chat-messages');
-  msgs.innerHTML = '';
-  msgs.appendChild(buildEmptyState());
-}
+// clearChat() now defined in agentic block above
 
 function toggleContext() {
   ctxEnabled = !ctxEnabled;
@@ -2800,59 +3081,85 @@ function chatKeydown(e) {
 // ────────────────────────────────────────────────
 // CHAT SEND
 // ────────────────────────────────────────────────
+// ────────────────────────────────────────────────
+// AGENTIC CHAT STATE
+// ────────────────────────────────────────────────
+const BT = '`'; // backtick helper for template literals
+// Phases: idle -> detect -> ask -> plan -> code -> done
+let agentPhase     = 'idle';
+let agentSkills    = [];   // detected skill IDs
+let agentCStd      = 17;   // chosen C++ standard (or 11 for pure C)
+let agentBackend   = 'c';  // 'c' | 'cpp'
+let agentQACount   = 0;    // how many clarifying rounds done
+let pendingPlanEl  = null; // DOM element for plan approve/revise
+
+const SKILL_KEYWORDS = {
+  embedded:   /embedded|microcontroller|gpio|uart|spi|i2c|rtos|mcu|arduino|stm32|esp32|firmware/i,
+  medical:    /medical|healthcare|hl7|fhir|ecg|patient|clinical|dicom|vitals/i,
+  automotive: /can bus|obd|ecu|autosar|iso26262|vehicle|adas|v2x/i,
+  aerospace:  /aerospace|avionics|do-178|flight|drone|uav|satellite|navigation/i,
+  edgeai:     /edge\s?ai|tflite|onnx|inference|neural|cnn|model|quantiz/i,
+};
+
+const STD_KEYWORDS = {
+  cpp23: /c\+\+23|cpp23|coroutine|std::expected|std::flat_map/i,
+  cpp20: /c\+\+20|cpp20|concept|range|module|co_await|std::span/i,
+  cpp17: /c\+\+17|cpp17|filesystem|variant|optional|structured bind/i,
+  cpp:   /c\+\+|cpp|class|template|namespace|vector|iostream|object.orient/i,
+    c11:   /c11|plain\s*c|posix|minimal|bare.metal|no stdlib|freestanding/i,
+};
+
+function detectSkillsAndStd(text) {
+  const skills = [];
+  for (const [k, re] of Object.entries(SKILL_KEYWORDS)) {
+    if (re.test(text)) skills.push(k);
+  }
+  // C standard detection
+  let std = 17; let backend = 'cpp';
+  if (STD_KEYWORDS.cpp23.test(text)) { std = 23; backend = 'cpp'; }
+  else if (STD_KEYWORDS.cpp20.test(text)) { std = 20; backend = 'cpp'; }
+  else if (STD_KEYWORDS.cpp17.test(text)) { std = 17; backend = 'cpp'; }
+  else if (STD_KEYWORDS.cpp.test(text))   { std = 17; backend = 'cpp'; }
+  else if (STD_KEYWORDS.c11.test(text))   { std = 11; backend = 'c'; }
+  return { skills, std, backend };
+}
+
+// ────────────────────────────────────────────────
+// SEND CHAT (agentic entry point)
+// ────────────────────────────────────────────────
 async function sendChat() {
   const input = document.getElementById('chat-input');
   const text  = input.value.trim();
   if (!text || chatThinking) return;
 
   const s = getSettings();
-  if (!s.url) {
-    openSettings();
-    toast('Configure your API URL and model first', 'err');
-    return;
-  }
-  if (!s.model) {
-    openSettings();
-    toast('No model selected — fetch or type a model ID in Settings', 'err');
-    return;
-  }
+  if (!s.url)   { openSettings(); toast('Configure your API URL first', 'err'); return; }
+  if (!s.model) { openSettings(); toast('No model selected in Settings', 'err'); return; }
   if (!s.key && !s.url.includes('localhost') && !s.url.includes('127.0.0.1')) {
-    openSettings();
-    toast('Set your API key first', 'err');
-    return;
+    openSettings(); toast('Set your API key first', 'err'); return;
   }
 
-  // Build user message — optionally inject editor context
-  let userContent = text;
-  if (ctxEnabled) {
-    const code = document.getElementById('dictum-editor').value.trim();
-    if (code) userContent += `\n\n[Current editor code]\n\`\`\`dictum\n${code}\n\`\`\``;
-  }
-  if (ctxErrEnabled) {
-    const cOut = document.getElementById('c-output').textContent.trim();
-    if (cOut && cOut.includes('error')) {
-      userContent += `\n\n[Current errors]\n${cOut.slice(0, 600)}`;
-    }
-  }
-
-  chatHistory.push({ role: 'user', content: userContent });
   appendChatMsg('user', text);
   input.value = '';
   input.style.height = 'auto';
-
   chatThinking = true;
   document.getElementById('chat-send').disabled = true;
-  const thinkingEl = appendThinking();
-
-  const skill = document.getElementById('chat-skill').value;
 
   try {
-    const assistantText = await callAPI(s, skill);
-    chatHistory.push({ role: 'assistant', content: assistantText });
-    thinkingEl.remove();
-    appendChatMsg('assistant', assistantText);
+    if (agentPhase === 'idle') {
+      await agentPhaseDetect(text, s);
+    } else if (agentPhase === 'ask') {
+      await agentPhaseAsk(text, s);
+    } else if (agentPhase === 'plan_revision') {
+      await agentPhasePlanRevision(text, s);
+    } else {
+      // fallback: free-form assistant after code is generated
+      chatHistory.push({ role: 'user', content: text });
+      const reply = await callAPI(s, agentSkills[0] || 'general', chatHistory);
+      chatHistory.push({ role: 'assistant', content: reply });
+      appendChatMsg('assistant', reply);
+    }
   } catch(err) {
-    thinkingEl.remove();
     appendChatMsg('assistant', `Error: ${err.message}\n\nCheck your Base URL, API Key, and Model in ⚙ Settings.`);
   }
 
@@ -2860,68 +3167,507 @@ async function sendChat() {
   document.getElementById('chat-send').disabled = false;
 }
 
-// ────────────────────────────────────────────────
-// API CALLER  (single unified path)
-// ────────────────────────────────────────────────
-function buildSystemPrompt(skill) {
-  return `You are a Dictum AI assistant. Dictum is an AI-native systems programming language that compiles to C11 or C++17/20/23.
+// ── Phase 1: detect skills + C standard ──────────────────────────────────
+async function agentPhaseDetect(text, s) {
+  const { skills, std, backend } = detectSkillsAndStd(text);
+  agentSkills  = skills.length ? skills : ['general'];
+  agentCStd    = std;
+  agentBackend = backend;
 
-Dictum syntax basics:
-- Programs: program Name: ... end program
-- Variables: keep X as whole number with value 5
-- Actions (functions): action name takes Param as type produces type
-- Control flow: if ... then / while ... repeat / for each X in Y repeat
-- Modules: use Http / use File / use Console / use Json / use Thread
-- Error handling: attempt ... on failure with Err ... end attempt
-- Unsafe: unsafe: extern ... transmute ... end unsafe
+  // update backend selector to match
+  if (document.getElementById('backend-select')) {
+    document.getElementById('backend-select').value = agentBackend;
+    activeBackend = agentBackend;
+    document.getElementById('status-backend').textContent =
+      agentBackend === 'cpp' ? `C++${agentCStd}` : 'C11';
+  }
 
-Skill context: ${skill.toUpperCase()}
+  // Build detect message for AI — ask clarifying questions
+  const detectPrompt = `The user wants to build: "${text}"
 
-When generating code:
-1. Always emit valid Dictum in a \`\`\`dictum block
-2. Explain what the code does briefly
-3. If the user asks to fix or improve their code, show the corrected version
-4. Keep explanations concise — this is a code assistant, not a tutorial
+Detected skills: ${agentSkills.join(', ')}
+Chosen C standard: ${agentBackend === 'c' ? 'C11' : `C++${agentCStd}`}
 
-Never emit raw C. Always use Dictum syntax.`;
+Your job in this DETECT phase:
+1. Show a short one-line summary of what you understood
+2. Show which skill(s) you selected and why (one line each)
+3. Show which C standard you picked and why
+4. Ask 2-3 targeted clarifying questions (numbered) that would improve the design. Keep each question to one line. Do not generate code yet.
+
+Format your reply with a section header: "## 🔍 Understanding" then "## ❓ Clarifying Questions"`;
+
+  chatHistory = [{ role: 'user', content: detectPrompt }];
+  const reply = await callAPI(s, agentSkills[0], chatHistory);
+  chatHistory.push({ role: 'assistant', content: reply });
+
+  // Render with phase badge + skill chips
+  appendAgentMsg('detect', agentSkills, agentBackend, agentCStd, reply);
+  agentPhase  = 'ask';
+  agentQACount = 0;
 }
 
-async function callAPI(s, skill) {
-  // Normalise base URL: strip trailing slash + known path suffixes
+// ── Phase 2: clarifying Q&A ───────────────────────────────────────────────
+async function agentPhaseAsk(text, s) {
+  agentQACount++;
+  chatHistory.push({ role: 'user', content: text });
+
+  // After 1 round of Q&A (or user says "ready"/"go"/"build") → move to plan
+  const readySignals = /^(ready|go|ok|sure|yes|proceed|build|generate|start|make it|do it|fine)/i;
+  const skipToCode   = /skip|just code|no questions|write the code/i;
+
+  let planNow = agentQACount >= 2 || readySignals.test(text) || skipToCode.test(text);
+
+  if (!planNow) {
+    // one more Q&A round
+    const qaPrompt = `Continue the clarification. The user answered: "${text}". Ask 1-2 follow-up questions if still unclear, otherwise say you have enough info and ask the user to say "ready" when they want to proceed to the plan.`;
+    chatHistory.push({ role: 'user', content: qaPrompt });
+    const reply = await callAPI(s, agentSkills[0], chatHistory);
+    chatHistory.pop(); // remove injected prompt
+    chatHistory.push({ role: 'assistant', content: reply });
+    appendAgentMsg('ask', agentSkills, agentBackend, agentCStd, reply);
+  } else {
+    // generate plan
+    await agentPhasePlan(s);
+  }
+}
+
+// ── Phase 3: plan ─────────────────────────────────────────────────────────
+async function agentPhasePlan(s) {
+  agentPhase = 'plan';
+  const planPrompt = `Based on everything discussed so far, create a detailed implementation plan in Dictum.
+
+Skills in use: ${agentSkills.join(', ')}
+C standard: ${agentBackend === 'c' ? 'C11' : `C++${agentCStd}`}
+
+Your plan must cover:
+- Program name and top-level structure
+- Which Dictum modules to use (Console, File, Http, Json, Thread, etc.)
+- Every action/function: name, inputs, outputs, logic summary
+- Control flow (loops, conditionals, error handling)
+- Data types and key variables
+- Edge cases and error paths
+
+Format as a structured numbered list. No code yet — plan only.
+End your reply with: "---PLAN_READY---"`;
+
+  chatHistory.push({ role: 'user', content: planPrompt });
+  const reply = await callAPI(s, agentSkills[0], chatHistory);
+  chatHistory.push({ role: 'assistant', content: reply });
+
+  // Strip the sentinel and render as plan block with approve/revise
+  const cleanReply = reply.replace('---PLAN_READY---', '').trim();
+  appendPlanMsg(cleanReply);
+}
+
+// ── Phase 4: code generation ──────────────────────────────────────────────
+// ── transpileAndCheck: returns {ok, error, code} ─────────────────────────
+async function transpileAndCheck(source) {
+  try {
+    const res = await fetch(`${API_BASE}/api/transpile`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        source, backend: activeBackend,
+        cpp_standard: agentCStd, stdlib: true, validate_code: true,
+      }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setCOutput(data.code || '');
+      if (data.summary) document.getElementById('ast-output').textContent = data.summary;
+      updateFileTree();
+      setStatus('ok', 'Validation passed');
+    } else {
+      setStatus('err', 'Validation error');
+      setCOutput('// Error:\n// ' + (data.error || 'Unknown error'));
+    }
+    return { ok: data.ok, error: data.error || '', code: data.code || '' };
+  } catch(e) {
+    return { ok: false, error: `Server unavailable: ${e.message}`, code: '' };
+  }
+}
+
+// ── Auto-fix loop ─────────────────────────────────────────────────────────
+const MAX_FIX_ATTEMPTS = 4;
+
+async function agentAutoFix(s, dictumCode, firstError) {
+  let currentCode  = dictumCode;
+  let currentError = firstError;
+
+  for (let attempt = 1; attempt <= MAX_FIX_ATTEMPTS; attempt++) {
+    // Show "fixing" badge in chat
+    appendFixAttemptMsg(attempt, MAX_FIX_ATTEMPTS, currentError);
+
+    const fixPrompt =
+`The Dictum code failed to transpile. This is fix attempt ${attempt} of ${MAX_FIX_ATTEMPTS}.
+
+Current broken code:
+\`\`\`dictum
+${currentCode}
+\`\`\`
+
+Transpiler error:
+${currentError}
+
+Instructions:
+1. Carefully read the error — it includes the line number and what went wrong
+2. Fix ONLY the error described — do not rewrite unrelated parts
+3. Emit the COMPLETE fixed program in a single \`\`\`dictum block
+4. After the block, write one line starting with "Fix:" explaining what you changed`;
+
+    chatHistory.push({ role: 'user', content: fixPrompt });
+    const thinkEl = appendThinking();
+    let reply;
+    try {
+      reply = await callAPI(s, agentSkills[0] || 'general', chatHistory);
+    } catch(e) {
+      thinkEl.remove();
+      appendAgentMsg('compile', agentSkills, agentBackend, agentCStd,
+        `Fix attempt ${attempt} failed — API error: ${e.message}`);
+      return false;
+    }
+    thinkEl.remove();
+    chatHistory.push({ role: 'assistant', content: reply });
+
+    const match = reply.match(/```(?:dictum|dict)\s*\n([\s\S]*?)```/);
+    if (!match) {
+      appendAgentMsg('compile', agentSkills, agentBackend, agentCStd,
+        `Fix attempt ${attempt}: AI did not return a code block. Stopping.`);
+      return false;
+    }
+
+    currentCode = match[1].trim();
+    document.getElementById('dictum-editor').value = currentCode;
+    updateLineNums();
+
+    const result = await transpileAndCheck(currentCode);
+
+    if (result.ok) {
+      // Extract fix explanation
+      const fixLine = reply.match(/^Fix:(.+)/m);
+      const fixNote = fixLine ? fixLine[1].trim() : 'error resolved';
+      appendFixSuccessMsg(attempt, fixNote);
+      toast(`Fixed on attempt ${attempt}!`, 'ok');
+      return true;
+    }
+
+    // Show the fixed code + new error in chat
+    appendAgentMsg('compile', agentSkills, agentBackend, agentCStd,
+      reply + `
+
+⚠ Still failing: ${result.error}`);
+    currentError = result.error;
+  }
+
+  // All attempts exhausted
+  appendFixExhaustedMsg(MAX_FIX_ATTEMPTS, currentError);
+  return false;
+}
+
+async function agentPhaseCode(s) {
+  agentPhase = 'code';
+  if (pendingPlanEl) { pendingPlanEl.querySelector('.chat-plan-actions')?.remove(); }
+
+  const codePrompt =
+`The plan has been approved. Generate the complete, working Dictum program.
+
+Skills: ${agentSkills.join(', ')}
+Backend: ${agentBackend === 'c' ? 'C11' : 'C++' + agentCStd}
+
+Rules:
+1. Emit ALL code in a single ${BT}${BT}${BT}dictum block
+2. Complete - no placeholders, no TODO comments
+3. Proper Dictum syntax throughout
+4. After the code block, show the dictumc CLI command
+5. Pick C standard based on features used and state: "Compiling to: C11/C++17/C++20/C++23"`;
+
+  chatHistory.push({ role: 'user', content: codePrompt });
+  const thinkEl = appendThinking();
+  const reply = await callAPI(s, agentSkills[0], chatHistory);
+  thinkEl.remove();
+  chatHistory.push({ role: 'assistant', content: reply });
+  appendAgentMsg('code', agentSkills, agentBackend, agentCStd, reply);
+
+  // Detect C standard from reply
+  const stdMatch = reply.match(/→ Compiling to: C\+\+(\d+)/i) || reply.match(/C\+\+(\d+)/i);
+  const c11Match = reply.match(/→ Compiling to: C11/i);
+  if (stdMatch)      { agentCStd = parseInt(stdMatch[1]); agentBackend = 'cpp'; }
+  else if (c11Match) { agentCStd = 11; agentBackend = 'c'; }
+
+  if (document.getElementById('backend-select')) {
+    document.getElementById('backend-select').value = agentBackend;
+    activeBackend = agentBackend;
+    document.getElementById('status-backend').textContent =
+      agentBackend === 'cpp' ? ('C++' + agentCStd) : 'C11';
+  }
+
+  const dictumMatch = reply.match(/```(?:dictum|dict)\s*\n([\s\S]*?)```/);
+  if (!dictumMatch) {
+    appendAgentMsg('compile', agentSkills, agentBackend, agentCStd,
+      '⚠ No code block found in AI response. Try asking again.');
+    agentPhase = 'done';
+    return;
+  }
+
+  const code = dictumMatch[1].trim();
+  document.getElementById('dictum-editor').value = code;
+  updateLineNums();
+
+  // ── Transpile + auto-fix loop ─────────────────────────────────────────
+  const result = await transpileAndCheck(code);
+
+  if (result.ok) {
+    const stdLabel = agentBackend === 'c' ? 'C11' : ('C++' + agentCStd);
+    toast('Code generated — ' + stdLabel, 'ok');
+    appendFixSuccessMsg(0, 'First attempt passed validation ✓');
+  } else {
+    // Kick off the auto-fix loop
+    await agentAutoFix(s, code, result.error);
+  }
+
+  agentPhase = 'done';
+}
+
+// ── Plan revision ─────────────────────────────────────────────────────────
+async function agentPhasePlanRevision(text, s) {
+  agentPhase = 'plan';
+  chatHistory.push({ role: 'user', content: `Revise the plan based on this feedback: ${text}\n\nEnd your reply with: "---PLAN_READY---"` });
+  const reply = await callAPI(s, agentSkills[0], chatHistory);
+  chatHistory.push({ role: 'assistant', content: reply });
+  const cleanReply = reply.replace('---PLAN_READY---', '').trim();
+  appendPlanMsg(cleanReply);
+}
+
+// ── Reset agentic state ───────────────────────────────────────────────────
+function clearChat() {
+  chatHistory  = [];
+  agentPhase   = 'idle';
+  agentSkills  = [];
+  agentQACount = 0;
+  pendingPlanEl = null;
+  const msgs = document.getElementById('chat-messages');
+  msgs.innerHTML = '';
+  msgs.appendChild(buildEmptyState());
+}
+
+// ────────────────────────────────────────────────
+// API CALLER  (routes through /api/proxy on server to avoid CORS)
+// ────────────────────────────────────────────────
+async function callAPI(s, skill, messages) {
   const base = s.url.replace(/\/+$/, '')
-                     .replace(/\/(chat\/completions|completions|messages|v1)$/, '');
-  // Always append /v1 if the base doesn't already have it (handles bare hosts like localhost:1234)
-  const apiBase = base.endsWith('/v1') ? base : `${base}/v1`;
+                     .replace(/\/(chat\/completions|completions|messages)$/, '');
+  const apiBase   = base.endsWith('/v1') ? base : `${base}/v1`;
+  const targetUrl = `${apiBase}/chat/completions`;
 
-  const messages = [
-    { role: 'system', content: buildSystemPrompt(skill) },
-    ...chatHistory.map(m => ({ role: m.role, content: m.content })),
-  ];
-
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(s.key ? { 'Authorization': `Bearer ${s.key}` } : {}),
-  };
-
-  const res = await fetch(`${apiBase}/chat/completions`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      model:       s.model,
-      messages,
-      max_tokens:  2048,
-      temperature: 0.3,
-      stream:      false,
-    }),
+  const history = messages || chatHistory;
+  const body = JSON.stringify({
+    model:       s.model,
+    messages:    [
+      { role: 'system', content: buildSystemPrompt(skill) },
+      ...history,
+    ],
+    max_tokens:  4096,
+    temperature: 0.3,
+    stream:      false,
   });
 
+  const extraHeaders = s.key ? { 'Authorization': `Bearer ${s.key}` } : {};
+
+  // Try direct fetch first (works for CORS-enabled providers)
+  // Fall back to /api/proxy for providers like NVIDIA that block browser calls
+  let res;
+  try {
+    res = await fetch(targetUrl, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', ...extraHeaders },
+      body,
+    });
+  } catch (directErr) {
+    // Network error (CORS block or unreachable) — route through backend proxy
+    res = await fetch(`${API_BASE}/api/proxy`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url:     targetUrl,
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', ...extraHeaders },
+        body,
+      }),
+    });
+  }
+
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`HTTP ${res.status}: ${err.slice(0, 200)}`);
+    // If direct succeeded but got CORS-blocked response, try proxy
+    const errText = await res.text();
+    // Try proxy as fallback if we got a 0 or network error code
+    throw new Error(`HTTP ${res.status}: ${errText.slice(0, 200)}`);
   }
 
   const data = await res.json();
   return data.choices?.[0]?.message?.content || '(empty response)';
+}
+
+function buildSystemPrompt(skill) {
+  const skillGuides = {
+    embedded:   'Focus on zero-allocation patterns, hardware register access, interrupt-safe code.',
+    medical:    'Ensure data integrity, overflow checks, IEEE 754 precision for sensor readings.',
+    automotive: 'Use MISRA-safe patterns, no dynamic allocation, deterministic timing.',
+    aerospace:  'Formal verification-friendly structure, no recursion, bounded loops.',
+    edgeai:     'Optimize for quantized inference, fixed-point math, minimal footprint.',
+    general:    'General-purpose Dictum patterns.',
+  };
+  const guide = skillGuides[skill] || skillGuides.general;
+  return `You are a Dictum AI assistant — expert in the Dictum language, which compiles to C11/C++17/20/23.
+
+Skill context: ${skill.toUpperCase()}
+Skill guidance: ${guide}
+
+Dictum syntax:
+- program Name: ... end program
+- use Console / File / Http / Json / Thread / Math
+- keep X as whole number with value 5
+- keep Y as text with value "hello"
+- action name takes Param as type produces type: ... end action
+- call Module.method with arg
+- if Condition then ... end if
+- while Condition repeat ... end repeat
+- for each Item in Collection repeat ... end repeat
+- attempt ... on failure with Err ... end attempt
+
+Never emit raw C or C++. Always use Dictum syntax.`;
+}
+
+// ────────────────────────────────────────────────
+// CHAT RENDER HELPERS  (agentic)
+// ────────────────────────────────────────────────
+function appendAgentMsg(phase, skills, backend, std, content) {
+  const msgs = document.getElementById('chat-messages');
+  const empty = document.getElementById('chat-empty');
+  if (empty) empty.remove();
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'chat-msg assistant';
+
+  const roleEl = document.createElement('div');
+  roleEl.className = 'chat-msg-role';
+  roleEl.textContent = 'Dictum AI';
+  wrapper.appendChild(roleEl);
+
+  // Phase badge
+  const phaseLabels = { detect: '🔍 Detect', ask: '❓ Clarify', plan: '📋 Plan', code: '⚡ Code', compile: '🔨 Compile' };
+  const badge = document.createElement('span');
+  badge.className = `chat-phase-badge phase-${phase}`;
+  badge.textContent = phaseLabels[phase] || phase;
+  wrapper.appendChild(badge);
+
+  // Skill chips
+  if (skills && skills.length) {
+    const chipWrap = document.createElement('div');
+    chipWrap.style.marginBottom = '6px';
+    skills.forEach(sk => {
+      const chip = document.createElement('span');
+      chip.className = 'chat-skill-chip';
+      chip.textContent = sk;
+      chipWrap.appendChild(chip);
+    });
+    const stdChip = document.createElement('span');
+    stdChip.className = 'chat-std-chip';
+    stdChip.textContent = backend === 'c' ? 'C11' : `C++${std}`;
+    chipWrap.appendChild(stdChip);
+    wrapper.appendChild(chipWrap);
+  }
+
+  // Message body
+  const parts = parseMessageContent(content);
+  parts.forEach(part => {
+    if (part.type === 'text') {
+      const body = document.createElement('div');
+      body.className = 'chat-msg-body';
+      body.textContent = part.content;
+      wrapper.appendChild(body);
+    } else if (part.type === 'code') {
+      const block = document.createElement('div');
+      block.className = 'chat-code-block';
+      block.innerHTML = `
+        <div class="chat-code-block-header">
+          <span class="chat-code-block-lang">${part.lang}</span>
+          ${part.lang === 'dictum' || part.lang === 'dict'
+            ? `<button class="chat-code-apply" onclick="applyCode(this)">↓ Apply to editor</button>`
+            : ''}
+        </div>
+        <pre>${escapeHtml(part.content)}</pre>`;
+      wrapper.appendChild(block);
+    }
+  });
+
+  msgs.appendChild(wrapper);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function appendPlanMsg(planText) {
+  const msgs = document.getElementById('chat-messages');
+  const empty = document.getElementById('chat-empty');
+  if (empty) empty.remove();
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'chat-msg assistant';
+  pendingPlanEl = wrapper;
+
+  const roleEl = document.createElement('div');
+  roleEl.className = 'chat-msg-role';
+  roleEl.textContent = 'Dictum AI';
+  wrapper.appendChild(roleEl);
+
+  const badge = document.createElement('span');
+  badge.className = 'chat-phase-badge phase-plan';
+  badge.textContent = '📋 Plan';
+  wrapper.appendChild(badge);
+
+  const planBlock = document.createElement('div');
+  planBlock.className = 'chat-plan-block';
+  planBlock.textContent = planText;
+  wrapper.appendChild(planBlock);
+
+  const actions = document.createElement('div');
+  actions.className = 'chat-plan-actions';
+
+  const approveBtn = document.createElement('button');
+  approveBtn.className = 'plan-approve-btn';
+  approveBtn.textContent = '✓ Approve — Generate Code';
+  approveBtn.onclick = async () => {
+    approveBtn.disabled = true;
+    reviseBtn.disabled  = true;
+    chatThinking = true;
+    document.getElementById('chat-send').disabled = true;
+    try {
+      const s = getSettings();
+      await agentPhaseCode(s);
+    } catch(e) {
+      appendChatMsg('assistant', `Error during code gen: ${e.message}`);
+    }
+    chatThinking = false;
+    document.getElementById('chat-send').disabled = false;
+  };
+
+  const reviseBtn = document.createElement('button');
+  reviseBtn.className = 'plan-revise-btn';
+  reviseBtn.textContent = '↺ Revise Plan';
+  reviseBtn.onclick = () => {
+    agentPhase = 'plan_revision';
+    actions.remove();
+    const hint = document.createElement('div');
+    hint.className = 'chat-msg-body';
+    hint.style.color = 'var(--amber)';
+    hint.textContent = 'Tell me what to change about the plan…';
+    wrapper.appendChild(hint);
+    msgs.scrollTop = msgs.scrollHeight;
+  };
+
+  actions.appendChild(approveBtn);
+  actions.appendChild(reviseBtn);
+  wrapper.appendChild(actions);
+  msgs.appendChild(wrapper);
+  msgs.scrollTop = msgs.scrollHeight;
 }
 
 // ────────────────────────────────────────────────
@@ -3023,8 +3769,174 @@ function appendThinking() {
   return div;
 }
 
+// ────────────────────────────────────────────────
+// FILE TREE
+// ────────────────────────────────────────────────
+function ftreeSelect(id) {
+  document.querySelectorAll('.file-tree-item').forEach(el => el.classList.remove('active'));
+  const tabMap = { 'dict': null, 'c': 'c-out', 'ast-view': 'ast', 'terminal-view': 'terminal' };
+  const treeId = { 'dict': 'ftree-dict', 'c': 'ftree-c', 'ast-view': 'ftree-ast', 'terminal-view': 'ftree-terminal' };
+  const el = document.getElementById(treeId[id]);
+  if (el) el.classList.add('active');
+  if (id === 'dict') {
+    // focus editor
+    document.getElementById('dictum-editor').focus();
+  } else if (tabMap[id]) {
+    switchTab(tabMap[id]);
+  }
+}
+
+function updateFileTree() {
+  // Update c output filename based on backend
+  const nameEl = document.getElementById('ftree-c-name');
+  if (nameEl) nameEl.textContent = activeBackend === 'cpp' ? 'output.cpp' : 'output.c';
+}
+
+function ftreeDownload(type, event) {
+  if (event) { event.stopPropagation(); }
+  switch (type) {
+    case 'dict': {
+      const code = document.getElementById('dictum-editor').value;
+      if (!code.trim()) { toast('Editor is empty', 'err'); return; }
+      downloadText(code, 'program.dict', 'text/plain');
+      break;
+    }
+    case 'c': {
+      const el = document.getElementById('c-output');
+      const code = el ? el.innerText || el.textContent : '';
+      if (!code.trim() || code.includes('Transpiled C will appear')) { toast('No C output yet — transpile first', 'err'); return; }
+      const ext  = activeBackend === 'cpp' ? 'cpp' : 'c';
+      downloadText(code, `output.${ext}`, 'text/plain');
+      break;
+    }
+    case 'ast': {
+      const el = document.getElementById('ast-output');
+      const text = el ? el.innerText || el.textContent : '';
+      if (!text.trim() || text.includes('AST summary')) { toast('No AST yet — validate first', 'err'); return; }
+      downloadText(text, 'ast.txt', 'text/plain');
+      break;
+    }
+    case 'terminal': {
+      const el = document.getElementById('terminal');
+      const text = el ? el.innerText || el.textContent : '';
+      if (!text.trim() || text.includes('No execution')) { toast('No terminal output yet — run first', 'err'); return; }
+      downloadText(text, 'terminal.log', 'text/plain');
+      break;
+    }
+  }
+}
+
+function downloadActiveTab() {
+  // Figure out which tab is active
+  const tabs = ['c-out', 'terminal', 'ast'];
+  const tabEls = document.querySelectorAll('.output-tab');
+  let activeId = 'c-out';
+  tabEls.forEach((t, i) => { if (t.classList.contains('active')) activeId = tabs[i]; });
+  const typeMap = { 'c-out': 'c', 'terminal': 'terminal', 'ast': 'ast' };
+  ftreeDownload(typeMap[activeId] || 'c', null);
+}
+
+function downloadText(content, filename, mime) {
+  const blob = new Blob([content], { type: mime });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast(`Downloaded ${filename}`, 'ok');
+}
+
+// ────────────────────────────────────────────────
+// AUTO-FIX RENDER HELPERS
+// ────────────────────────────────────────────────
+function appendFixAttemptMsg(attempt, maxAttempts, error) {
+  const msgs = document.getElementById('chat-messages');
+  const wrapper = document.createElement('div');
+  wrapper.className = 'chat-msg assistant';
+  wrapper.id = `fix-attempt-${attempt}`;
+
+  const roleEl = document.createElement('div');
+  roleEl.className = 'chat-msg-role';
+  roleEl.textContent = 'Dictum AI';
+  wrapper.appendChild(roleEl);
+
+  const card = document.createElement('div');
+  card.className = 'fix-attempt-card';
+
+  const header = document.createElement('div');
+  header.className = 'fix-attempt-header';
+
+  const badge = document.createElement('span');
+  badge.className = 'fix-attempt-badge';
+  badge.textContent = `🔧 Fix attempt ${attempt} / ${maxAttempts}`;
+  header.appendChild(badge);
+
+  // Dot progress
+  const dots = document.createElement('div');
+  dots.className = 'fix-attempt-dots';
+  for (let i = 1; i <= maxAttempts; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'fix-dot' + (i < attempt ? ' done' : i === attempt ? ' active' : '');
+    dots.appendChild(dot);
+  }
+  header.appendChild(dots);
+  card.appendChild(header);
+
+  const errEl = document.createElement('div');
+  errEl.className = 'fix-error-text';
+  errEl.textContent = 'Error: ' + error.slice(0, 300);
+  card.appendChild(errEl);
+
+  wrapper.appendChild(card);
+  msgs.appendChild(wrapper);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function appendFixSuccessMsg(attempt, note) {
+  const msgs = document.getElementById('chat-messages');
+  const wrapper = document.createElement('div');
+  wrapper.className = 'chat-msg assistant';
+
+  const roleEl = document.createElement('div');
+  roleEl.className = 'chat-msg-role';
+  roleEl.textContent = 'Dictum AI';
+  wrapper.appendChild(roleEl);
+
+  const card = document.createElement('div');
+  card.className = 'fix-success-card';
+  card.innerHTML = attempt === 0
+    ? `<strong>✓ Transpiled successfully</strong><br>${escapeHtml(note)}`
+    : `<strong>✓ Fixed on attempt ${attempt}</strong><br>${escapeHtml(note)}<br><span style="color:var(--dim);font-size:11px">Code is now in the editor and validated.</span>`;
+  wrapper.appendChild(card);
+  msgs.appendChild(wrapper);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function appendFixExhaustedMsg(maxAttempts, lastError) {
+  const msgs = document.getElementById('chat-messages');
+  const wrapper = document.createElement('div');
+  wrapper.className = 'chat-msg assistant';
+
+  const roleEl = document.createElement('div');
+  roleEl.className = 'chat-msg-role';
+  roleEl.textContent = 'Dictum AI';
+  wrapper.appendChild(roleEl);
+
+  const card = document.createElement('div');
+  card.className = 'fix-exhausted-card';
+  card.innerHTML =
+    `<strong>✗ Could not fix after ${maxAttempts} attempts</strong><br>` +
+    `<span style="opacity:0.8">Last error: ${escapeHtml(lastError.slice(0, 300))}</span><br><br>` +
+    `<span style="color:var(--dim);font-size:11px">The code is in the editor — you can describe the issue and I'll try a different approach.</span>`;
+  wrapper.appendChild(card);
+  msgs.appendChild(wrapper);
+  msgs.scrollTop = msgs.scrollHeight;
+  toast('Auto-fix exhausted — describe the issue to try again', 'err');
+}
+
 buildSamplesList();
 updateLineNums();
+updateFileTree();
 
 // Show app directly if URL has #play
 if (location.hash === '#play') openApp();

@@ -172,6 +172,13 @@ class GenerateRequest(BaseModel):
     auto_transpile: bool = True
 
 
+class ProxyRequest(BaseModel):
+    url: str                    # full target URL, e.g. https://integrate.api.nvidia.com/v1/chat/completions
+    method: str = "POST"
+    headers: dict = {}
+    body: Optional[str] = None  # JSON string
+
+
 # ────────────────────────────────────────────────────────────────────────────
 # App
 # ────────────────────────────────────────────────────────────────────────────
@@ -397,6 +404,55 @@ def workspace_delete(name: str):
     if not deleted:
         raise HTTPException(404, f"Program '{name}' not found")
     return {"ok": True, "deleted": name}
+
+
+# ── CORS Proxy ───────────────────────────────────────────────────────────────
+# Forwards requests from the browser to any external API that doesn't support CORS
+# (e.g. NVIDIA NIM integrate.api.nvidia.com). The server makes the request server-
+# side, so CORS restrictions never apply.
+
+@app.post("/api/proxy")
+async def cors_proxy(req: ProxyRequest, request: Request):
+    import urllib.request as ureq
+    import urllib.error
+
+    # Basic SSRF guard: block private/loopback ranges reaching internal infra
+    from urllib.parse import urlparse
+    import ipaddress
+    parsed = urlparse(req.url)
+    host = parsed.hostname or ""
+    # Allow localhost only when request comes from localhost itself
+    client_host = request.client.host if request.client else ""
+    is_internal_client = client_host in ("127.0.0.1", "::1", "localhost")
+
+    try:
+        addr = ipaddress.ip_address(host)
+        if addr.is_private and not is_internal_client:
+            raise HTTPException(403, "Proxying to private IP addresses is not allowed")
+    except ValueError:
+        pass  # hostname, not an IP — allow
+
+    # Build the upstream request
+    body_bytes = req.body.encode("utf-8") if req.body else None
+    headers = {k: v for k, v in req.headers.items()}
+    headers.setdefault("Content-Type", "application/json")
+
+    upstream = ureq.Request(req.url, data=body_bytes, headers=headers, method=req.method.upper())
+
+    try:
+        with ureq.urlopen(upstream, timeout=90) as resp:
+            response_body = resp.read()
+            content_type  = resp.headers.get("Content-Type", "application/json")
+        from fastapi.responses import Response
+        return Response(content=response_body, media_type=content_type)
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")
+        from fastapi.responses import Response
+        return Response(content=body, status_code=e.code, media_type="application/json")
+    except urllib.error.URLError as e:
+        raise HTTPException(502, f"Upstream request failed: {e.reason}")
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
 
 # ── Generate (BYOK) ──────────────────────────────────────────────────────────
