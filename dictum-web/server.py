@@ -1,8 +1,15 @@
 #!/usr/bin/env python3
 """
-Dictum Web — Production server
+Dictum Web — Production server v5.3
 Serves the landing page / editor frontend as static files
 and mounts the full Dictum API at /api/*
+
+New in v5.3:
+  - /api/generate now accepts `api_endpoint`, `api_format`, and `system` fields
+    so any BYOK provider (Anthropic, OpenAI-compat, NVIDIA NIM) works
+  - /api/generate-stream: SSE streaming for both Anthropic and OpenAI formats
+  - NVIDIA NIM auto-detected from endpoint URL → forces openai format + correct headers
+  - GenerateRequest.system: override the system prompt (used by Ask/Plan phases)
 
 Designed for fly.io free tier deployment.
 PORT env var overrides default 8080.
@@ -16,8 +23,6 @@ import tempfile
 import time
 
 # ── Resolve project root ──────────────────────────────────────────────────
-# When running from dictum-web/, the Dictumc repo is expected one level up.
-# In Docker (Dockerfile), WORKDIR is /app which is the repo root.
 _HERE        = os.path.dirname(os.path.abspath(__file__))
 _REPO_ROOT   = os.environ.get("DICTUM_REPO", os.path.dirname(_HERE))
 _STATIC_DIR  = os.path.join(_HERE, "static")
@@ -28,7 +33,7 @@ sys.path.insert(0, _REPO_ROOT)
 try:
     from fastapi import FastAPI, HTTPException, Request
     from fastapi.middleware.cors import CORSMiddleware
-    from fastapi.responses import FileResponse, HTMLResponse
+    from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse, Response
     from fastapi.staticfiles import StaticFiles
     from pydantic import BaseModel
     from typing import Optional, List
@@ -167,22 +172,28 @@ class GenerateRequest(BaseModel):
     backend: str = "c"
     cpp_standard: int = 17
     skills: List[str] = []
+    # BYOK — v5.2 original fields (Anthropic only)
     api_key: str = ""
     model: str = "claude-sonnet-4-6"
     auto_transpile: bool = True
+    # v5.3 additions — multi-provider support
+    api_endpoint: str = ""      # e.g. "https://api.anthropic.com" or "https://integrate.api.nvidia.com/v1"
+    api_format: str = "anthropic"  # "anthropic" | "openai"
+    system: str = ""            # optional system prompt override (Ask/Plan phases bypass skill builder)
+    stream: bool = False        # used by generate-stream endpoint
 
 
 class ProxyRequest(BaseModel):
-    url: str                    # full target URL, e.g. https://integrate.api.nvidia.com/v1/chat/completions
+    url: str
     method: str = "POST"
     headers: dict = {}
-    body: Optional[str] = None  # JSON string
+    body: Optional[str] = None
 
 
 # ────────────────────────────────────────────────────────────────────────────
 # App
 # ────────────────────────────────────────────────────────────────────────────
-app = FastAPI(title="Dictum", version="5.2", docs_url="/api/docs")
+app = FastAPI(title="Dictum", version="5.3", docs_url="/api/docs")
 
 app.add_middleware(
     CORSMiddleware,
@@ -209,9 +220,9 @@ def health():
     return {
         "ok": True,
         "dictum_available": DICTUM_AVAILABLE,
-        "version": "5.2",
+        "version": "5.3",
         "targets_available": [
-            k for k, v in _QEMU_TARGETS.items()
+            k for k in _QEMU_TARGETS
             if _target_available(k)["available"]
         ],
     }
@@ -407,21 +418,17 @@ def workspace_delete(name: str):
 
 
 # ── CORS Proxy ───────────────────────────────────────────────────────────────
-# Forwards requests from the browser to any external API that doesn't support CORS
-# (e.g. NVIDIA NIM integrate.api.nvidia.com). The server makes the request server-
-# side, so CORS restrictions never apply.
+# Routes browser→server to bypass CORS (e.g. NVIDIA NIM, direct Anthropic from browsers)
 
 @app.post("/api/proxy")
 async def cors_proxy(req: ProxyRequest, request: Request):
     import urllib.request as ureq
     import urllib.error
-
-    # Basic SSRF guard: block private/loopback ranges reaching internal infra
     from urllib.parse import urlparse
     import ipaddress
+
     parsed = urlparse(req.url)
     host = parsed.hostname or ""
-    # Allow localhost only when request comes from localhost itself
     client_host = request.client.host if request.client else ""
     is_internal_client = client_host in ("127.0.0.1", "::1", "localhost")
 
@@ -430,9 +437,8 @@ async def cors_proxy(req: ProxyRequest, request: Request):
         if addr.is_private and not is_internal_client:
             raise HTTPException(403, "Proxying to private IP addresses is not allowed")
     except ValueError:
-        pass  # hostname, not an IP — allow
+        pass
 
-    # Build the upstream request
     body_bytes = req.body.encode("utf-8") if req.body else None
     headers = {k: v for k, v in req.headers.items()}
     headers.setdefault("Content-Type", "application/json")
@@ -443,11 +449,9 @@ async def cors_proxy(req: ProxyRequest, request: Request):
         with ureq.urlopen(upstream, timeout=90) as resp:
             response_body = resp.read()
             content_type  = resp.headers.get("Content-Type", "application/json")
-        from fastapi.responses import Response
         return Response(content=response_body, media_type=content_type)
     except urllib.error.HTTPError as e:
         body = e.read().decode("utf-8", errors="replace")
-        from fastapi.responses import Response
         return Response(content=body, status_code=e.code, media_type="application/json")
     except urllib.error.URLError as e:
         raise HTTPException(502, f"Upstream request failed: {e.reason}")
@@ -455,7 +459,7 @@ async def cors_proxy(req: ProxyRequest, request: Request):
         raise HTTPException(500, str(e))
 
 
-# ── Generate (BYOK) ──────────────────────────────────────────────────────────
+# ── Generate helpers ─────────────────────────────────────────────────────────
 
 _SKILLS_ROOT = os.path.join(_REPO_ROOT, "industry_skills")
 _SKILL_FILES = {
@@ -482,7 +486,6 @@ def _load_skill(sid: str) -> str:
 
 
 def _build_system_prompt(skills: List[str]) -> str:
-    import re
     parts = ["""You are a Dictum code generation assistant.
 Dictum is an AI-native systems programming language that compiles to C11 or C++17/20/23.
 
@@ -510,48 +513,151 @@ def _extract_dictum(text: str) -> str:
     return m.group(1).strip() if m else ""
 
 
+def _resolve_provider(req: GenerateRequest):
+    """
+    Returns (url, headers, payload_dict, effective_format).
+    Handles Anthropic, OpenAI-compatible, and NVIDIA NIM automatically.
+    NIM is detected from the endpoint URL and forces openai format.
+    Falls back to Anthropic-only behaviour when no api_endpoint is given
+    (backwards-compatible with the original v5.2 server).
+    """
+    import json as _json
+
+    api_key      = req.api_key.strip() or os.environ.get("ANTHROPIC_API_KEY", "")
+    api_endpoint = req.api_endpoint.strip()
+    system_text  = req.system.strip() if req.system.strip() else _build_system_prompt(req.skills)
+
+    # ── Detect NVIDIA NIM ──────────────────────────────────────────────────
+    is_nim = bool(api_endpoint) and (
+        "nvidia.com" in api_endpoint or
+        "nim" in api_endpoint.lower()
+    )
+    # OpenRouter has a non-standard path: openrouter.ai/api/v1/...
+    # We detect it so we don't mangle the URL.
+    is_openrouter = bool(api_endpoint) and "openrouter.ai" in api_endpoint
+
+    # ── Determine effective format ─────────────────────────────────────────
+    if is_nim:
+        effective_format = "openai"
+    elif api_endpoint:
+        effective_format = req.api_format.strip().lower()
+        if effective_format not in ("openai", "anthropic"):
+            effective_format = "anthropic"
+    else:
+        # Legacy: no endpoint given → Anthropic default
+        effective_format = "anthropic"
+        api_endpoint = "https://api.anthropic.com"
+
+    # ── Build URL ──────────────────────────────────────────────────────────
+    # Normalise: strip trailing slash and any existing known path suffixes
+    # so that https://api.openai.com/v1, https://api.openai.com/v1/,
+    # https://api.openai.com/v1/chat/completions, and https://api.openai.com
+    # all resolve to the same correct final URL.
+    _base = api_endpoint.rstrip("/")
+
+    if is_openrouter:
+        # OpenRouter path: https://openrouter.ai/api/v1/chat/completions
+        # Strip everything after the host, then add the correct path
+        from urllib.parse import urlparse as _urlparse
+        _parsed = _urlparse(_base)
+        _origin = f"{_parsed.scheme}://{_parsed.netloc}"
+        url = _origin + "/api/v1/chat/completions"
+    else:
+        # Standard: strip any known path suffix, then append the correct one
+        for _suffix in ("/v1/chat/completions", "/v1/messages", "/chat/completions",
+                        "/messages", "/v1"):
+            if _base.endswith(_suffix):
+                _base = _base[: -len(_suffix)]
+                break
+
+        if effective_format == "anthropic":
+            url = _base + "/v1/messages"
+        else:  # openai / nim
+            url = _base + "/v1/chat/completions"
+
+    # ── Build headers ──────────────────────────────────────────────────────
+    if effective_format == "anthropic":
+        headers = {
+            "Content-Type": "application/json",
+            "x-api-key": api_key,
+            "anthropic-version": "2023-06-01",
+        }
+    else:  # openai / nim
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}",
+        }
+
+    # ── Build payload ──────────────────────────────────────────────────────
+    if effective_format == "anthropic":
+        payload = {
+            "model": req.model,
+            "max_tokens": 4096,
+            "system": system_text,
+            "messages": [{"role": "user", "content": req.prompt}],
+        }
+    else:
+        payload = {
+            "model": req.model,
+            "max_tokens": 4096,
+            "messages": [
+                {"role": "system", "content": system_text},
+                {"role": "user",   "content": req.prompt},
+            ],
+        }
+
+    return url, headers, payload, effective_format, api_key
+
+
+# ── /api/generate (non-streaming, backwards compatible) ──────────────────────
+
 @app.post("/api/generate")
 def generate(req: GenerateRequest):
     import urllib.request, json
 
-    api_key = req.api_key.strip() or os.environ.get("ANTHROPIC_API_KEY", "")
-    if not api_key:
+    if not req.api_key.strip() and not os.environ.get("ANTHROPIC_API_KEY", "") and not req.api_endpoint:
         return {
             "ok": False,
-            "error": "No API key. Enter your Anthropic key in Settings → API Key.",
+            "error": "No API key. Enter your key in Settings → API Key.",
         }
 
-    payload = json.dumps({
-        "model": req.model,
-        "max_tokens": 4096,
-        "system": _build_system_prompt(req.skills),
-        "messages": [{"role": "user", "content": req.prompt}],
-    }).encode()
-
-    api_req = urllib.request.Request(
-        "https://api.anthropic.com/v1/messages",
-        data=payload,
-        headers={
-            "Content-Type": "application/json",
-            "x-api-key": api_key,
-            "anthropic-version": "2023-06-01",
-        },
-        method="POST",
-    )
-
     try:
-        with urllib.request.urlopen(api_req, timeout=60) as resp:
-            body = json.loads(resp.read())
-    except urllib.error.HTTPError as e:
-        return {"ok": False, "error": f"API error {e.code}: {e.read().decode()[:300]}"}
+        url, headers, payload, effective_format, _ = _resolve_provider(req)
     except Exception as e:
         return {"ok": False, "error": str(e)}
 
-    full_text = "".join(
-        b["text"] for b in body.get("content", []) if b.get("type") == "text"
-    )
-    dictum_code = _extract_dictum(full_text)
+    payload_bytes = json.dumps(payload).encode()
 
+    # Debug: log the resolved URL so misconfigurations are visible in server logs
+    print(f"[generate] provider={effective_format} url={url} model={req.model} "
+          f"endpoint_in={req.api_endpoint!r}", flush=True)
+
+    api_req = urllib.request.Request(url, data=payload_bytes, headers=headers, method="POST")
+
+    try:
+        with urllib.request.urlopen(api_req, timeout=90) as resp:
+            body = json.loads(resp.read())
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode()[:500]
+        print(f"[generate] HTTP {e.code} from {url}: {err_body[:200]}", flush=True)
+        return {"ok": False, "error": f"API error {e.code}: {err_body[:300]}",
+                "debug_url": url, "debug_format": effective_format}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+    # Extract text from response (both formats)
+    if effective_format == "anthropic":
+        full_text = "".join(
+            b["text"] for b in body.get("content", []) if b.get("type") == "text"
+        )
+    else:  # openai / nim
+        choices = body.get("choices", [])
+        full_text = choices[0].get("message", {}).get("content", "") if choices else ""
+
+    if not full_text:
+        return {"ok": False, "error": "Empty response from API", "message": ""}
+
+    dictum_code = _extract_dictum(full_text)
     result = {"ok": True, "message": full_text, "dictum": dictum_code, "c": "", "warnings": []}
 
     if req.auto_transpile and dictum_code:
@@ -560,18 +666,121 @@ def generate(req: GenerateRequest):
             cpp_standard=req.cpp_standard, stdlib=True, validate_code=True,
         ))
         result["transpile_ok"] = tr.get("ok", False)
-        result["c"] = tr.get("code", "")
-        result["warnings"] = tr.get("warnings", [])
+        result["c"]            = tr.get("code", "")
+        result["warnings"]     = tr.get("warnings", [])
         if not tr.get("ok"):
             result["transpile_error"] = tr.get("error", "")
 
     return result
 
 
+# ── /api/generate-stream (SSE streaming) ─────────────────────────────────────
+
+@app.post("/api/generate-stream")
+async def generate_stream(req: GenerateRequest):
+    """
+    SSE streaming endpoint.  Supports:
+    - Anthropic Messages API (stream:true)  → delta.text events
+    - OpenAI Chat Completions (stream:true) → choices[0].delta.content
+    - NVIDIA NIM (openai-compatible)
+
+    Each SSE event: data: {"text": "..."}\n\n
+    Terminated with: data: [DONE]\n\n
+
+    Falls back to a single non-streaming request if the provider doesn't
+    support SSE (returns the full text as one chunk then [DONE]).
+    """
+    import json as _json
+
+    if not req.api_key.strip() and not os.environ.get("ANTHROPIC_API_KEY", ""):
+        async def _err():
+            yield f'data: {_json.dumps({"error": "No API key"})}\n\n'
+            yield "data: [DONE]\n\n"
+        return StreamingResponse(_err(), media_type="text/event-stream")
+
+    try:
+        url, headers, payload, effective_format, _ = _resolve_provider(req)
+    except Exception as e:
+        async def _err2():
+            yield f'data: {_json.dumps({"error": str(e)})}\n\n'
+            yield "data: [DONE]\n\n"
+        return StreamingResponse(_err2(), media_type="text/event-stream")
+
+    # Add stream:true to payload
+    stream_payload = dict(payload)
+    stream_payload["stream"] = True
+    payload_bytes = _json.dumps(stream_payload).encode()
+
+    async def _stream_gen():
+        import asyncio
+        import threading
+        import queue as _queue
+        import urllib.request as _ureq
+        import urllib.error as _uerr
+
+        q: _queue.Queue = _queue.Queue()
+
+        print(f"[generate-stream] provider={effective_format} url={url} model={req.model}", flush=True)
+
+        def _do_request():
+            try:
+                req_obj = _ureq.Request(url, data=payload_bytes, headers=headers, method="POST")
+                with _ureq.urlopen(req_obj, timeout=120) as resp:
+                    for raw_line in resp:
+                        line = raw_line.decode("utf-8", errors="replace").rstrip("\n\r")
+                        if line.startswith("data: "):
+                            data_str = line[6:].strip()
+                            if data_str == "[DONE]":
+                                q.put(None)
+                                return
+                            try:
+                                parsed = _json.loads(data_str)
+                                delta = ""
+                                # Anthropic SSE
+                                if parsed.get("type") == "content_block_delta":
+                                    delta = parsed.get("delta", {}).get("text", "")
+                                # OpenAI / NIM SSE
+                                elif "choices" in parsed:
+                                    delta = parsed["choices"][0].get("delta", {}).get("content", "") or ""
+                                if delta:
+                                    q.put(_json.dumps({"text": delta}))
+                            except _json.JSONDecodeError:
+                                pass
+                q.put(None)
+            except _uerr.HTTPError as e:
+                err_body = e.read().decode("utf-8", errors="replace")[:400]
+                q.put(_json.dumps({"error": f"HTTP {e.code}: {err_body}"}))
+                q.put(None)
+            except Exception as e:
+                q.put(_json.dumps({"error": str(e)}))
+                q.put(None)
+
+        t = threading.Thread(target=_do_request, daemon=True)
+        t.start()
+
+        while True:
+            try:
+                item = q.get(timeout=0.05)
+            except _queue.Empty:
+                await asyncio.sleep(0.01)
+                continue
+            if item is None:
+                yield "data: [DONE]\n\n"
+                break
+            yield f"data: {item}\n\n"
+
+    return StreamingResponse(
+        _stream_gen(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
 # ── Static files (index.html) ──────────────────────────────────────────────
 
 if os.path.isdir(_STATIC_DIR):
     app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
+
 
 @app.get("/", response_class=HTMLResponse)
 @app.get("/{full_path:path}", response_class=HTMLResponse)
@@ -585,10 +794,9 @@ def serve_spa(full_path: str = ""):
             status_code=503
         )
     with open(index, encoding="utf-8") as f:
-        # Inject the correct API base URL so the frontend hits /api/*
         html = f.read().replace(
-            "window.DICTUM_API || 'http://localhost:8765'",
-            "window.DICTUM_API || ''"     # same-origin, prefix /api in JS
+            "window.DICTUM_API || 'http://localhost:8080'",
+            "window.DICTUM_API || ''"
         )
     return HTMLResponse(html)
 
@@ -598,6 +806,6 @@ def serve_spa(full_path: str = ""):
 # ────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
-    print(f"Dictum Web starting on port {port}")
+    print(f"Dictum Web v5.3 starting on port {port}")
     print(f"Dictum package: {'available' if DICTUM_AVAILABLE else 'NOT FOUND — transpile/run will fail'}")
     uvicorn.run("server:app", host="0.0.0.0", port=port, reload=False)

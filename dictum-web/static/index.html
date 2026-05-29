@@ -1830,6 +1830,16 @@ body {
   .statusbar { grid-column: 1; grid-row: 5; }
   .nav-links { display: none; }
 }
+
+/* streaming cursor */
+.stream-cursor {
+  display: inline-block;
+  animation: blink-cur 0.7s step-end infinite;
+  color: var(--cyan);
+  margin-left: 1px;
+}
+@keyframes blink-cur { 0%,100%{opacity:1} 50%{opacity:0} }
+
 </style>
 </head>
 <body>
@@ -2273,7 +2283,8 @@ body {
       <label class="settings-label">Base URL</label>
       <input class="settings-input" id="settings-api-url"
         placeholder="https://api.openai.com/v1"
-        value="" />
+        value=""
+        oninput="updateProviderBadge(this.value)" />
       <div class="settings-hint">
         Any OpenAI-compatible endpoint — Anthropic, OpenAI, Groq, Ollama, LM Studio, OpenRouter, or your own server.<br>
         Examples: <code style="color:var(--cyan);font-family:var(--font-mono)">http://localhost:1234/v1</code> &nbsp;·&nbsp;
@@ -2308,6 +2319,21 @@ body {
           oninput="filterModels(this.value)" />
         <div class="model-list" id="model-list"></div>
       </div>
+    </div>
+
+    <!-- API Format (auto-detected but user can override) -->
+    <div class="settings-group">
+      <label class="settings-label">API Format</label>
+      <select class="settings-input" id="settings-api-format">
+        <option value="">Auto-detect</option>
+        <option value="anthropic">Anthropic Messages API</option>
+        <option value="openai">OpenAI-compatible / NIM</option>
+      </select>
+      <div class="settings-hint">
+        Leave on Auto-detect unless you need to force a format.
+        NVIDIA NIM is auto-detected from the URL.
+      </div>
+      <div id="nim-badge" style="display:none;margin-top:8px;font-family:var(--font-mono);font-size:11px;padding:4px 10px;border-radius:4px;background:rgba(118,185,0,0.1);border:1px solid rgba(118,185,0,0.4);color:#76b900;font-weight:600"></div>
     </div>
 
     <div class="settings-actions">
@@ -2867,29 +2893,35 @@ function toast(msg, type) {
 
 function getSettings() {
   return {
-    url:   localStorage.getItem('dictum_api_url')   || '',
-    key:   localStorage.getItem('dictum_api_key')   || '',
-    model: localStorage.getItem('dictum_api_model') || '',
+    url:    localStorage.getItem('dictum_api_url')    || '',
+    key:    localStorage.getItem('dictum_api_key')    || '',
+    model:  localStorage.getItem('dictum_api_model')  || '',
+    format: localStorage.getItem('dictum_api_format') || '',
   };
 }
 
 function saveSettings() {
-  const url   = document.getElementById('settings-api-url').value.trim();
-  const key   = document.getElementById('settings-api-key').value.trim();
-  const model = document.getElementById('settings-model').value.trim();
-  if (!url) { toast('Base URL is required', 'err'); return; }
+  const url    = document.getElementById('settings-api-url').value.trim();
+  const key    = document.getElementById('settings-api-key').value.trim();
+  const model  = document.getElementById('settings-model').value.trim();
+  const format = document.getElementById('settings-api-format')?.value || '';
+  if (!url)   { toast('Base URL is required', 'err'); return; }
   if (!model) { toast('Model ID is required', 'err'); return; }
-  localStorage.setItem('dictum_api_url',   url);
-  localStorage.setItem('dictum_api_key',   key);
-  localStorage.setItem('dictum_api_model', model);
-  // collapse model list
+  localStorage.setItem('dictum_api_url',    url);
+  localStorage.setItem('dictum_api_key',    key);
+  localStorage.setItem('dictum_api_model',  model);
+  localStorage.setItem('dictum_api_format', format);
   document.getElementById('model-list-wrap').classList.remove('visible');
+  // Auto-detect NIM and show badge
+  if (isNIM(url)) {
+    toast('NVIDIA NIM detected — using OpenAI format', 'ok');
+  }
   closeSettings();
   toast('Settings saved', 'ok');
 }
 
 function clearSettings() {
-  ['dictum_api_url','dictum_api_key','dictum_api_model'].forEach(k => localStorage.removeItem(k));
+  ['dictum_api_url','dictum_api_key','dictum_api_model','dictum_api_format'].forEach(k => localStorage.removeItem(k));
   document.getElementById('settings-api-url').value  = '';
   document.getElementById('settings-api-key').value  = '';
   document.getElementById('settings-model').value    = '';
@@ -2904,10 +2936,31 @@ function openSettings() {
   document.getElementById('settings-api-url').value  = s.url;
   document.getElementById('settings-api-key').value  = s.key;
   document.getElementById('settings-model').value    = s.model;
+  const fmtEl = document.getElementById('settings-api-format');
+  if (fmtEl) fmtEl.value = s.format || (isAnthropic(s.url) ? 'anthropic' : 'openai');
   document.getElementById('model-list-wrap').classList.remove('visible');
   document.getElementById('model-fetch-status').textContent = '';
   document.getElementById('model-fetch-status').className   = 'model-fetch-status';
+  // Show/hide NIM badge
+  updateProviderBadge(s.url);
   document.getElementById('settings-modal').classList.add('open');
+}
+
+function updateProviderBadge(url) {
+  const badge = document.getElementById('nim-badge');
+  if (!badge) return;
+  if (isNIM(url)) {
+    badge.style.display = 'inline-block';
+    badge.textContent   = '⚡ NVIDIA NIM detected — will use OpenAI format';
+  } else if (isAnthropic(url)) {
+    badge.style.display = 'inline-block';
+    badge.textContent   = '◈ Anthropic detected';
+    badge.style.color   = '#c8a96e';
+    badge.style.borderColor = 'rgba(200,169,110,0.4)';
+    badge.style.background  = 'rgba(200,169,110,0.08)';
+  } else {
+    badge.style.display = 'none';
+  }
 }
 
 // ── Model fetcher ─────────────────────────────────────────────────────────
@@ -2929,9 +2982,11 @@ async function fetchModels() {
   status.textContent = 'Fetching models…';
   wrap.classList.remove('visible');
 
-  // Normalise base: strip trailing slash, strip /chat/completions etc.
-  const base = url.replace(/\/+$/, '').replace(/\/(chat\/completions|completions|messages)$/, '');
-  const endpoint = `${base}/models`;
+  // Normalise base: strip trailing slash + any known API path suffixes
+  const base = url.replace(/\/+$/, '')
+    .replace(/\/(v1\/chat\/completions|v1\/messages|chat\/completions|completions|messages)$/, '')
+    .replace(/\/v1$/, '');
+  const endpoint = `${base}/v1/models`;
 
   try {
     const headers = { 'Content-Type': 'application/json' };
@@ -3317,16 +3372,23 @@ Instructions:
 
     chatHistory.push({ role: 'user', content: fixPrompt });
     const thinkEl = appendThinking();
-    let reply;
+    let reply = '';
+    let sEl = null;
     try {
-      reply = await callAPI(s, agentSkills[0] || 'general', chatHistory);
+      reply = await callAPIStream(s, agentSkills[0] || 'general', fixPrompt, (chunk) => {
+        if (!sEl) { thinkEl.remove(); sEl = appendStreamMsg(); }
+        updateStreamMsg(sEl, chunk);
+      });
+      if (sEl) finalizeStreamMsg(sEl, reply);
+      else thinkEl.remove();
     } catch(e) {
       thinkEl.remove();
-      appendAgentMsg('compile', agentSkills, agentBackend, agentCStd,
-        `Fix attempt ${attempt} failed — API error: ${e.message}`);
-      return false;
+      if (!reply) {
+        appendAgentMsg('compile', agentSkills, agentBackend, agentCStd,
+          `Fix attempt ${attempt} failed — API error: ${e.message}`);
+        return false;
+      }
     }
-    thinkEl.remove();
     chatHistory.push({ role: 'assistant', content: reply });
 
     const match = reply.match(/```(?:dictum|dict)\s*\n([\s\S]*?)```/);
@@ -3383,8 +3445,24 @@ Rules:
 
   chatHistory.push({ role: 'user', content: codePrompt });
   const thinkEl = appendThinking();
-  const reply = await callAPI(s, agentSkills[0], chatHistory);
-  thinkEl.remove();
+
+  // Use streaming for code generation — gives live feedback
+  let reply = '';
+  let streamMsgEl = null;
+  try {
+    reply = await callAPIStream(s, agentSkills[0], codePrompt, (chunk) => {
+      if (!streamMsgEl) {
+        thinkEl.remove();
+        streamMsgEl = appendStreamMsg();
+      }
+      updateStreamMsg(streamMsgEl, chunk);
+    });
+    if (streamMsgEl) finalizeStreamMsg(streamMsgEl, reply);
+    else thinkEl.remove();
+  } catch(e) {
+    thinkEl.remove();
+    reply = await callAPI(s, agentSkills[0], chatHistory);
+  }
   chatHistory.push({ role: 'assistant', content: reply });
   appendAgentMsg('code', agentSkills, agentBackend, agentCStd, reply);
 
@@ -3450,61 +3528,142 @@ function clearChat() {
   msgs.appendChild(buildEmptyState());
 }
 
-// ────────────────────────────────────────────────
-// API CALLER  (routes through /api/proxy on server to avoid CORS)
-// ────────────────────────────────────────────────
-async function callAPI(s, skill, messages) {
-  const base = s.url.replace(/\/+$/, '')
-                     .replace(/\/(chat\/completions|completions|messages)$/, '');
-  const apiBase   = base.endsWith('/v1') ? base : `${base}/v1`;
-  const targetUrl = `${apiBase}/chat/completions`;
+// ────────────────────────────────────────────────────────────────────────────
+// PROVIDER HELPERS
+// ────────────────────────────────────────────────────────────────────────────
 
+// Detect NVIDIA NIM from base URL
+function isNIM(url) {
+  return url && (url.includes('nvidia.com') || url.toLowerCase().includes('nim'));
+}
+
+// Detect Anthropic from base URL
+function isAnthropic(url) {
+  return url && url.includes('anthropic.com');
+}
+
+// Return effective API format: 'anthropic' or 'openai'
+function effectiveFormat(s) {
+  if (isNIM(s.url)) return 'openai';
+  // If user set a custom format via settings, honour it
+  return s.format || (isAnthropic(s.url) ? 'anthropic' : 'openai');
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// API CALLER — routes through /api/generate or /api/generate-stream
+// Supports Anthropic, OpenAI-compat, and NVIDIA NIM
+// ────────────────────────────────────────────────────────────────────────────
+async function callAPI(s, skill, messages, opts = {}) {
   const history = messages || chatHistory;
-  const body = JSON.stringify({
-    model:       s.model,
-    messages:    [
-      { role: 'system', content: buildSystemPrompt(skill) },
-      ...history,
-    ],
-    max_tokens:  4096,
-    temperature: 0.3,
-    stream:      false,
-  });
+  const fmt = effectiveFormat(s);
 
-  const extraHeaders = s.key ? { 'Authorization': `Bearer ${s.key}` } : {};
+  // Route through the backend's /api/generate (non-streaming)
+  // This avoids CORS on every provider, and the backend handles format routing
+  // Normalise the URL: pass it as-is — the backend handles all normalisation.
+  // We only strip a trailing slash to avoid double-slash issues.
+  const cleanUrl = s.url.replace(/\/+$/, '');
 
-  // Try direct fetch first (works for CORS-enabled providers)
-  // Fall back to /api/proxy for providers like NVIDIA that block browser calls
-  let res;
-  try {
-    res = await fetch(targetUrl, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json', ...extraHeaders },
-      body,
-    });
-  } catch (directErr) {
-    // Network error (CORS block or unreachable) — route through backend proxy
-    res = await fetch(`${API_BASE}/api/proxy`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        url:     targetUrl,
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json', ...extraHeaders },
-        body,
-      }),
-    });
+  const payload = {
+    prompt:       history[history.length - 1]?.content || '',
+    backend:      activeBackend,
+    cpp_standard: agentCStd,
+    skills:       [skill],
+    api_key:      s.key,
+    api_endpoint: cleanUrl,
+    api_format:   fmt,
+    model:        s.model,
+    auto_transpile: false,
+    stream:       false,
+  };
+
+  // For multi-turn, we need to include the full history.
+  // We re-format it as a single prompt with conversation context.
+  if (history.length > 1) {
+    const ctx = history.slice(0, -1)
+      .map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
+      .join('\n\n');
+    payload.prompt = `Conversation so far:\n${ctx}\n\nUser: ${payload.prompt}`;
   }
 
+  const res = await fetch(`${API_BASE}/api/generate`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(payload),
+  });
+
   if (!res.ok) {
-    // If direct succeeded but got CORS-blocked response, try proxy
     const errText = await res.text();
-    // Try proxy as fallback if we got a 0 or network error code
     throw new Error(`HTTP ${res.status}: ${errText.slice(0, 200)}`);
   }
 
   const data = await res.json();
-  return data.choices?.[0]?.message?.content || '(empty response)';
+  if (!data.ok) {
+    const debugUrl = data.debug_url ? ` [URL: ${data.debug_url}]` : '';
+    throw new Error((data.error || 'Generation failed') + debugUrl);
+  }
+  return data.message || '(empty response)';
+}
+
+// ── Streaming version — used by agentPhaseCode for real-time output ──────────
+async function callAPIStream(s, skill, prompt, onChunk) {
+  const fmt = effectiveFormat(s);
+
+  const cleanUrlS = s.url.replace(/\/+$/, '');
+
+  const payload = {
+    prompt,
+    backend:      activeBackend,
+    cpp_standard: agentCStd,
+    skills:       [skill],
+    api_key:      s.key,
+    api_endpoint: cleanUrlS,
+    api_format:   fmt,
+    model:        s.model,
+    auto_transpile: false,
+    stream:       true,
+  };
+
+  let fullText = '';
+
+  try {
+    const resp = await fetch(`${API_BASE}/api/generate-stream`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'text/event-stream' },
+      body:    JSON.stringify(payload),
+    });
+
+    if (!resp.ok || !resp.body) throw new Error(`HTTP ${resp.status}`);
+
+    const reader = resp.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop() || '';
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const d = line.slice(6).trim();
+          if (d === '[DONE]') break;
+          try {
+            const p = JSON.parse(d);
+            if (p.text) { fullText += p.text; onChunk(fullText); }
+            if (p.error) throw new Error(p.error);
+          } catch {}
+        }
+      }
+    }
+  } catch(e) {
+    // Fallback: non-streaming
+    if (!fullText) {
+      fullText = await callAPI(s, skill, [{ role: 'user', content: prompt }]);
+    }
+  }
+
+  return fullText;
 }
 
 function buildSystemPrompt(skill) {
@@ -3932,6 +4091,72 @@ function appendFixExhaustedMsg(maxAttempts, lastError) {
   msgs.appendChild(wrapper);
   msgs.scrollTop = msgs.scrollHeight;
   toast('Auto-fix exhausted — describe the issue to try again', 'err');
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// STREAMING RENDER HELPERS
+// ────────────────────────────────────────────────────────────────────────────
+function appendStreamMsg() {
+  const msgs = document.getElementById('chat-messages');
+  const empty = document.getElementById('chat-empty');
+  if (empty) empty.remove();
+  const wrapper = document.createElement('div');
+  wrapper.className = 'chat-msg assistant streaming-msg';
+  const roleEl = document.createElement('div');
+  roleEl.className = 'chat-msg-role';
+  roleEl.textContent = 'Dictum AI';
+  wrapper.appendChild(roleEl);
+  const body = document.createElement('div');
+  body.className = 'chat-msg-body stream-body';
+  body.style.whiteSpace = 'pre-wrap';
+  wrapper.appendChild(body);
+  msgs.appendChild(wrapper);
+  msgs.scrollTop = msgs.scrollHeight;
+  return wrapper;
+}
+
+function updateStreamMsg(wrapper, text) {
+  const body = wrapper.querySelector('.stream-body');
+  if (!body) return;
+  // Show last 800 chars while streaming to avoid huge DOM
+  const display = text.length > 800 ? '…' + text.slice(-800) : text;
+  body.innerHTML = escapeHtml(display) + '<span class="stream-cursor">▊</span>';
+  const msgs = document.getElementById('chat-messages');
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function finalizeStreamMsg(wrapper, fullText) {
+  wrapper.classList.remove('streaming-msg');
+  const body = wrapper.querySelector('.stream-body');
+  if (!body) return;
+  // Re-render with proper code block parsing
+  body.innerHTML = '';
+  body.style.whiteSpace = '';
+  const parts = parseMessageContent(fullText);
+  const frag = document.createDocumentFragment();
+  parts.forEach(part => {
+    if (part.type === 'text') {
+      const span = document.createElement('span');
+      span.style.whiteSpace = 'pre-wrap';
+      span.textContent = part.content;
+      frag.appendChild(span);
+    } else if (part.type === 'code') {
+      const block = document.createElement('div');
+      block.className = 'chat-code-block';
+      block.innerHTML = `
+        <div class="chat-code-block-header">
+          <span class="chat-code-block-lang">${part.lang}</span>
+          ${part.lang === 'dictum' || part.lang === 'dict'
+            ? `<button class="chat-code-apply" onclick="applyCode(this)">↓ Apply to editor</button>`
+            : ''}
+        </div>
+        <pre>${escapeHtml(part.content)}</pre>`;
+      frag.appendChild(block);
+    }
+  });
+  body.appendChild(frag);
+  const msgs = document.getElementById('chat-messages');
+  msgs.scrollTop = msgs.scrollHeight;
 }
 
 buildSamplesList();
