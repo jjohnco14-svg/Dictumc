@@ -261,6 +261,31 @@ Level 4 and 5 stdlib interfaces define higher-level modules (`MemoryMap`, `Signa
 
 ---
 
+## Multi-File Module Imports
+
+Dictum programs can import other `.dict` files as named modules using `import`:
+
+```dictum
+import MyLib from "mylib.dict"
+```
+
+The transpiler resolves the path relative to the importing file's directory, recursively transpiles each imported module, and generates a `.h` / `.c` (or `.hpp` / `.cpp`) pair for each. Circular imports are detected and rejected. The CLI passes `--source-path` or the file path of the root `.dict` so that relative imports resolve correctly from wherever the program lives.
+
+```bash
+# Multi-file project layout
+src/
+  main.dict          # import Math from "utils/math.dict"
+  utils/
+    math.dict        # shared actions
+
+dictumc src/main.dict -o build/main.c --makefile
+# Emits build/main.c + build/math.c + build/math.h + Makefile
+```
+
+The generated Makefile includes all discovered module object files automatically.
+
+---
+
 ## CLI
 
 `dictumc_cli.py` — the `dictumc` command.
@@ -310,33 +335,66 @@ Warnings are printed to stderr. The exit code is 0 on success, 1 on any error (s
 
 ---
 
-## VibeCoder Playground + QEMU
+## VibeCoder Web IDE
 
-`ui/backend_server.py` — FastAPI backend for the browser-based IDE.
+`dictum-web/server.py` — the hosted browser IDE, deployed on fly.io.
 
 ```bash
 pip install "dictum[server]"
-python ui/backend_server.py
-# Open http://localhost:8765
+python dictum-web/server.py
+# Open http://localhost:8080
 ```
 
-The playground exposes `/transpile` and `/run` endpoints. The VibeCoder HTML frontend sends Dictum source, gets back C/C++ and (optionally) execution output, and persists named programs to a SQLite workspace that survives tab close and server restart.
+### Endpoints
+
+| Endpoint | Description |
+|---|---|
+| `POST /api/transpile` | Transpile Dictum source → C or C++; returns code + warnings |
+| `POST /api/run` | Transpile → compile → execute, optionally on a QEMU target |
+| `POST /api/generate` | LLM-powered code generation (BYOK, non-streaming) |
+| `POST /api/generate-stream` | SSE streaming generation |
+| `GET /api/targets` | List available QEMU cross-compilation targets |
+| `GET/POST /api/workspace/*` | SQLite-backed named program storage (persists across sessions) |
+
+### BYOK AI Integration
+
+The `/api/generate` and `/api/generate-stream` endpoints accept any LLM provider. Pass your key and endpoint directly from the browser settings panel — nothing is stored server-side.
+
+```json
+{
+  "prompt": "write a TCP echo server",
+  "api_key": "sk-...",
+  "api_endpoint": "https://api.anthropic.com",
+  "api_format": "anthropic",
+  "model": "claude-opus-4-20250514",
+  "skills": ["general", "embedded"]
+}
+```
+
+Supported providers:
+
+| Provider | `api_format` | `api_endpoint` |
+|---|---|---|
+| Anthropic | `anthropic` | `https://api.anthropic.com` (default) |
+| OpenAI | `openai` | `https://api.openai.com/v1` |
+| NVIDIA NIM | `openai` (auto-detected) | `https://integrate.api.nvidia.com/v1` |
+| Any OpenAI-compatible | `openai` | your endpoint |
+
+NVIDIA NIM is auto-detected from the endpoint URL — `api_format` does not need to be set manually.
+
+The `skills` field is a list of industry skill IDs (e.g. `["embedded", "security"]`) that are injected into the system prompt to steer generation toward domain-appropriate patterns.
+
+### SQLite Workspace
+
+Named programs are persisted to `workspace.db` in the server directory. The workspace survives tab close and server restart. All CRUD operations are exposed via `/api/workspace/*`.
 
 ---
 
-## QEMU Connection Guide
+## QEMU Cross-Compilation
 
-QEMU user-mode lets you cross-compile a Dictum program and execute it for a foreign architecture — ARM64, RISC-V, MIPS, PowerPC — entirely on your host machine, no physical hardware required. The playground server handles all of this transparently once the toolchain is installed.
+QEMU user-mode lets you cross-compile a Dictum program and execute it for a foreign architecture — ARM64, RISC-V, MIPS, PowerPC — entirely on your host machine, no physical hardware required.
 
-### Step 1 — Install the backend server dependencies
-
-```bash
-pip install fastapi uvicorn pydantic
-```
-
-### Step 2 — Install QEMU user-mode and cross-compilers
-
-On Ubuntu 22.04+ or Debian 12+:
+### Install cross-compilers (Ubuntu / Debian)
 
 ```bash
 sudo apt update
@@ -348,50 +406,23 @@ sudo apt install -y qemu-user \
     gcc-powerpc64le-linux-gnu g++-powerpc64le-linux-gnu
 ```
 
-You don't need all of them. Install only the targets you plan to use. The server detects availability at runtime.
+Install only the targets you plan to use. The server detects availability at runtime and reports missing binaries via `GET /api/targets`.
 
-On macOS (via Homebrew), QEMU user-mode is not available — only `qemu-system-*` is. Use a Linux VM or Docker container for cross-compilation targets on macOS.
+### Target reference
 
-On WSL2 (Windows), install the packages as above inside the WSL2 Ubuntu environment.
+| `target` | Architecture | C compiler | QEMU binary |
+|---|---|---|---|
+| `linux` | x86-64 (host native) | `gcc` | none |
+| `arm64` | ARM64 / AArch64 | `aarch64-linux-gnu-gcc` | `qemu-aarch64` |
+| `riscv64` | RISC-V 64-bit | `riscv64-linux-gnu-gcc` | `qemu-riscv64` |
+| `mips` | MIPS big-endian | `mips-linux-gnu-gcc` | `qemu-mips` |
+| `mipsel` | MIPS little-endian | `mipsel-linux-gnu-gcc` | `qemu-mipsel` |
+| `ppc64le` | PowerPC 64-bit LE | `powerpc64le-linux-gnu-gcc` | `qemu-ppc64le` |
 
-### Step 3 — Start the backend server
-
-```bash
-# From the Dictumc project root
-python ui/backend_server.py
-```
-
-The server starts on `http://0.0.0.0:8765`. Open `ui/dictum_vibecoder.html` in a browser, or hit the API directly.
-
-### Step 4 — Verify which targets are available
+### Run on a specific target
 
 ```bash
-curl http://localhost:8765/targets
-```
-
-Response:
-
-```json
-{
-  "targets": [
-    { "id": "linux",   "label": "Linux x86-64 (host native)", "available": true,  "reason": null },
-    { "id": "arm64",   "label": "ARM64 / AArch64",            "available": true,  "reason": null },
-    { "id": "riscv64", "label": "RISC-V 64-bit",              "available": false, "reason": "missing: qemu-riscv64" },
-    { "id": "mips",    "label": "MIPS big-endian",            "available": false, "reason": "missing: mips-linux-gnu-gcc, qemu-mips" },
-    { "id": "mipsel",  "label": "MIPS little-endian",         "available": false, "reason": "missing: mipsel-linux-gnu-gcc, qemu-mipsel" },
-    { "id": "ppc64le", "label": "PowerPC 64-bit LE",          "available": false, "reason": "missing: powerpc64le-linux-gnu-gcc, qemu-ppc64le" }
-  ]
-}
-```
-
-Any target with `"available": false` shows exactly which binaries are missing. Install them from Step 2 and restart the server.
-
-### Step 5 — Run a program on a specific target
-
-`POST /run` with a `target` field set to any available target ID:
-
-```bash
-curl -X POST http://localhost:8765/run \
+curl -X POST http://localhost:8080/api/run \
   -H "Content-Type: application/json" \
   -d '{
     "source": "program Hello:\n    print the text \"Hello from ARM64\" and newline\nend program",
@@ -407,7 +438,7 @@ Response:
 ```json
 {
   "ok": true,
-  "code": "/* generated C11 */\n#include <stdio.h>\n...",
+  "code": "/* generated C11 */\n...",
   "output": "Hello from ARM64\n",
   "stderr": "",
   "exit_code": 0,
@@ -417,58 +448,17 @@ Response:
 }
 ```
 
-### Target reference
+### How it works
 
-| `target` | Architecture | C compiler | C++ compiler | QEMU binary |
-|---|---|---|---|---|
-| `linux` | x86-64 (host native) | `gcc` | `g++` | none |
-| `arm64` | ARM64 / AArch64 | `aarch64-linux-gnu-gcc` | `aarch64-linux-gnu-g++` | `qemu-aarch64` |
-| `riscv64` | RISC-V 64-bit | `riscv64-linux-gnu-gcc` | `riscv64-linux-gnu-g++` | `qemu-riscv64` |
-| `mips` | MIPS big-endian | `mips-linux-gnu-gcc` | `mips-linux-gnu-g++` | `qemu-mips` |
-| `mipsel` | MIPS little-endian | `mipsel-linux-gnu-gcc` | `mipsel-linux-gnu-g++` | `qemu-mipsel` |
-| `ppc64le` | PowerPC 64-bit LE | `powerpc64le-linux-gnu-gcc` | `powerpc64le-linux-gnu-g++` | `qemu-ppc64le` |
+When `target` is anything other than `linux`, the server transpiles your source, invokes the cross-compiler with `-static` (self-contained binary, no sysroot linker dependency), then executes via `qemu-<arch> [-L <sysroot>] ./program`. Compilation timeout is 30 seconds; execution timeout is 10 seconds.
 
-### How it works internally
+### Platform notes
 
-When you set `target` to anything other than `linux`, the server:
+**macOS** — QEMU user-mode (`qemu-user`) is Linux-only. Use Docker: `docker run --rm -it -p 8080:8080 -v $(pwd):/app ubuntu:24.04 bash` and install dependencies inside.
 
-1. Transpiles your Dictum source to C (or C++) normally.
-2. Invokes the cross-compiler with `-static` — static linking is required because the binary needs to be self-contained inside the QEMU sandbox (dynamic linker paths differ between sysroots).
-3. Executes the binary via `qemu-<arch> [-L <sysroot>] ./program`. The `-L` flag points QEMU at the correct multiarch sysroot when one is present at `/usr/<arch>-linux-gnu`.
-4. Returns stdout, stderr, and exit code exactly as the native path does.
+**WSL2** — install packages as above inside the WSL2 Ubuntu environment.
 
-The timeout is 30 seconds for compilation and 10 seconds for execution. Programs that produce no output or hang are killed.
-
-### Using the C++ backend with QEMU
-
-The `backend` field can be `"c"` or `"cpp"` independently of the target. For example, to run a C++17 program on ARM64:
-
-```bash
-curl -X POST http://localhost:8765/run \
-  -H "Content-Type: application/json" \
-  -d '{
-    "source": "program Vec:\n    use Console\n    keep Items as array of whole number with 3 elements\n    put 1 into Items at 0\n    put 2 into Items at 1\n    put 3 into Items at 2\n    for each Item in Items repeat\n        call Console.write_line with Item\n    end for\nend program",
-    "backend": "cpp",
-    "cpp_standard": 17,
-    "target": "arm64",
-    "compile": true,
-    "stdlib": true
-  }'
-```
-
-### Troubleshooting
-
-**`"missing: qemu-aarch64"`** — run `sudo apt install qemu-user` and restart the server. The server does not auto-detect newly installed binaries until restart.
-
-**`"missing: aarch64-linux-gnu-gcc"`** — run `sudo apt install gcc-aarch64-linux-gnu`. The package name pattern is `gcc-<arch>-linux-gnu`.
-
-**Compile error on cross target but not on `linux`** — this usually means your program uses a stdlib module (`Http`, `Tls`, `Net`) that requires shared libraries not available in the static cross-sysroot. Pure-logic programs and programs using only `Console`, `Math`, `Text`, `File`, and `Thread` are safe for cross targets.
-
-**QEMU exits with a non-zero code, no stderr** — check `exit_code` in the response. Exit code 139 is a segfault inside QEMU — this is a program bug surfaced by the target's ABI, not a QEMU issue.
-
-**Slow first compile on a new target** — the cross-compiler caches object files in `/tmp`. Subsequent runs are fast.
-
-**macOS: targets unavailable** — QEMU user-mode (`qemu-user`) is a Linux-only package. On macOS you can run `qemu-system-aarch64` for full VM emulation, but that is not integrated with the playground server. Use Docker: `docker run --rm -it -p 8765:8765 -v $(pwd):/app ubuntu:24.04 bash` and install dependencies inside the container.
+**Cross-target stdlib limitations** — programs using `Http`, `Tls`, or `Net` require shared libraries not available in a static cross-sysroot. `Console`, `Math`, `Text`, `File`, and `Thread` work on all targets.
 
 ---
 
@@ -476,7 +466,7 @@ curl -X POST http://localhost:8765/run \
 
 `dictumc/polyglot_transpiler.py`, `polyglot_ast.py`, `polyglot_parser.py`, `linker/`
 
-The polyglot pipeline lets a single Dictum project compile different modules to different backends and link them together. The canonical use case is a mixed C/C++ program where performance-critical or C-ABI-exposed parts emit C, and object-oriented or template-heavy parts emit C++.
+The polyglot pipeline lets a single Dictum project compile different modules to different backends and link them together.
 
 ### Declaring a polyglot module
 
@@ -500,12 +490,9 @@ polyglot module Interface uses cpp with safety checked:
 end module
 ```
 
-`@export` marks an action or shape for cross-language linking. The polyglot linker (`PolyglotLinker`) generates:
-- A `.h` / `.hpp` header for each exported interface
-- A C-ABI shim for C++ → C calls
-- A `CMakeLists.txt` or `Makefile` that builds both modules and links them
+`@export` marks an action or shape for cross-language linking. The polyglot linker generates `.h` / `.hpp` headers, C-ABI shims for C++ → C calls, and a `CMakeLists.txt` or `Makefile` for the combined build.
 
-### Safety levels at module boundaries
+### Python API
 
 ```python
 from dictumc.polyglot_transpiler import PolyglotTranspiler
@@ -524,13 +511,7 @@ result = t.run(link=True, write_files=True)
 # result['interfaces']     — PolyglotInterface objects (exported symbols)
 ```
 
-`safe` — bounds-checked, no raw pointers across the boundary.  
-`checked` — raw C ABI but with runtime assertions injected at the boundary.  
-`unsafe` — raw C pointers and manual memory, no checks.
-
-### Interop patterns
-
-Beyond in-process FFI, the polyglot system supports `grpc`, `http`, `msgqueue`, and `wasm` as interop patterns — declared in the `polyglot module` header. The binding generator produces the appropriate glue (gRPC stubs, REST client wrappers, etc.) based on the pattern.
+Beyond in-process FFI, the polyglot system supports `grpc`, `http`, `msgqueue`, and `wasm` as interop patterns.
 
 ---
 
@@ -540,15 +521,7 @@ Beyond in-process FFI, the polyglot system supports `grpc`, `http`, `msgqueue`, 
 
 ### What the skills are
 
-Each skill is a JSON descriptor containing:
-- Target industry and domain
-- Dictum syntax features exercised
-- Underlying C/C++ concepts the generated code demonstrates
-- Concrete deliverables (programs to ship)
-- Estimated hours to mastery
-- Prerequisites from prior skills
-
-The skills are not tutorials. They are **instruction sets for AI systems** — structured enough that an AI given a skill descriptor can generate correct Dictum programs for that domain without improvising.
+Each skill is a JSON descriptor containing the target industry, Dictum syntax features exercised, underlying C/C++ concepts demonstrated, concrete deliverables, estimated hours to mastery, and prerequisites. They are instruction sets for AI systems — structured enough that an AI given a skill descriptor can generate correct Dictum programs for that domain.
 
 ### Skill tiers
 
@@ -562,21 +535,11 @@ The skills are not tutorials. They are **instruction sets for AI systems** — s
 | 6 | 24, 41, 44, 49 | Aerospace, quantum, neuromorphic |
 | 7 | 8, 50 | OS kernels, language design |
 
-### Industry skills included
+### Industry skill packs
 
-`SKILL_EMBEDDED.md`, `SKILL_AEROSPACE.md`, `SKILL_AUTOMOTIVE.md`, `SKILL_EDGEAI.md`, `SKILL_INDUSTRIAL.md`, `SKILL_MEDICAL.md`, `SKILL_GENERAL.md` — each a detailed reference covering Dictum syntax patterns, C ABI patterns, and safety requirements specific to that domain.
+`SKILL_EMBEDDED.md`, `SKILL_AEROSPACE.md`, `SKILL_AUTOMOTIVE.md`, `SKILL_EDGEAI.md`, `SKILL_INDUSTRIAL.md`, `SKILL_MEDICAL.md`, `SKILL_GENERAL.md` — each a detailed reference covering Dictum syntax patterns, C ABI patterns, and safety requirements for that domain.
 
-The full `DICTUM_50_INDUSTRY_SKILLS.json` contains all 50 skills in machine-readable form. The `Dictum_Skill_System.md` in `docs/` is the AI-facing reference that describes how to use the skills to drive code generation.
-
----
-
-## What Dictum is and is not
-
-**Dictum is:** an AI-native language where the grammar, validator, and constraint system are first-class features designed to make LLM code generation reliable and checkable for systems programming.
-
-**Dictum is not:** a C/C++ transpiler in the sense of "translate your Python-style code to C." The natural-language surface is the language. C and C++ are the compilation targets, chosen because they are the right output for the domains Dictum targets — embedded, systems, IoT, robotics, aerospace, high-performance computing.
-
-The difference matters because Dictum's grammar and validator give AI structured feedback. An LLM generating C directly has no feedback loop until `gcc` runs. An LLM generating Dictum gets `ValidationError: Variable 'X' used before declaration at line 4` — actionable, token-precise, recoverable.
+The full `DICTUM_50_INDUSTRY_SKILLS.json` contains all 50 skills in machine-readable form. `docs/Dictum_Skill_System.md` is the AI-facing reference for using skills to drive generation.
 
 ---
 
@@ -602,16 +565,18 @@ The difference matters because Dictum's grammar and validator give AI structured
 | C++ backend (classes, templates, lambdas) | ✅ Production-ready |
 | Unsafe blocks (`extern`, `transmute`, `bind`) | ✅ Grammar-gated |
 | Grammar-constrained generation / token masking | ✅ Production-ready |
+| Multi-file module imports (`import X from "x.dict"`) | ✅ Recursive, cycle-detected |
 | Polyglot C+C++ module linking | ✅ Working |
 | QEMU cross-compilation playground | ✅ arm64, riscv64, mips, mipsel, ppc64le |
 | VibeCoder browser IDE with SQLite workspace | ✅ Persistent across sessions |
+| BYOK AI (Anthropic, OpenAI-compat, NVIDIA NIM) | ✅ Non-streaming + SSE streaming |
 | 50 industry skill descriptors | ✅ JSON + markdown |
 
-### Current limitations
+### Known limitations
 
-- Multi-file module imports (`import MyModule from "mymodule.dict"`) — AST node exists (`ImportDict`), transpiler integration pending.
 - 50 industry skills — JSON descriptors complete; skills that reference `Http`/`Net`/`Json` are marked `"status": "stub"` until end-to-end integration tests pass.
 - UTF-8 string operations are byte-length-counted; grapheme-cluster operations are available via `Text.grapheme_*` but not unicode-normalized beyond codepoint counting.
+- QEMU cross-targets require Linux host (or Docker on macOS/Windows); QEMU user-mode is not available natively on macOS.
 
 ---
 
@@ -619,7 +584,7 @@ The difference matters because Dictum's grammar and validator give AI structured
 
 ```bash
 # Install
-pip install dictum          # or: pip install -e .
+pip install dictum-lang          # or: pip install -e .
 
 # Build stdlib (once)
 cd stdlib && make lib
@@ -633,10 +598,11 @@ make && ./hello
 
 ## Requirements
 
-- Python 3.11+
+- Python 3.9+
 - gcc 11+ or clang 14+
 - Linux or macOS (Windows: WSL 2)
 - For HTTP/TLS: `libcurl4-openssl-dev`, `libssl-dev`
+- For web server: `pip install "dictum-lang[server]"`
 - For QEMU targets: see QEMU section above
 
 ## Running tests
@@ -646,10 +612,10 @@ pip install -e ".[dev]"
 pytest tests/ -v
 ```
 
-279 unit tests + compile+run integration tests. Integration tests are skipped automatically if gcc is not on `PATH`.
+279 unit tests + compile+run integration tests across C and C++ backends, polyglot pipeline, and stdlib. Integration tests are skipped automatically if `gcc` is not on `PATH`. CI runs on Python 3.10, 3.11, and 3.12.
 
 ---
 
 ## License
 
-MIT. See LICENSE.
+Apache 2.0. See LICENSE.
